@@ -1,0 +1,29 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "contact-generator",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-06-27",
+  "compatibility_flags": ["global_fetch_strictly_public"],
+  "preview_urls": false,
+  "workers_dev": false,
+  "observability": {
+    "enabled": false,
+    "head_sampling_rate": 1,
+  },
+  "routes": [
+    {
+      "pattern": "contact-generator.beyekiri.cfd",
+      "custom_domain": true,
+    },
+  ],
+  "placement": {
+    "mode": "off",
+  },
+  "assets": {
+    "directory": "./public",
+  },
+}
