@@ -11,7 +11,7 @@
   "preview_urls": false,
   "workers_dev": false,
   "observability": {
-    "enabled": false,
+    "enabled": true,
     "head_sampling_rate": 1,
   },
   "routes": [

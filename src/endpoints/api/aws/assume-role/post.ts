@@ -2,6 +2,7 @@ import { OpenAPIRoute } from 'chanfana';
 import { Context } from 'hono';
 import { z } from 'zod';
 import { CredentialsDAO } from '../../../../dao';
+import { Credentials } from '../../../../model';
 
 export class AssumeRoleRoute extends OpenAPIRoute {
   schema = {
@@ -46,7 +47,11 @@ export class AssumeRoleRoute extends OpenAPIRoute {
       }
 
       const credentialsDAO: CredentialsDAO = new CredentialsDAO(c.env.AccessBridgeDB);
-      const credentials = credentialsDAO.getCredentialsByPrincipalArn(principalArn);
+      const credentials: Credentials | undefined = await credentialsDAO.getCredentialsByPrincipalArn(principalArn);
+
+      if (!credentials) {
+        return c.text('Unauthorized', 403);
+      }
 
       return c.json({ credentials });
     } catch (error) {
