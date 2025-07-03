@@ -1,6 +1,6 @@
 import { fromHono } from 'chanfana';
 import { Hono } from 'hono';
-import { GenerateContactRoute } from './endpoints';
+import { GenerateConsoleUrlRoute } from './endpoints';
 
 // Start a Hono app
 const app = new Hono();
@@ -11,7 +11,7 @@ const openapi = fromHono(app, {
 });
 
 // Register OpenAPI endpoints
-openapi.get('/api/contact', GenerateContactRoute);
+openapi.get('/api/aws/console', GenerateConsoleUrlRoute);
 
 // Export the Hono app
 export default app;

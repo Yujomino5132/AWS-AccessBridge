@@ -14,14 +14,14 @@
     "eslint": "^9.30.x",
     "eslint-config-prettier": "^10.1.x",
     "eslint-plugin-prettier": "^5.5.x",
-    "globals": "^16.2.x",
+    "globals": "^16.3.x",
     "prettier": "^3.6.x",
     "typescript": "^5.8.x",
     "typescript-eslint": "^8.35.x",
     "wrangler": "^4.22.x"
   },
   "dependencies": {
-    "@faker-js/faker": "^9.8.x",
+    "axios": "^1.10.0",
     "chanfana": "^2.8.x",
     "hono": "^4.8.x",
     "zod": "^3.25.x"

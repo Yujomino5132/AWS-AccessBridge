@@ -4,7 +4,7 @@
  */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "contact-generator",
+  "name": "aws-access-bridge",
   "main": "src/index.ts",
   "compatibility_date": "2025-06-27",
   "compatibility_flags": ["global_fetch_strictly_public"],
@@ -16,7 +16,7 @@
   },
   "routes": [
     {
-      "pattern": "contact-generator.beyekiri.cfd",
+      "pattern": "aws-access-bridge.beyekiri.cfd",
       "custom_domain": true,
     },
   ],

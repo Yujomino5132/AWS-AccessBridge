@@ -1,1 +1,1 @@
-export { GenerateContactRoute } from './api/contact/get';
+export { GenerateConsoleUrlRoute } from './api/aws/console/get';
