@@ -36,22 +36,23 @@ class CredentialsDAO {
     const trustChain: Array<Credential> = [];
 
     let depth: number = 0;
+    let assumedBy: string = principalArn;
     let credential: Credential;
     do {
-      credential = await this.getCredentialByPrincipalArn(principalArn);
+      credential = await this.getCredentialByPrincipalArn(assumedBy);
+      if (credential.assumedBy) {
+        assumedBy = credential.assumedBy;
+      }
       trustChain.push(credential);
-    } while (credential.assumedBy !== undefined && credential.assumedBy.length > 0 && ++depth <= CredentialsDAO.ASSUME_ROLE_CHAIN_LIMIT);
+    } while (credential.assumedBy && credential.assumedBy.length > 0 && ++depth <= CredentialsDAO.ASSUME_ROLE_CHAIN_LIMIT);
 
     if (!credential.accessKeyId || !credential.secretAccessKey) {
       throw new Error('Unable to assume the beginning role');
     }
 
-    const principalArns: Array<string> = [credential.principalArn];
-    for (const principal of trustChain) {
-      if (!principal.assumedBy) {
-        break;
-      }
-      principalArns.push(principal.assumedBy);
+    const principalArns: Array<string> = [];
+    for (const trustedPrincipal of trustChain) {
+      principalArns.push(trustedPrincipal.principalArn);
     }
     return {
       principalArns: principalArns,
