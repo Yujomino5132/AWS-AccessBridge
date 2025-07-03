@@ -13,21 +13,21 @@ export class GenerateConsoleUrlRoute extends OpenAPIRoute {
         name: 'accessKeyId',
         in: 'query',
         required: true,
-        description: 'Temporary AWS session ID',
+        description: 'AWS access key ID',
         schema: { type: 'string' },
       },
       {
         name: 'secretAccessKey',
         in: 'query',
         required: true,
-        description: 'Temporary AWS session key',
+        description: 'AWS secret access key',
         schema: { type: 'string' },
       },
       {
         name: 'sessionToken',
         in: 'query',
         required: true,
-        description: 'Temporary AWS session token',
+        description: 'AWS session token',
         schema: { type: 'string' },
       },
     ],
@@ -63,8 +63,8 @@ export class GenerateConsoleUrlRoute extends OpenAPIRoute {
       }
 
       const credentials: SessionCredentials = {
-        accessKeyId,
-        secretAccessKey,
+        sessionId: accessKeyId,
+        sessionKey: secretAccessKey,
         sessionToken,
       };
 
@@ -80,8 +80,8 @@ export class GenerateConsoleUrlRoute extends OpenAPIRoute {
 }
 
 interface SessionCredentials {
-  accessKeyId: string;
-  secretAccessKey: string;
+  sessionId: string;
+  sessionKey: string;
   sessionToken: string;
 }
 
