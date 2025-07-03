@@ -1,4 +1,4 @@
-interface Credentials {
+interface Credential {
   principalArn: string;
   assumedBy: string | undefined;
   accessKeyId: string | undefined;
@@ -6,7 +6,7 @@ interface Credentials {
   sessionToken: string | undefined;
 }
 
-interface CredentialsInternal {
+interface CredentialInternal {
   principal_arn: string;
   assumed_by: string | undefined;
   access_key_id: string | undefined;
@@ -14,4 +14,4 @@ interface CredentialsInternal {
   session_token: string | undefined;
 }
 
-export type { Credentials, CredentialsInternal };
+export type { Credential, CredentialInternal };
