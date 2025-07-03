@@ -26,4 +26,10 @@
   "assets": {
     "directory": "./public",
   },
+  "d1_databases": [
+    {
+      "binding": "AccessBridgeDB",
+      "database_id": "913f420e-ce0b-43cb-a38c-ec2333987754",
+    },
+  ],
 }
