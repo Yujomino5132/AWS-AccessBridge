@@ -1,0 +1,1 @@
+export { AssumeRoleUtil } from './AssumeRoleUtil';

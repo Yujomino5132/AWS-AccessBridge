@@ -3,6 +3,7 @@ import { Context } from 'hono';
 import { z } from 'zod';
 import { CredentialsDAO } from '../../../../dao';
 import { CredentialChain } from '../../../../model';
+import { AssumeRoleUtil } from '../../../../utils';
 
 export class AssumeRoleRoute extends OpenAPIRoute {
   schema = {
@@ -53,7 +54,15 @@ export class AssumeRoleRoute extends OpenAPIRoute {
         return c.text('Unauthorized', 403);
       }
 
-      return c.json({ credentialChain });
+      const newCreds = await AssumeRoleUtil.assumeRole(
+        credentialChain.accessKeyId,
+        credentialChain.secretAccessKey,
+        credentialChain.principalArns[0],
+        credentialChain.sessionToken,
+        'us-east-2',
+      );
+
+      return c.json({ newCreds });
     } catch (error) {
       console.error('Error generating AWS Console URL:', error);
       return c.text('Internal Server Error', 500);
