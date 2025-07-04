@@ -3,34 +3,25 @@ import { Context } from 'hono';
 import { z } from 'zod';
 import axios from 'axios';
 
+const CredentialsSchema = z.object({
+  accessKeyId: z.string(),
+  secretAccessKey: z.string(),
+  sessionToken: z.string(),
+});
+
 export class GenerateConsoleUrlRoute extends OpenAPIRoute {
   schema = {
     tags: ['AWS'],
     summary: 'Generate AWS Console Login URL',
     description: 'Takes temporary AWS credentials and returns a federated AWS Console login URL.',
-    parameters: [
-      {
-        name: 'accessKeyId',
-        in: 'query',
-        required: true,
-        description: 'AWS access key ID',
-        schema: { type: 'string' },
+    requestBody: {
+      required: true,
+      content: {
+        'application/json': {
+          schema: CredentialsSchema,
+        },
       },
-      {
-        name: 'secretAccessKey',
-        in: 'query',
-        required: true,
-        description: 'AWS secret access key',
-        schema: { type: 'string' },
-      },
-      {
-        name: 'sessionToken',
-        in: 'query',
-        required: true,
-        description: 'AWS session token',
-        schema: { type: 'string' },
-      },
-    ],
+    },
     responses: {
       '200': {
         description: 'Successfully generated AWS Console login URL',
@@ -53,14 +44,14 @@ export class GenerateConsoleUrlRoute extends OpenAPIRoute {
 
   async handle(c: Context) {
     try {
-      const accessKeyId = c.req.query('accessKeyId');
-      const secretAccessKey = c.req.query('secretAccessKey');
-      const sessionToken = c.req.query('sessionToken');
+      const body = await c.req.json();
+      const parsed = CredentialsSchema.safeParse(body);
 
-      // 参数校验
-      if (!accessKeyId || !secretAccessKey || !sessionToken) {
-        return c.text('Missing required query parameters', 400);
+      if (!parsed.success) {
+        return c.text('Invalid request body parameters', 400);
       }
+
+      const { accessKeyId, secretAccessKey, sessionToken } = parsed.data;
 
       const credentials: SessionCredentials = {
         sessionId: accessKeyId,
@@ -98,7 +89,7 @@ async function getSigninToken(session: SessionCredentials): Promise<string> {
 function buildLoginUrl(signinToken: string, destination = 'https://console.aws.amazon.com/'): string {
   const params = new URLSearchParams({
     Action: 'login',
-    Issuer: 'example.com', // 可替换为您的系统标识
+    Issuer: 'example.com',
     Destination: destination,
     SigninToken: signinToken,
   });
