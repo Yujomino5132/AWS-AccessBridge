@@ -1,3 +1,4 @@
+import { UnauthorizedError } from '../error';
 import { Credential, CredentialChain, CredentialInternal } from '../model';
 
 class CredentialsDAO {
@@ -20,7 +21,7 @@ class CredentialsDAO {
       .first<CredentialInternal>();
 
     if (!result) {
-      throw new Error('PrincipalArn not found');
+      throw new UnauthorizedError();
     }
 
     return {

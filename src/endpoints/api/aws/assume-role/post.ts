@@ -3,22 +3,7 @@ import { CredentialsDAO } from '../../../../dao';
 import { CredentialChain } from '../../../../model';
 import { AssumeRoleUtil } from '../../../../utils';
 import { IActivityAPIRoute } from '../../../IActivityAPIRoute';
-import { BadRequestError, ForbiddenError } from '../../../../error';
-
-interface AssumeRoleRequest {
-  principalArn: string;
-}
-
-interface AssumeRoleResponse {
-  accessKeyId: string;
-  secretAccessKey: string;
-  sessionToken: string | undefined;
-  expiration: string | undefined;
-}
-
-interface AssumeRoleEnv {
-  AccessBridgeDB: D1Database;
-}
+import { BadRequestError } from '../../../../error';
 
 class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleResponse, AssumeRoleEnv> {
   schema = {
@@ -33,10 +18,6 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
     }
     const credentialsDAO: CredentialsDAO = new CredentialsDAO(env.AccessBridgeDB);
     const credentialChain: CredentialChain = await credentialsDAO.getCredentialChainByPrincipalArn(request.principalArn);
-
-    if (!credentialChain) {
-      throw new ForbiddenError('Unauthorized');
-    }
 
     if (credentialChain.principalArns.length === 1) {
       throw new BadRequestError('For security reasons, long-term credentials are not retrievable.');
@@ -68,6 +49,21 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
       expiration: newCredentials.Expiration,
     };
   }
+}
+
+interface AssumeRoleRequest {
+  principalArn: string;
+}
+
+interface AssumeRoleResponse {
+  accessKeyId: string;
+  secretAccessKey: string;
+  sessionToken: string | undefined;
+  expiration: string | undefined;
+}
+
+interface AssumeRoleEnv {
+  AccessBridgeDB: D1Database;
 }
 
 export { AssumeRoleRoute };

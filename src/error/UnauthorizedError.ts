@@ -1,16 +1,16 @@
 import { ErrorCode, IServiceError } from './IServiceError';
 
-class BadRequestError extends IServiceError {
+class UnauthorizedError extends IServiceError {
   constructor(message?: string) {
-    super(message ?? 'The request could not be understood by the server due to malformed syntax.');
+    super(message ?? 'Authentication is required and has failed or has not yet been provided.');
   }
 
   public getErrorCode(): ErrorCode {
-    return 400;
+    return 401;
   }
 
   public getErrorType(): string {
-    return 'BadRequest';
+    return 'Unauthorized';
   }
 
   public getErrorMessage(): string {
@@ -18,4 +18,4 @@ class BadRequestError extends IServiceError {
   }
 }
 
-export { BadRequestError };
+export { UnauthorizedError };
