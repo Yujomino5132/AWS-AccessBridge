@@ -1,4 +1,4 @@
-import { UnauthorizedError } from '../error';
+import { InternalServerError, UnauthorizedError } from '../error';
 import { Credential, CredentialChain, CredentialInternal } from '../model';
 
 class CredentialsDAO {
@@ -48,7 +48,10 @@ class CredentialsDAO {
     } while (credential.assumedBy && credential.assumedBy.length > 0 && ++depth <= CredentialsDAO.ASSUME_ROLE_CHAIN_LIMIT);
 
     if (!credential.accessKeyId || !credential.secretAccessKey) {
-      throw new Error('Unable to assume the beginning role');
+      if (depth >= CredentialsDAO.ASSUME_ROLE_CHAIN_LIMIT) {
+        console.error('Principal chain exceeds the maximum allowed depth.');
+      }
+      throw new InternalServerError('Principal chain is not valid. Contact system administrator.');
     }
 
     const principalArns: Array<string> = [];
