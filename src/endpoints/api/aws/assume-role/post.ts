@@ -54,15 +54,31 @@ export class AssumeRoleRoute extends OpenAPIRoute {
         return c.text('Unauthorized', 403);
       }
 
-      const newCreds = await AssumeRoleUtil.assumeRole(
-        credentialChain.accessKeyId,
-        credentialChain.secretAccessKey,
-        credentialChain.principalArns[0],
-        credentialChain.sessionToken,
-        'us-east-2',
-      );
+      if (credentialChain.principalArns.length === 1) {
+        return c.text('For security reason, you can not retrieve long term credentials.', 400);
+      }
 
-      return c.json({ newCreds });
+      let newCredentials: {
+        AccessKeyId: string;
+        SecretAccessKey: string;
+        SessionToken?: string;
+        Expiration?: string;
+      } = {
+        AccessKeyId: credentialChain.accessKeyId,
+        SecretAccessKey: credentialChain.secretAccessKey,
+      };
+      console.log('PrincipalArns:', credentialChain.principalArns);
+      for (let i: number = credentialChain.principalArns.length - 2; i >= 0; --i) {
+        newCredentials = await AssumeRoleUtil.assumeRole(
+          newCredentials.AccessKeyId,
+          newCredentials.SecretAccessKey,
+          credentialChain.principalArns[i],
+          newCredentials.SessionToken,
+          'us-east-1',
+        );
+      }
+
+      return c.json({ newCredentials });
     } catch (error) {
       console.error('Error generating AWS Console URL:', error);
       return c.text('Internal Server Error', 500);
