@@ -2,13 +2,13 @@ import { OpenAPIRoute } from 'chanfana';
 import { Context } from 'hono';
 import { DefaultInternalServerError, InternalServerError, IServiceError } from '../error';
 
-abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IResponse> extends OpenAPIRoute {
-  async handle(c: Context) {
+abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IResponse, TEnv extends IEnv> extends OpenAPIRoute {
+  async handle(c: Context<TEnv>) {
     try {
       const body = await c.req.json();
       const request = body as TRequest;
 
-      const response = await this.handleRequest(request);
+      const response = await this.handleRequest(request, c.env as TEnv);
 
       return c.json(response);
     } catch (error: unknown) {
@@ -27,7 +27,7 @@ abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IR
     }
   }
 
-  protected abstract handleRequest(request: TRequest): Promise<TResponse>;
+  protected abstract handleRequest(request: TRequest, env: TEnv): Promise<TResponse>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -36,5 +36,8 @@ interface IRequest {}
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface IResponse {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface IEnv {}
+
 export { IActivityAPIRoute };
-export type { IRequest, IResponse };
+export type { IRequest, IResponse, IEnv };
