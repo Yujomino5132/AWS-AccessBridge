@@ -1,61 +1,43 @@
-import { OpenAPIRoute } from 'chanfana';
 import { Context } from 'hono';
 import { z } from 'zod';
 import { CredentialsDAO } from '../../../../dao';
 import { CredentialChain } from '../../../../model';
 import { AssumeRoleUtil } from '../../../../utils';
+import { IActivityAPIRoute } from '../../../ActivityAPIRoute';
 
-export class AssumeRoleRoute extends OpenAPIRoute {
+interface AssumeRoleRequest {
+  principalArn: string;
+}
+
+interface AssumeRoleResponse {
+  principalArn: string;
+}
+
+class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleResponse> {
   schema = {
-    request: {
-      parameters: [
-        {
-          name: 'principalArn',
-          in: 'query',
-          required: true,
-          description: 'AWS access key ID',
-          schema: { type: 'string' },
-        },
-      ],
-    },
-    responses: {
-      '200': {
-        description: 'Successfully generated AWS Console login URL',
-        content: {
-          'application/json': {
-            schema: z.object({
-              awsConsoleUrl: z.string().url(),
-            }),
-          },
-        },
-      },
-      '400': {
-        description: 'Missing or invalid request parameters',
-      },
-      '500': {
-        description: 'Internal Server Error',
-      },
-    },
+    body: z.object({
+      principalArn: z.string().min(1, 'principalArn is required'),
+    }),
   };
 
   async handle(c: Context) {
     try {
-      const principalArn = c.req.query('principalArn');
+      const body = await c.req.json();
+      const principalArn = body.principalArn;
 
-      // 参数校验
       if (!principalArn) {
-        return c.text('Missing required query parameters', 400);
+        return c.json({ error: 'Missing required field: principalArn' }, 400);
       }
 
       const credentialsDAO: CredentialsDAO = new CredentialsDAO(c.env.AccessBridgeDB);
       const credentialChain: CredentialChain = await credentialsDAO.getCredentialChainByPrincipalArn(principalArn);
 
       if (!credentialChain) {
-        return c.text('Unauthorized', 403);
+        return c.json({ error: 'Unauthorized' }, 403);
       }
 
       if (credentialChain.principalArns.length === 1) {
-        return c.text('For security reason, you can not retrieve long term credentials.', 400);
+        return c.json({ error: 'For security reasons, long-term credentials are not retrievable.' }, 400);
       }
 
       let newCredentials: {
@@ -67,8 +49,8 @@ export class AssumeRoleRoute extends OpenAPIRoute {
         AccessKeyId: credentialChain.accessKeyId,
         SecretAccessKey: credentialChain.secretAccessKey,
       };
-      console.log('PrincipalArns:', credentialChain.principalArns);
-      for (let i: number = credentialChain.principalArns.length - 2; i >= 0; --i) {
+
+      for (let i = credentialChain.principalArns.length - 2; i >= 0; --i) {
         newCredentials = await AssumeRoleUtil.assumeRole(
           newCredentials.AccessKeyId,
           newCredentials.SecretAccessKey,
@@ -78,10 +60,17 @@ export class AssumeRoleRoute extends OpenAPIRoute {
         );
       }
 
-      return c.json({ newCredentials });
+      return c.json({
+        accessKeyId: newCredentials.AccessKeyId,
+        secretAccessKey: newCredentials.SecretAccessKey,
+        sessionToken: newCredentials.SessionToken,
+        expiration: newCredentials.Expiration,
+      });
     } catch (error) {
-      console.error('Error generating AWS Console URL:', error);
-      return c.text('Internal Server Error', 500);
+      console.error('Error assuming role:', error);
+      return c.json({ error: 'Internal Server Error' }, 500);
     }
   }
 }
+
+export { AssumeRoleRoute };
