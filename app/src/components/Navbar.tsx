@@ -12,7 +12,7 @@ export default function Navbar() {
   return (
     <nav className="bg-gray-900 text-white px-6 py-4 flex justify-between items-center shadow">
       <div className="text-xl font-bold">
-        <span className="text-blue-400">AWS</span> access portal
+        <span className="text-blue-400">AWS</span> AccessBridge
       </div>
       <div className="text-sm flex items-center gap-2">
         <span>{email}</span>

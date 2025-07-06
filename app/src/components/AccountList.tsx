@@ -57,11 +57,13 @@ export default function AccountList() {
         <div key={accountId} className="bg-gray-800 rounded p-4 my-2 text-white shadow">
           <div className="flex items-center cursor-pointer" onClick={() => toggleExpand(accountId)}>
             <svg
-              className={`w-4 h-4 mr-2 transform ${expanded[accountId] ? 'rotate-90' : ''} transition-transform`}
-              fill="currentColor"
-              viewBox="0 0 20 20"
+              className={`w-3 h-3 mr-2 transform transition-transform ${expanded[accountId] ? 'rotate-90' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
             >
-              <path d="M6 6l6 4-6 4V6z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>
             <div className="text-lg font-semibold">{accountId}</div>
           </div>
