@@ -49,7 +49,7 @@ class CredentialsDAO {
 
     if (!credential.accessKeyId || !credential.secretAccessKey) {
       if (depth >= CredentialsDAO.ASSUME_ROLE_CHAIN_LIMIT) {
-        console.error('Principal chain exceeds the maximum allowed depth.');
+        console.error('Principal chain exceeds the maximum allowed depth: ', CredentialsDAO.ASSUME_ROLE_CHAIN_LIMIT);
       }
       throw new InternalServerError('Principal chain is not valid. Contact system administrator.');
     }

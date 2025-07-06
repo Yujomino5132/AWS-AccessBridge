@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { CredentialsDAO } from '../../../../dao';
-import { CredentialChain } from '../../../../model';
+import { AccessKeysWithExpiration, CredentialChain } from '../../../../model';
 import { AssumeRoleUtil } from '../../../../utils';
 import { IActivityAPIRoute } from '../../../IActivityAPIRoute';
 import { BadRequestError } from '../../../../error';
@@ -23,31 +23,16 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
       throw new BadRequestError('For security reasons, long-term credentials are not retrievable.');
     }
 
-    let newCredentials: {
-      AccessKeyId: string;
-      SecretAccessKey: string;
-      SessionToken?: string;
-      Expiration?: string;
-    } = {
-      AccessKeyId: credentialChain.accessKeyId,
-      SecretAccessKey: credentialChain.secretAccessKey,
+    let newCredentials: AccessKeysWithExpiration = {
+      accessKeyId: credentialChain.accessKeyId,
+      secretAccessKey: credentialChain.secretAccessKey,
     };
 
     for (let i = credentialChain.principalArns.length - 2; i >= 0; --i) {
-      newCredentials = await AssumeRoleUtil.assumeRole(
-        newCredentials.AccessKeyId,
-        newCredentials.SecretAccessKey,
-        credentialChain.principalArns[i],
-        newCredentials.SessionToken,
-        'us-east-1',
-      );
+      newCredentials = await AssumeRoleUtil.assumeRole(credentialChain.principalArns[i], newCredentials, 'AccessBridge-FederatedUser');
     }
-    return {
-      accessKeyId: newCredentials.AccessKeyId,
-      secretAccessKey: newCredentials.SecretAccessKey,
-      sessionToken: newCredentials.SessionToken,
-      expiration: newCredentials.Expiration,
-    };
+
+    return newCredentials;
   }
 }
 
@@ -58,8 +43,8 @@ interface AssumeRoleRequest {
 interface AssumeRoleResponse {
   accessKeyId: string;
   secretAccessKey: string;
-  sessionToken: string | undefined;
-  expiration: string | undefined;
+  sessionToken?: string;
+  expiration?: string;
 }
 
 interface AssumeRoleEnv {

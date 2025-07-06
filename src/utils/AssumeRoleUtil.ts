@@ -1,40 +1,37 @@
 import { AwsClient } from 'aws4fetch';
+import { AccessKeys, AccessKeysWithExpiration } from '../model';
+import { InternalServerError, UnauthorizedError } from '../error';
 
 class AssumeRoleUtil {
   public static async assumeRole(
-    accessKeyId: string,
-    secretAccessKey: string,
     roleArn: string,
-    sessionToken?: string,
+    accessKeys: AccessKeys,
+    sessionName: string,
     region: string = 'us-east-1',
-  ): Promise<{
-    AccessKeyId: string;
-    SecretAccessKey: string;
-    SessionToken: string;
-    Expiration: string;
-  }> {
-    const stsClient = new AwsClient({
-      accessKeyId,
-      secretAccessKey,
-      sessionToken,
+  ): Promise<AccessKeysWithExpiration> {
+    const stsClient: AwsClient = new AwsClient({
       service: 'sts',
-      region,
+      region: region,
+      accessKeyId: accessKeys.accessKeyId,
+      secretAccessKey: accessKeys.secretAccessKey,
+      sessionToken: accessKeys.sessionToken,
     });
 
-    const queryParams = new URLSearchParams({
+    const queryParams: URLSearchParams = new URLSearchParams({
       Action: 'AssumeRole',
       RoleArn: roleArn,
-      RoleSessionName: 'aws4fetch-session',
+      RoleSessionName: sessionName,
       Version: '2011-06-15',
     });
 
     const url = `https://sts.${region}.amazonaws.com/?${queryParams.toString()}`;
 
-    const response = await stsClient.fetch(url, { method: 'POST' });
-    const xmlText = await response.text();
+    const response: Response = await stsClient.fetch(url, { method: 'POST' });
+    const xmlText: string = await response.text();
 
     if (!response.ok) {
-      throw new Error(`AssumeRole failed: ${response.status} ${response.statusText}\n${xmlText}`);
+      console.error(`AssumeRole failed: ${response.status} ${response.statusText}\n${xmlText}`);
+      throw new UnauthorizedError('Failed to get response from STS AssumeRole.');
     }
 
     // Extract credentials using regex (simplified)
@@ -44,14 +41,14 @@ class AssumeRoleUtil {
     const expirationMatch = xmlText.match(/<Expiration>([^<]+)<\/Expiration>/);
 
     if (!accessKeyIdMatch || !secretAccessKeyMatch || !sessionTokenMatch || !expirationMatch) {
-      throw new Error('Unable to parse temporary credentials from STS AssumeRole response.');
+      throw new InternalServerError('Unable to parse temporary credentials from STS AssumeRole response.');
     }
 
     return {
-      AccessKeyId: accessKeyIdMatch[1],
-      SecretAccessKey: secretAccessKeyMatch[1],
-      SessionToken: sessionTokenMatch[1],
-      Expiration: expirationMatch[1],
+      accessKeyId: accessKeyIdMatch[1],
+      secretAccessKey: secretAccessKeyMatch[1],
+      sessionToken: sessionTokenMatch[1],
+      expiration: expirationMatch[1],
     };
   }
 }
