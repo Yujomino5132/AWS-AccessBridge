@@ -1,9 +1,6 @@
 import { z } from 'zod';
-import { CredentialsDAO } from '../../../../dao';
-import { AccessKeysWithExpiration, CredentialChain } from '../../../../model';
-import { AssumeRoleUtil, EmailUtils } from '../../../../utils';
+import { AssumableRolesDAO } from '../../../../dao';
 import { IActivityAPIRoute, IEnv, IRequest, IResponse } from '../../../IActivityAPIRoute';
-import { BadRequestError } from '../../../../error';
 import { Context } from 'hono';
 
 class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListAssumablesResponse, AListAssumablesEnv> {
@@ -17,7 +14,12 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
     request: ListAssumablesRequest,
     env: AListAssumablesEnv,
     cxt: Context<AListAssumablesEnv>,
-  ): Promise<ListAssumablesResponse> {}
+  ): Promise<ListAssumablesResponse> {
+    const userEmail: string = this.getAuthenticatedUserEmailAddress(cxt);
+    const assumableRolesDAO: AssumableRolesDAO = new AssumableRolesDAO(env.AccessBridgeDB);
+
+    return assumableRolesDAO.getAllRolesByUserEmail(userEmail);
+  }
 }
 
 type ListAssumablesRequest = IRequest;
@@ -26,6 +28,8 @@ interface ListAssumablesResponse extends IResponse {
   [key: string]: string[];
 }
 
-type AListAssumablesEnv = IEnv;
+interface AListAssumablesEnv extends IEnv {
+  AccessBridgeDB: D1Database;
+}
 
 export { ListAssumablesRoute };

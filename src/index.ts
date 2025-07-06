@@ -13,7 +13,7 @@ const openapi = fromHono(app, {
 // Register OpenAPI endpoints
 openapi.post('/api/aws/console', GenerateConsoleUrlRoute);
 openapi.post('/api/aws/assume-role', AssumeRoleRoute);
-openapi.get('/api/user/list-assumables', ListAssumablesRoute);
+openapi.get('/api/user/assumables', ListAssumablesRoute);
 
 // Export the Hono app
 export default app;

@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS accessable_accounts (
     user_email VARCHAR(120),
     aws_account_id CHAR(12),
     PRIMARY KEY (user_email, aws_account_id)
-)
+);
 
 -- Assumable Roles
 CREATE TABLE IF NOT EXISTS assumable_roles (
@@ -20,4 +20,4 @@ CREATE TABLE IF NOT EXISTS assumable_roles (
     aws_account_id CHAR(12),
     role_name VARCHAR(128),
     PRIMARY KEY (user_email, aws_account_id, role_name)
-)
+);
