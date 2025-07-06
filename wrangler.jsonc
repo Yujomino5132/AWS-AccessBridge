@@ -22,7 +22,7 @@
     },
   ],
   "placement": {
-    "mode": "off",
+    "mode": "smart",
   },
   "assets": {
     "directory": "./app/dist/",
