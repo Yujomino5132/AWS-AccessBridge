@@ -5,8 +5,9 @@
   "scripts": {
     "cf-typegen": "wrangler types",
     "buildApp": "cd app/ && npm run release",
-    "predeploy": "npm run prettier && npm run lint && npm run buildApp",
-    "deploy": "wrangler deploy --dry-run && wrangler deploy",
+    "predeploy": "npm install && npm run prettier && npm run lint && npm run buildApp",
+    "deploy": "wrangler deploy --dry-run",
+    "postdeploy": "wrangler deploy",
     "prettier": "prettier --write '!app' .",
     "lint": "eslint --ext .ts,.tsx --fix --ignore-pattern app/ ."
   },
