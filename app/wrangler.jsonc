@@ -1,5 +1,5 @@
- {
-    "$schema": "node_modules/wrangler/config-schema.json",
-    "name": "aws-access-bridge-app",
-    "compatibility_date": "2025-07-06",
-  }
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "aws-access-bridge-app",
+  "compatibility_date": "2025-07-06",
+}

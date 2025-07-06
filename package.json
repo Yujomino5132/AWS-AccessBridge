@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "predeploy": "npm run prettier && npm run lint",
-    "deploy": "wrangler deploy --dry-run && wrangler deploy",
-    "dev": "wrangler dev",
     "cf-typegen": "wrangler types",
-    "prettier": "prettier --write .",
-    "lint": "eslint --ext .ts,.tsx --fix ."
+    "buildApp": "cd app/ && npm run release",
+    "predeploy": "npm run prettier && npm run lint && npm run buildApp",
+    "deploy": "wrangler deploy --dry-run && wrangler deploy",
+    "prettier": "prettier --write '!app' .",
+    "lint": "eslint --ext .ts,.tsx --fix --ignore-pattern app/ ."
   },
   "devDependencies": {
     "eslint": "^9.30.x",

@@ -25,7 +25,7 @@
     "mode": "off",
   },
   "assets": {
-    "directory": "./dist/client",
+    "directory": "./app/dist/",
   },
   "d1_databases": [
     {
