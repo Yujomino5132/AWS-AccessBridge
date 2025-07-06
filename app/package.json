@@ -5,8 +5,12 @@
   "scripts": {
     "cf-typegen": "wrangler types",
     "clean": "rm -rf dist/",
+    "prebuild": "npm run prettier && npm run lint",
     "build": "tsc -b && vite build",
-    "release": "npm run clean && npm install && npm run build"
+    "prerelease": "npm run clean && npm install",
+    "release": "npm run build",
+    "prettier": "prettier --write .",
+    "lint": "eslint --ext .ts,.tsx --fix ."
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.9.x",
@@ -14,7 +18,12 @@
     "@types/react": "^19.1.x",
     "@types/react-dom": "^19.1.x",
     "@vitejs/plugin-react": "^4.6.x",
+    "eslint": "^9.30.x",
+    "eslint-plugin-react-hooks": "^5.2.x",
+    "eslint-plugin-react-refresh": "^0.4.x",
+    "globals": "^16.3.x",
     "typescript": "^5.8.x",
+    "typescript-eslint": "^8.35.x",
     "vite": "^7.0.x"
   },
   "dependencies": {
