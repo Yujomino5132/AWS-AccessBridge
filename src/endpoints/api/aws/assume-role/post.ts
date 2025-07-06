@@ -1,9 +1,10 @@
 import { z } from 'zod';
 import { CredentialsDAO } from '../../../../dao';
 import { AccessKeysWithExpiration, CredentialChain } from '../../../../model';
-import { AssumeRoleUtil } from '../../../../utils';
-import { IActivityAPIRoute } from '../../../IActivityAPIRoute';
+import { AssumeRoleUtil, EmailUtils } from '../../../../utils';
+import { IActivityAPIRoute, IEnv, IRequest, IResponse } from '../../../IActivityAPIRoute';
 import { BadRequestError } from '../../../../error';
+import { Context } from 'hono';
 
 class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleResponse, AssumeRoleEnv> {
   schema = {
@@ -12,7 +13,7 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
     }),
   };
 
-  protected async handleRequest(request: AssumeRoleRequest, env: AssumeRoleEnv): Promise<AssumeRoleResponse> {
+  protected async handleRequest(request: AssumeRoleRequest, env: AssumeRoleEnv, cxt: Context<AssumeRoleEnv>): Promise<AssumeRoleResponse> {
     if (!request.principalArn) {
       throw new BadRequestError('Missing required fields.');
     }
@@ -28,26 +29,28 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
       secretAccessKey: credentialChain.secretAccessKey,
     };
 
+    const userEmail: string = this.getAuthenticatedUserEmailAddress(cxt);
+    const userId: string = EmailUtils.extractUsername(userEmail);
     for (let i = credentialChain.principalArns.length - 2; i >= 0; --i) {
-      newCredentials = await AssumeRoleUtil.assumeRole(credentialChain.principalArns[i], newCredentials, 'AccessBridge-FederatedUser');
+      newCredentials = await AssumeRoleUtil.assumeRole(credentialChain.principalArns[i], newCredentials, `AccessBridge-${userId}`);
     }
 
     return newCredentials;
   }
 }
 
-interface AssumeRoleRequest {
+interface AssumeRoleRequest extends IRequest {
   principalArn: string;
 }
 
-interface AssumeRoleResponse {
+interface AssumeRoleResponse extends IResponse {
   accessKeyId: string;
   secretAccessKey: string;
   sessionToken?: string;
   expiration?: string;
 }
 
-interface AssumeRoleEnv {
+interface AssumeRoleEnv extends IEnv {
   AccessBridgeDB: D1Database;
 }
 

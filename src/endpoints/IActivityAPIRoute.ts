@@ -13,7 +13,7 @@ abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IR
 
       const body: unknown = await c.req.json();
       const request: TRequest = body as TRequest;
-      const response: TResponse = await this.handleRequest(request, c.env as TEnv);
+      const response: TResponse = await this.handleRequest(request, c.env as TEnv, c);
       return c.json(response);
     } catch (error: unknown) {
       if (!(error instanceof IServiceError) || error instanceof InternalServerError) {
@@ -31,9 +31,9 @@ abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IR
     }
   }
 
-  protected abstract handleRequest(request: TRequest, env: TEnv): Promise<TResponse>;
+  protected abstract handleRequest(request: TRequest, env: TEnv, cxt: Context<TEnv>): Promise<TResponse>;
 
-  protected getAuthenticatedUserEmailAddress(c: Context<TEnv>):string{
+  protected getAuthenticatedUserEmailAddress(c: Context<TEnv>): string {
     return c.get('AuthenticatedUserEmailAddress');
   }
 }
