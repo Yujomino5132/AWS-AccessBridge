@@ -1,22 +1,3 @@
-body {
-  font-family: sans-serif;
-  padding: 2rem;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-}
-
-.modal {
-  background: white;
-  padding: 1rem;
-  margin: 10% auto;
-  width: 400px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px gray;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

@@ -3,9 +3,7 @@ export function buildPrincipalArn(accountId: string, roleName: string): string {
 }
 
 export function exportEnv(accessKeyId: string, secretAccessKey: string, sessionToken: string): string {
-  return `
-  export AWS_ACCESS_KEY_ID="${accessKeyId}"
-  export AWS_SECRET_ACCESS_KEY="${secretAccessKey}"
-  export AWS_SESSION_TOKEN="${sessionToken}"
-  `.trim();
+  return `export AWS_ACCESS_KEY_ID="${accessKeyId}"
+export AWS_SECRET_ACCESS_KEY="${secretAccessKey}"
+export AWS_SESSION_TOKEN="${sessionToken}"`.trim();
 }
