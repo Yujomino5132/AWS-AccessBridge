@@ -11,7 +11,7 @@ abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IR
       }
       c.set('AuthenticatedUserEmailAddress', userEmail);
 
-      const body: unknown = await c.req.json();
+      const body: unknown = c.req.method === 'GET' ? {} : await c.req.json();
       const request: TRequest = body as TRequest;
       const response: TResponse = await this.handleRequest(request, c.env as TEnv, c);
       return c.json(response);

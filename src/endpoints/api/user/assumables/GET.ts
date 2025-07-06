@@ -1,14 +1,9 @@
-import { z } from 'zod';
 import { AssumableRolesDAO } from '../../../../dao';
 import { IActivityAPIRoute, IEnv, IRequest, IResponse } from '../../../IActivityAPIRoute';
 import { Context } from 'hono';
 
 class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListAssumablesResponse, AListAssumablesEnv> {
-  schema = {
-    body: z.object({
-      principalArn: z.string().min(1, 'principalArn is required'),
-    }),
-  };
+  schema = {};
 
   protected async handleRequest(
     request: ListAssumablesRequest,
