@@ -7,7 +7,7 @@
   "name": "aws-access-bridge",
   "main": "src/index.ts",
   "upload_source_maps": true,
-  "compatibility_date": "2025-06-27",
+  "compatibility_date": "2025-07-06",
   "compatibility_flags": ["global_fetch_strictly_public"],
   "preview_urls": false,
   "workers_dev": false,
@@ -25,7 +25,7 @@
     "mode": "off",
   },
   "assets": {
-    "directory": "./public",
+    "directory": "./dist/client",
   },
   "d1_databases": [
     {

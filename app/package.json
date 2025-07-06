@@ -1,0 +1,23 @@
+{
+    "name": "@rexezuge/aws-access-bridge-app",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+      "build": "tsc -b && vite build",
+    "cf-typegen": "wrangler types"
+    },
+    "devDependencies": {
+      "vite": "^7.0.x",
+      "typescript": "^5.8.x",
+      "@cloudflare/vite-plugin": "^1.9.x",
+      "@types/node": "^24.0.x",
+      "@types/react": "^19.1.x",
+      "@types/react-dom": "^19.1.x",
+      "@vitejs/plugin-react": "^4.6.x"
+    },
+    "dependencies": {
+      "react": "^19.1.x",
+      "react-dom": "^19.1.x"
+    },
+  "type": "module"
+  }

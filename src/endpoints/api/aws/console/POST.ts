@@ -62,7 +62,7 @@ export class GenerateConsoleUrlRoute extends OpenAPIRoute {
       const signinToken = await getSigninToken(credentials);
       const loginUrl = buildLoginUrl(signinToken);
 
-      return c.json({ awsConsoleUrl: loginUrl });
+      return c.json({ url: loginUrl });
     } catch (error) {
       console.error('Error generating AWS Console URL:', error);
       return c.text('Internal Server Error', 500);
