@@ -1,4 +1,4 @@
-import { BadRequestError, InternalServerError, UnauthorizedError } from '../error';
+import { ForbiddenError, InternalServerError, UnauthorizedError } from '../error';
 import { Credential, CredentialChain, CredentialInternal } from '../model';
 
 class CredentialsDAO {
@@ -56,7 +56,7 @@ class CredentialsDAO {
     }
 
     if (trustChain.length <= 1) {
-      throw new BadRequestError('For security reasons, long-term credentials are not retrievable.');
+      throw new ForbiddenError('For security reasons, long-term credentials are not retrievable.');
     }
 
     const principalArns: Array<string> = [];
