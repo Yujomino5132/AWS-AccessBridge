@@ -27,10 +27,6 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
     const credentialsDAO: CredentialsDAO = new CredentialsDAO(env.AccessBridgeDB);
     const credentialChain: CredentialChain = await credentialsDAO.getCredentialChainByPrincipalArn(request.principalArn);
 
-    if (credentialChain.principalArns.length === 1) {
-      throw new BadRequestError('For security reasons, long-term credentials are not retrievable.');
-    }
-
     let newCredentials: AccessKeysWithExpiration = {
       accessKeyId: credentialChain.accessKeyId,
       secretAccessKey: credentialChain.secretAccessKey,

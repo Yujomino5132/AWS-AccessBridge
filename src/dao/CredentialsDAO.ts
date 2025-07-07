@@ -1,4 +1,4 @@
-import { InternalServerError, UnauthorizedError } from '../error';
+import { BadRequestError, InternalServerError, UnauthorizedError } from '../error';
 import { Credential, CredentialChain, CredentialInternal } from '../model';
 
 class CredentialsDAO {
@@ -53,6 +53,10 @@ class CredentialsDAO {
         console.error('Principal chain exceeds the maximum allowed depth: ', CredentialsDAO.ASSUME_ROLE_CHAIN_LIMIT);
       }
       throw new InternalServerError('Principal chain is not valid. Contact system administrator.');
+    }
+
+    if (trustChain.length <= 1) {
+      throw new BadRequestError('For security reasons, long-term credentials are not retrievable.');
     }
 
     const principalArns: Array<string> = [];
