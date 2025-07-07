@@ -7,13 +7,6 @@ CREATE TABLE IF NOT EXISTS credentials (
     session_token VARCHAR(2048)
 );
 
--- Accessable Accounts
-CREATE TABLE IF NOT EXISTS accessable_accounts (
-    user_email VARCHAR(120),
-    aws_account_id CHAR(12),
-    PRIMARY KEY (user_email, aws_account_id)
-);
-
 -- Assumable Roles
 CREATE TABLE IF NOT EXISTS assumable_roles (
     user_email VARCHAR(120),
