@@ -1,6 +1,5 @@
 import { AssumableRolesDAO } from '../../../../dao';
-import { IActivityAPIRoute, IEnv, IRequest, IResponse } from '../../../IActivityAPIRoute';
-import { Context } from 'hono';
+import { ActivityContext, IActivityAPIRoute, IEnv, IRequest, IResponse } from '../../../IActivityAPIRoute';
 
 class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListAssumablesResponse, ListAssumablesEnv> {
   schema = {};
@@ -8,7 +7,7 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
   protected async handleRequest(
     request: ListAssumablesRequest,
     env: ListAssumablesEnv,
-    cxt: Context<ListAssumablesEnv>,
+    cxt: ActivityContext<ListAssumablesEnv>,
   ): Promise<ListAssumablesResponse> {
     const userEmail: string = this.getAuthenticatedUserEmailAddress(cxt);
     const assumableRolesDAO: AssumableRolesDAO = new AssumableRolesDAO(env.AccessBridgeDB);

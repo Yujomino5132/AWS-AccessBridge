@@ -1,4 +1,4 @@
-class EmailUtils {
+class EmailUtil {
   /**
    * Extracts the part of an email address before the '@' symbol.
    *
@@ -46,4 +46,4 @@ class EmailUtils {
   }
 }
 
-export { EmailUtils };
+export { EmailUtil };

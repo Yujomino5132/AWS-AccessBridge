@@ -3,7 +3,7 @@ import { Context } from 'hono';
 import { DefaultInternalServerError, InternalServerError, IServiceError, UnauthorizedError } from '../error';
 
 abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IResponse, TEnv extends IEnv> extends OpenAPIRoute {
-  async handle(c: Context<TEnv>) {
+  async handle(c: ActivityContext<TEnv>) {
     try {
       const userEmail: string | undefined = c.req.header('Cf-Access-Authenticated-User-Email');
       if (!userEmail) {
@@ -33,9 +33,9 @@ abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IR
     }
   }
 
-  protected abstract handleRequest(request: TRequest, env: TEnv, cxt: Context<TEnv>): Promise<TResponse>;
+  protected abstract handleRequest(request: TRequest, env: TEnv, cxt: ActivityContext<TEnv>): Promise<TResponse>;
 
-  protected getAuthenticatedUserEmailAddress(c: Context<TEnv>): string {
+  protected getAuthenticatedUserEmailAddress(c: ActivityContext<TEnv>): string {
     return c.get('AuthenticatedUserEmailAddress');
   }
 }
@@ -52,5 +52,7 @@ interface IEnv {
   };
 }
 
+type ActivityContext<TEnv extends IEnv> = Context<TEnv>;
+
 export { IActivityAPIRoute };
-export type { IRequest, IResponse, IEnv };
+export type { IRequest, IResponse, IEnv, ActivityContext };

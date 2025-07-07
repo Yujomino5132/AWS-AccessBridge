@@ -1,5 +1,4 @@
-import { IActivityAPIRoute, IEnv, IRequest, IResponse } from '../../../IActivityAPIRoute';
-import { Context } from 'hono';
+import { ActivityContext, IActivityAPIRoute, IEnv, IRequest, IResponse } from '../../../IActivityAPIRoute';
 
 class GetCurrentUserRoute extends IActivityAPIRoute<GetCurrentUserRequest, GetCurrentUserResponse, GetCurrentUserEnv> {
   schema = {};
@@ -7,7 +6,7 @@ class GetCurrentUserRoute extends IActivityAPIRoute<GetCurrentUserRequest, GetCu
   protected async handleRequest(
     request: GetCurrentUserRequest,
     env: GetCurrentUserEnv,
-    cxt: Context<GetCurrentUserEnv>,
+    cxt: ActivityContext<GetCurrentUserEnv>,
   ): Promise<GetCurrentUserResponse> {
     const userEmail: string = this.getAuthenticatedUserEmailAddress(cxt);
     return {

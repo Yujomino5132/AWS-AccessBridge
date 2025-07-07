@@ -1,10 +1,9 @@
 import { z } from 'zod';
 import { AssumableRolesDAO, CredentialsDAO } from '../../../../dao';
 import { AccessKeysWithExpiration, CredentialChain } from '../../../../model';
-import { ArnUtil, AssumeRoleUtil, EmailUtils } from '../../../../utils';
-import { IActivityAPIRoute, IEnv, IRequest, IResponse } from '../../../IActivityAPIRoute';
+import { ArnUtil, AssumeRoleUtil, EmailUtil } from '../../../../utils';
+import { ActivityContext, IActivityAPIRoute, IEnv, IRequest, IResponse } from '../../../IActivityAPIRoute';
 import { BadRequestError } from '../../../../error';
-import { Context } from 'hono';
 
 class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleResponse, AssumeRoleEnv> {
   schema = {
@@ -13,7 +12,11 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
     }),
   };
 
-  protected async handleRequest(request: AssumeRoleRequest, env: AssumeRoleEnv, cxt: Context<AssumeRoleEnv>): Promise<AssumeRoleResponse> {
+  protected async handleRequest(
+    request: AssumeRoleRequest,
+    env: AssumeRoleEnv,
+    cxt: ActivityContext<AssumeRoleEnv>,
+  ): Promise<AssumeRoleResponse> {
     if (!request.principalArn) {
       throw new BadRequestError('Missing required fields.');
     }
@@ -32,7 +35,7 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
       secretAccessKey: credentialChain.secretAccessKey,
     };
 
-    const userId: string = EmailUtils.extractUsername(userEmail);
+    const userId: string = EmailUtil.extractUsername(userEmail);
     for (let i = credentialChain.principalArns.length - 2; i >= 0; --i) {
       newCredentials = await AssumeRoleUtil.assumeRole(credentialChain.principalArns[i], newCredentials, `AccessBridge-${userId}`);
     }
