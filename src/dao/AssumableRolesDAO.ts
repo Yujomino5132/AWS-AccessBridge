@@ -1,3 +1,5 @@
+import { UnauthorizedError } from '../error';
+
 class AssumableRolesDAO {
   protected readonly database: D1Database;
 
@@ -57,6 +59,34 @@ class AssumableRolesDAO {
     }
 
     return roleMap;
+  }
+
+  /**
+   * Verifies whether the specified user has permission to assume a given role in a specific AWS account.
+   * Throws an UnauthorizedError if the user does not have access.
+   *
+   * @param userEmail - The email address of the user.
+   * @param awsAccountId - The AWS account ID.
+   * @param roleName - The name of the role to verify.
+   * @throws UnauthorizedError if the user is not authorized to assume the specified role in the given AWS account.
+   */
+  public async verifyUserHasAccessToRole(userEmail: string, awsAccountId: string, roleName: string): Promise<void> {
+    const result: never | null = await this.database
+      .prepare(
+        `SELECT 1
+           FROM assumable_roles
+           WHERE user_email = ?
+             AND aws_account_id = ?
+             AND role_name = ?
+           LIMIT 1`,
+      )
+      .bind(userEmail, awsAccountId, roleName)
+      .first();
+
+    if (!result) {
+      throw new UnauthorizedError(`${userEmail} is not authorized to assume role '${roleName}' in AWS account ${awsAccountId}.`);
+    }
+    return;
   }
 }
 

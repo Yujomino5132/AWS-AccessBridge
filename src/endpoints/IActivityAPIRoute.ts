@@ -20,8 +20,10 @@ abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IR
         console.error('Caught service error during execution: ', error);
       }
       if (error instanceof IServiceError) {
+        console.warn('Responding with IServiceError: ', error.stack);
         return c.json({ Exception: { Type: error.getErrorType(), Message: error.getErrorMessage() } }, error.getErrorCode());
       }
+      console.warn('Responding with DefaultInternalServerError: ', DefaultInternalServerError);
       return c.json(
         {
           Exception: { Type: DefaultInternalServerError.getErrorType(), Message: DefaultInternalServerError.getErrorMessage() },

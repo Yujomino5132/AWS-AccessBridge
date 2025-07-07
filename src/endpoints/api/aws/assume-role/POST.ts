@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { CredentialsDAO } from '../../../../dao';
+import { AssumableRolesDAO, CredentialsDAO } from '../../../../dao';
 import { AccessKeysWithExpiration, CredentialChain } from '../../../../model';
-import { AssumeRoleUtil, EmailUtils } from '../../../../utils';
+import { ArnUtil, AssumeRoleUtil, EmailUtils } from '../../../../utils';
 import { IActivityAPIRoute, IEnv, IRequest, IResponse } from '../../../IActivityAPIRoute';
 import { BadRequestError } from '../../../../error';
 import { Context } from 'hono';
@@ -17,6 +17,13 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
     if (!request.principalArn) {
       throw new BadRequestError('Missing required fields.');
     }
+
+    const userEmail: string = this.getAuthenticatedUserEmailAddress(cxt);
+    const accountId: string = ArnUtil.getAccountIdFromArn(request.principalArn);
+    const roleName: string = ArnUtil.getRoleNameFromArn(request.principalArn);
+
+    await new AssumableRolesDAO(env.AccessBridgeDB).verifyUserHasAccessToRole(userEmail, accountId, roleName);
+
     const credentialsDAO: CredentialsDAO = new CredentialsDAO(env.AccessBridgeDB);
     const credentialChain: CredentialChain = await credentialsDAO.getCredentialChainByPrincipalArn(request.principalArn);
 
@@ -29,7 +36,6 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
       secretAccessKey: credentialChain.secretAccessKey,
     };
 
-    const userEmail: string = this.getAuthenticatedUserEmailAddress(cxt);
     const userId: string = EmailUtils.extractUsername(userEmail);
     for (let i = credentialChain.principalArns.length - 2; i >= 0; --i) {
       newCredentials = await AssumeRoleUtil.assumeRole(credentialChain.principalArns[i], newCredentials, `AccessBridge-${userId}`);
