@@ -14,9 +14,9 @@ class CredentialsDAO {
     const result: CredentialInternal | null = await this.database
       .prepare(
         `SELECT principal_arn, assumed_by, access_key_id, secret_access_key, session_token
-        FROM credentials
-        WHERE principal_arn = ?
-        LIMIT 1`,
+         FROM credentials
+         WHERE principal_arn = ?
+         LIMIT 1`,
       )
       .bind(principalArn)
       .first<CredentialInternal>();

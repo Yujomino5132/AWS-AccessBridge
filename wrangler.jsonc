@@ -8,7 +8,7 @@
   "main": "src/index.ts",
   "upload_source_maps": true,
   "compatibility_date": "2025-07-06",
-  "compatibility_flags": ["global_fetch_strictly_public"],
+  "compatibility_flags": [],
   "preview_urls": false,
   "workers_dev": false,
   "observability": {

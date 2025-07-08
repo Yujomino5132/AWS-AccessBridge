@@ -18,8 +18,8 @@
     "globals": "^16.3.x",
     "prettier": "^3.6.x",
     "typescript": "^5.8.x",
-    "typescript-eslint": "^8.35.x",
-    "wrangler": "^4.23.x"
+    "typescript-eslint": "^8.36.x",
+    "wrangler": "^4.24.x"
   },
   "dependencies": {
     "aws4fetch": "^1.0.x",

@@ -74,11 +74,11 @@ class AssumableRolesDAO {
     const result: never | null = await this.database
       .prepare(
         `SELECT 1
-           FROM assumable_roles
-           WHERE user_email = ?
-             AND aws_account_id = ?
-             AND role_name = ?
-           LIMIT 1`,
+         FROM assumable_roles
+         WHERE user_email = ?
+           AND aws_account_id = ?
+           AND role_name = ?
+         LIMIT 1`,
       )
       .bind(userEmail, awsAccountId, roleName)
       .first();
