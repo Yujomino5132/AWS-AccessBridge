@@ -24,31 +24,61 @@ export default function AccountList() {
 
   const handleAccessKeys = async (accountId: string, role: string) => {
     const principalArn = `arn:aws:iam::${accountId}:role/${role}`;
-    const assumeRes = await fetch('/api/aws/assume-role', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ principalArn }),
-    });
-    const creds = await assumeRes.json();
-    setModalData(creds);
+
+    try {
+      const assumeRes = await fetch('/api/aws/assume-role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ principalArn }),
+      });
+
+      if (!assumeRes.ok) {
+        const errorText = await assumeRes.text();
+        throw new Error(`Assume role failed: ${assumeRes.status} ${errorText}`);
+      }
+
+      const creds = await assumeRes.json();
+      setModalData(creds);
+    } catch (error) {
+      console.error(error);
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
+    }
   };
 
   const handleConsole = async (accountId: string, role: string) => {
     const principalArn = `arn:aws:iam::${accountId}:role/${role}`;
-    const assumeRes = await fetch('/api/aws/assume-role', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ principalArn }),
-    });
-    const creds = await assumeRes.json();
 
-    const consoleRes = await fetch('/api/aws/console', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(creds),
-    });
-    const { url } = await consoleRes.json();
-    window.open(url, '_blank');
+    try {
+      const assumeRes = await fetch('/api/aws/assume-role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ principalArn }),
+      });
+
+      if (!assumeRes.ok) {
+        const errorText = await assumeRes.text();
+        throw new Error(`Assume role failed: ${assumeRes.status} ${errorText}`);
+      }
+
+      const creds = await assumeRes.json();
+
+      const consoleRes = await fetch('/api/aws/console', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(creds),
+      });
+
+      if (!consoleRes.ok) {
+        const errorText = await consoleRes.text();
+        throw new Error(`Console login failed: ${consoleRes.status} ${errorText}`);
+      }
+
+      const { url } = await consoleRes.json();
+      window.open(url, '_blank');
+    } catch (error) {
+      console.error(error);
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
+    }
   };
 
   return (
