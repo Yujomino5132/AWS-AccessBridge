@@ -55,13 +55,21 @@ AWS Access Bridge is a full-stack application that consists of:
 
 ## Deployment
 
-### 1. Install Dependencies
+### 1. Authenticate with Cloudflare
+
+First, authenticate Wrangler with your Cloudflare account:
+
+```bash
+npx wrangler login
+```
+
+### 2. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Create Cloudflare D1 Database
+### 3. Create Cloudflare D1 Database
 
 Create a new D1 database:
 
@@ -71,7 +79,7 @@ npx wrangler d1 create aws_access_bridge_db
 
 Update the `database_id` field in `wrangler.jsonc` with the new database ID returned from the command above.
 
-### 3. Run Database Migrations
+### 4. Run Database Migrations
 
 Initialize the database schema:
 
@@ -83,7 +91,7 @@ This creates two tables:
 - `credentials`: Stores AWS credentials and role chains
 - `assumable_roles`: Maps users to roles they can assume
 
-### 4. Configure Environment
+### 5. Configure Environment
 
 Update `wrangler.jsonc` with your specific configuration:
 
@@ -100,7 +108,7 @@ Update `wrangler.jsonc` with your specific configuration:
 }
 ```
 
-### 5. Build and Deploy
+### 6. Build and Deploy
 
 Build the frontend application:
 
@@ -119,6 +127,104 @@ The deployment process includes:
 2. Code formatting and linting
 3. Building the React frontend
 4. Deploying to Cloudflare Workers
+
+## AWS IAM Setup
+
+For security considerations, AWS Access Bridge implements an intermediate layer role assumption architecture. This setup requires creating specific IAM users and roles in your AWS account.
+
+### 1. Create IAM User
+
+Create an IAM user named `DO-NOT-DELETE-Federated-SSO-AccessBridge` with the following inline policy:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AssumeIntermediateRole",
+            "Effect": "Allow",
+            "Action": "sts:AssumeRole",
+            "Resource": [
+                "arn:aws:iam::<your-aws-account>:role/DO-NOT-DELETE-AccessBridge-Intermediate"
+            ]
+        }
+    ]
+}
+```
+
+### 2. Create Access Key Pair
+
+1. Generate an access key pair for the IAM user created above
+2. Store the credentials in the D1 database `credentials` table:
+   - `principal_arn`: The ARN of the intermediate role
+   - `access_key_id`: The access key ID
+   - `secret_access_key`: The secret access key
+   - `session_token`: Leave empty for permanent credentials
+
+### 3. Create Intermediate IAM Role
+
+Create an IAM role named `DO-NOT-DELETE-AccessBridge-Intermediate` with the following permissions policy:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AssumeAnyRole",
+            "Effect": "Allow",
+            "Action": "sts:AssumeRole",
+            "Resource": [
+                "arn:aws:iam::<your-aws-account>:role/*"
+            ]
+        }
+    ]
+}
+```
+
+And the following trust policy (replace `<your-aws-account>` with your actual AWS account ID):
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::<your-aws-account>:user/DO-NOT-DELETE-Federated-SSO-AccessBridge"
+            },
+            "Action": "sts:AssumeRole",
+            "Condition": {}
+        }
+    ]
+}
+```
+
+### 4. Configure Target Roles
+
+For each role that users should be able to assume through Access Bridge, ensure the role's trust policy allows the intermediate role to assume it:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::<your-aws-account>:role/DO-NOT-DELETE-AccessBridge-Intermediate"
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+}
+```
+
+### Security Benefits
+
+This intermediate layer approach provides several security advantages:
+- **Credential Isolation**: The base IAM user has minimal permissions
+- **Centralized Control**: All role assumptions go through the intermediate role
+- **Audit Trail**: Clear separation between the bridge service and target roles
+- **Reduced Attack Surface**: Limits the scope of potential credential compromise
 
 ## Development
 
