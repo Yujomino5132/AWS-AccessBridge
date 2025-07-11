@@ -25,6 +25,7 @@
   "d1_databases": [
     {
       "binding": "AccessBridgeDB",
+      "database_name": "aws_access_bridge_db",
       "database_id": "913f420e-ce0b-43cb-a38c-ec2333987754",
     },
   ],
