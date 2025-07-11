@@ -4,6 +4,164 @@ import { ActivityContext, IActivityAPIRoute, IEnv, IRequest, IResponse } from '.
 class GenerateConsoleUrlRoute extends IActivityAPIRoute<GenerateConsoleUrlRequest, GenerateConsoleUrlResponse, GenerateConsoleUrlEnv> {
   schema = {
     tags: ['AWS'],
+    summary: 'Generate AWS Console URL',
+    description:
+      'Generates a temporary AWS Console login URL using provided AWS credentials. The URL allows direct access to the AWS Management Console without requiring manual authentication. The generated URL expires after 15 minutes for security purposes.',
+    requestBody: {
+      description: 'AWS credentials required to generate the console URL',
+      required: true,
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            required: ['accessKeyId', 'secretAccessKey'],
+            properties: {
+              accessKeyId: {
+                type: 'string',
+                minLength: 16,
+                maxLength: 128,
+                description: 'AWS Access Key ID (typically 20 characters starting with AKIA for permanent keys or ASIA for temporary keys)',
+                example: 'AKIAIOSFODNN7EXAMPLE',
+              },
+              secretAccessKey: {
+                type: 'string',
+                minLength: 16,
+                maxLength: 128,
+                description: 'AWS Secret Access Key (typically 40 characters)',
+                example: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+              },
+              sessionToken: {
+                type: 'string',
+                description: 'AWS Session Token (required for temporary credentials from STS, typically 1000+ characters)',
+                example: 'AQoEXAMPLEH4aoAH0gNCAPyJxz4BlCFFxWNE1OPTgk5TthT+FvwqnKwRcOIfrRh3c/LTo6UDdyJwOOvEVPvLXCrrrUtdnniCEXAMPLE',
+              },
+            },
+          },
+          examples: {
+            'permanent-credentials': {
+              summary: 'Using permanent AWS credentials',
+              value: {
+                accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
+                secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+              },
+            },
+            'temporary-credentials': {
+              summary: 'Using temporary AWS credentials with session token',
+              value: {
+                accessKeyId: 'ASIAIOSFODNN7EXAMPLE',
+                secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+                sessionToken: 'AQoEXAMPLEH4aoAH0gNCAPyJxz4BlCFFxWNE1OPTgk5TthT+FvwqnKwRcOIfrRh3c/LTo6UDdyJwOOvEVPvLXCrrrUtdnniCEXAMPLE',
+              },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      '200': {
+        description: 'Successfully generated AWS Console URL',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              required: ['url'],
+              properties: {
+                url: {
+                  type: 'string',
+                  format: 'uri',
+                  description: 'Pre-authenticated AWS Console URL that expires after 15 minutes',
+                  example:
+                    'https://signin.aws.amazon.com/federation?Action=login&Issuer=AccessBridge&Destination=https%3A%2F%2Fconsole.aws.amazon.com%2F&SigninToken=VCaXjShAlpsXGHeOP1HnSjxuJMd1c1YvwjKNsKGKigo',
+                },
+              },
+            },
+          },
+        },
+      },
+      '400': {
+        description: 'Invalid request parameters or missing required fields',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                Exception: {
+                  type: 'object',
+                  properties: {
+                    Type: {
+                      type: 'string',
+                      example: 'BadRequestError',
+                    },
+                    Message: {
+                      type: 'string',
+                      description: 'Details about the invalid request parameters',
+                      example: 'Missing required field: accessKeyId',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      '401': {
+        description: 'Unauthorized - Missing or invalid Cloudflare Access authentication',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                Exception: {
+                  type: 'object',
+                  properties: {
+                    Type: {
+                      type: 'string',
+                      example: 'UnauthorizedError',
+                    },
+                    Message: {
+                      type: 'string',
+                      description: 'Authentication error details',
+                      example: 'No authenticated user email provided in request headers.',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      '500': {
+        description: 'Internal server error during URL generation',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                Exception: {
+                  type: 'object',
+                  properties: {
+                    Type: {
+                      type: 'string',
+                      example: 'InternalServerError',
+                    },
+                    Message: {
+                      type: 'string',
+                      description: 'Error description',
+                      example: 'Failed to generate AWS signin token',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    security: [
+      {
+        CloudflareAccess: [],
+      },
+    ],
   };
 
   protected async handleRequest(
