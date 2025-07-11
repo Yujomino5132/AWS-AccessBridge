@@ -49,24 +49,25 @@ AWS Access Bridge is a full-stack application that consists of:
 ## Prerequisites
 
 - Node.js 18+ and npm
-- Cloudflare account with Workers and D1 enabled
+- Cloudflare account with Workers, D1, and Zero Trust enabled
 - Wrangler CLI installed globally: `npm install -g wrangler`
 - AWS accounts and roles configured for cross-account access
+- Cloudflare Zero Trust team configured for application security
 
 ## Deployment
 
-### 1. Authenticate with Cloudflare
-
-First, authenticate Wrangler with your Cloudflare account:
-
-```bash
-npx wrangler login
-```
-
-### 2. Install Dependencies
+### 1. Install Dependencies
 
 ```bash
 npm install
+```
+
+### 2. Authenticate with Cloudflare
+
+Authenticate Wrangler with your Cloudflare account:
+
+```bash
+npx wrangler login
 ```
 
 ### 3. Create Cloudflare D1 Database
@@ -88,6 +89,7 @@ npx wrangler d1 migrations apply --remote aws_access_bridge_db
 ```
 
 This creates two tables:
+
 - `credentials`: Stores AWS credentials and role chains
 - `assumable_roles`: Maps users to roles they can assume
 
@@ -102,13 +104,49 @@ Update `wrangler.jsonc` with your specific configuration:
     {
       "binding": "AccessBridgeDB",
       "database_name": "aws_access_bridge_db",
-      "database_id": "your-database-id"
-    }
-  ]
+      "database_id": "your-database-id",
+    },
+  ],
 }
 ```
 
-### 6. Build and Deploy
+### 6. Configure Cloudflare Zero Trust
+
+Secure your application with Cloudflare Zero Trust:
+
+1. **Create a Zero Trust Team**:
+   - Go to [Cloudflare Zero Trust dashboard](https://one.dash.cloudflare.com/)
+   - Create a new team if you don't have one
+   - Note your team domain (e.g., `your-team.cloudflareaccess.com`)
+
+2. **Create an Access Application**:
+   - Navigate to Access > Applications
+   - Click "Add an application" > "Self-hosted"
+   - Configure the application:
+     - **Application name**: AWS Access Bridge
+     - **Subdomain**: Choose a subdomain for your app
+     - **Domain**: Select your Cloudflare domain
+     - **Path**: Leave blank to protect the entire application
+
+3. **Configure Access Policies**:
+   - Create policies to control who can access the application
+   - Example policy for email-based access:
+     - **Policy name**: Authorized Users
+     - **Action**: Allow
+     - **Include**: Emails - add authorized user email addresses
+   - Save the policy and application
+
+4. **Update Application Settings**:
+   - Enable "Accept all available identity providers" or configure specific providers
+   - Set session duration as needed (recommended: 8 hours)
+   - Enable "HTTP-only cookies" for additional security
+
+5. **Test Access**:
+   - Navigate to your application URL
+   - Verify that Zero Trust authentication is required
+   - Ensure authorized users can access the application
+
+### 7. Build and Deploy
 
 Build the frontend application:
 
@@ -123,6 +161,7 @@ npm run deploy
 ```
 
 The deployment process includes:
+
 1. Installing dependencies
 2. Code formatting and linting
 3. Building the React frontend
@@ -138,17 +177,15 @@ Create an IAM user named `DO-NOT-DELETE-Federated-SSO-AccessBridge` with the fol
 
 ```json
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "AssumeIntermediateRole",
-            "Effect": "Allow",
-            "Action": "sts:AssumeRole",
-            "Resource": [
-                "arn:aws:iam::<your-aws-account>:role/DO-NOT-DELETE-AccessBridge-Intermediate"
-            ]
-        }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AssumeIntermediateRole",
+      "Effect": "Allow",
+      "Action": "sts:AssumeRole",
+      "Resource": ["arn:aws:iam::<your-aws-account>:role/DO-NOT-DELETE-AccessBridge-Intermediate"]
+    }
+  ]
 }
 ```
 
@@ -167,17 +204,15 @@ Create an IAM role named `DO-NOT-DELETE-AccessBridge-Intermediate` with the foll
 
 ```json
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "AssumeAnyRole",
-            "Effect": "Allow",
-            "Action": "sts:AssumeRole",
-            "Resource": [
-                "arn:aws:iam::<your-aws-account>:role/*"
-            ]
-        }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AssumeAnyRole",
+      "Effect": "Allow",
+      "Action": "sts:AssumeRole",
+      "Resource": ["arn:aws:iam::<your-aws-account>:role/*"]
+    }
+  ]
 }
 ```
 
@@ -185,17 +220,17 @@ And the following trust policy (replace `<your-aws-account>` with your actual AW
 
 ```json
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": "arn:aws:iam::<your-aws-account>:user/DO-NOT-DELETE-Federated-SSO-AccessBridge"
-            },
-            "Action": "sts:AssumeRole",
-            "Condition": {}
-        }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::<your-aws-account>:user/DO-NOT-DELETE-Federated-SSO-AccessBridge"
+      },
+      "Action": "sts:AssumeRole",
+      "Condition": {}
+    }
+  ]
 }
 ```
 
@@ -205,22 +240,23 @@ For each role that users should be able to assume through Access Bridge, ensure 
 
 ```json
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": "arn:aws:iam::<your-aws-account>:role/DO-NOT-DELETE-AccessBridge-Intermediate"
-            },
-            "Action": "sts:AssumeRole"
-        }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::<your-aws-account>:role/DO-NOT-DELETE-AccessBridge-Intermediate"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
 }
 ```
 
 ### Security Benefits
 
 This intermediate layer approach provides several security advantages:
+
 - **Credential Isolation**: The base IAM user has minimal permissions
 - **Centralized Control**: All role assumptions go through the intermediate role
 - **Audit Trail**: Clear separation between the bridge service and target roles
@@ -251,11 +287,13 @@ This intermediate layer approach provides several security advantages:
 ### Local Development
 
 1. **Start the development server:**
+
    ```bash
    npx wrangler dev
    ```
 
 2. **Build the frontend in watch mode:**
+
    ```bash
    cd app && npm run build -- --watch
    ```
@@ -268,12 +306,14 @@ This intermediate layer approach provides several security advantages:
 ### Available Scripts
 
 **Root level:**
+
 - `npm run buildApp` - Build the React frontend
 - `npm run deploy` - Deploy to Cloudflare Workers
 - `npm run prettier` - Format code
 - `npm run lint` - Lint TypeScript code
 
 **Frontend (app/):**
+
 - `npm run build` - Build for production
 - `npm run release` - Clean and build
 - `npm run prettier` - Format frontend code
@@ -282,6 +322,7 @@ This intermediate layer approach provides several security advantages:
 ### Database Schema
 
 **credentials table:**
+
 ```sql
 CREATE TABLE credentials (
     principal_arn VARCHAR(256) PRIMARY KEY,
@@ -293,6 +334,7 @@ CREATE TABLE credentials (
 ```
 
 **assumable_roles table:**
+
 ```sql
 CREATE TABLE assumable_roles (
     user_email VARCHAR(120),
@@ -320,6 +362,7 @@ npm run lint
 ### Technology Stack
 
 **Backend:**
+
 - [Hono](https://hono.dev/) - Fast web framework for Cloudflare Workers
 - [Chanfana](https://chanfana.pages.dev/) - OpenAPI framework for Hono
 - [Zod](https://zod.dev/) - TypeScript-first schema validation
@@ -327,17 +370,20 @@ npm run lint
 - TypeScript for type safety
 
 **Frontend:**
+
 - React 19 with TypeScript
 - Tailwind CSS for styling
 - Vite for build tooling
 
 **Infrastructure:**
+
 - Cloudflare Workers for serverless compute
 - Cloudflare D1 for SQL database
 - Cloudflare Pages for static asset hosting
 
 ## Security Considerations
 
+- Application is protected by Cloudflare Zero Trust authentication
 - All AWS credentials are stored securely in Cloudflare D1
 - User authentication is required for all role assumptions
 - Role access is controlled via database mappings
