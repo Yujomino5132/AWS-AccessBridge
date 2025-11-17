@@ -1,7 +1,3 @@
-/**
- * For more details on how to configure Wrangler, refer to:
- * https://developers.cloudflare.com/workers/wrangler/configuration/
- */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "aws-access-bridge",
@@ -25,8 +21,8 @@
   "d1_databases": [
     {
       "binding": "AccessBridgeDB",
-      "database_name": "aws_access_bridge_db",
-      "database_id": "913f420e-ce0b-43cb-a38c-ec2333987754",
+      "database_name": "aws-access-bridge-db",
+      "database_id": "00000000-0000-0000-0000-000000000000",
     },
   ],
 }
