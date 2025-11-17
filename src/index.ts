@@ -1,9 +1,13 @@
 import { fromHono } from 'chanfana';
 import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 import { GenerateConsoleUrlRoute, AssumeRoleRoute, ListAssumablesRoute, GetCurrentUserRoute } from './endpoints';
 
 // Start a Hono app
 const app = new Hono();
+
+// Add CORS middleware
+app.use('*', cors());
 
 // Setup OpenAPI registry
 const openapi = fromHono(app, {

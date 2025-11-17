@@ -10,7 +10,9 @@ export default function AccountList() {
   const [modalData, setModalData] = useState<any | null>(null);
 
   useEffect(() => {
-    fetch('/api/user/assumables')
+    const backendUrl = import.meta.env.VITE_OPTIONAL_BACKEND_URL || '';
+    const baseUrl = backendUrl ? backendUrl : '';
+    fetch(`${baseUrl}/api/user/assumables`)
       .then((res) => res.json())
       .then((data) => {
         setRolesData(data);
@@ -26,7 +28,9 @@ export default function AccountList() {
     const principalArn = `arn:aws:iam::${accountId}:role/${role}`;
 
     try {
-      const assumeRes = await fetch('/api/aws/assume-role', {
+      const backendUrl = import.meta.env.VITE_OPTIONAL_BACKEND_URL || '';
+      const baseUrl = backendUrl ? backendUrl : '';
+      const assumeRes = await fetch(`${baseUrl}/api/aws/assume-role`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ principalArn }),
@@ -49,7 +53,9 @@ export default function AccountList() {
     const principalArn = `arn:aws:iam::${accountId}:role/${role}`;
 
     try {
-      const assumeRes = await fetch('/api/aws/assume-role', {
+      const backendUrl = import.meta.env.VITE_OPTIONAL_BACKEND_URL || '';
+      const baseUrl = backendUrl ? backendUrl : '';
+      const assumeRes = await fetch(`${baseUrl}/api/aws/assume-role`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ principalArn }),
@@ -62,7 +68,7 @@ export default function AccountList() {
 
       const creds = await assumeRes.json();
 
-      const consoleRes = await fetch('/api/aws/console', {
+      const consoleRes = await fetch(`${baseUrl}/api/aws/console`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(creds),
