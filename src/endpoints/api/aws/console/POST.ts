@@ -13,25 +13,25 @@ class GenerateConsoleUrlRoute extends IActivityAPIRoute<GenerateConsoleUrlReques
       content: {
         'application/json': {
           schema: {
-            type: 'object',
+            type: 'object' as const,
             required: ['accessKeyId', 'secretAccessKey'],
             properties: {
               accessKeyId: {
-                type: 'string',
+                type: 'string' as const,
                 minLength: 16,
                 maxLength: 128,
                 description: 'AWS Access Key ID (typically 20 characters starting with AKIA for permanent keys or ASIA for temporary keys)',
                 example: 'AKIAIOSFODNN7EXAMPLE',
               },
               secretAccessKey: {
-                type: 'string',
+                type: 'string' as const,
                 minLength: 16,
                 maxLength: 128,
                 description: 'AWS Secret Access Key (typically 40 characters)',
                 example: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
               },
               sessionToken: {
-                type: 'string',
+                type: 'string' as const,
                 description: 'AWS Session Token (required for temporary credentials from STS, typically 1000+ characters)',
                 example: 'AQoEXAMPLEH4aoAH0gNCAPyJxz4BlCFFxWNE1OPTgk5TthT+FvwqnKwRcOIfrRh3c/LTo6UDdyJwOOvEVPvLXCrrrUtdnniCEXAMPLE',
               },
@@ -63,11 +63,11 @@ class GenerateConsoleUrlRoute extends IActivityAPIRoute<GenerateConsoleUrlReques
         content: {
           'application/json': {
             schema: {
-              type: 'object',
+              type: 'object' as const,
               required: ['url'],
               properties: {
                 url: {
-                  type: 'string',
+                  type: 'string' as const,
                   format: 'uri',
                   description: 'Pre-authenticated AWS Console URL that expires after 15 minutes',
                   example:
@@ -83,17 +83,17 @@ class GenerateConsoleUrlRoute extends IActivityAPIRoute<GenerateConsoleUrlReques
         content: {
           'application/json': {
             schema: {
-              type: 'object',
+              type: 'object' as const,
               properties: {
                 Exception: {
-                  type: 'object',
+                  type: 'object' as const,
                   properties: {
                     Type: {
-                      type: 'string',
+                      type: 'string' as const,
                       example: 'BadRequestError',
                     },
                     Message: {
-                      type: 'string',
+                      type: 'string' as const,
                       description: 'Details about the invalid request parameters',
                       example: 'Missing required field: accessKeyId',
                     },
@@ -109,17 +109,17 @@ class GenerateConsoleUrlRoute extends IActivityAPIRoute<GenerateConsoleUrlReques
         content: {
           'application/json': {
             schema: {
-              type: 'object',
+              type: 'object' as const,
               properties: {
                 Exception: {
-                  type: 'object',
+                  type: 'object' as const,
                   properties: {
                     Type: {
-                      type: 'string',
+                      type: 'string' as const,
                       example: 'UnauthorizedError',
                     },
                     Message: {
-                      type: 'string',
+                      type: 'string' as const,
                       description: 'Authentication error details',
                       example: 'No authenticated user email provided in request headers.',
                     },
@@ -135,17 +135,17 @@ class GenerateConsoleUrlRoute extends IActivityAPIRoute<GenerateConsoleUrlReques
         content: {
           'application/json': {
             schema: {
-              type: 'object',
+              type: 'object' as const,
               properties: {
                 Exception: {
-                  type: 'object',
+                  type: 'object' as const,
                   properties: {
                     Type: {
-                      type: 'string',
+                      type: 'string' as const,
                       example: 'InternalServerError',
                     },
                     Message: {
-                      type: 'string',
+                      type: 'string' as const,
                       description: 'Error description',
                       example: 'Failed to generate AWS signin token',
                     },

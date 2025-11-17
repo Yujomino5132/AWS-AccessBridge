@@ -16,11 +16,11 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
       content: {
         'application/json': {
           schema: {
-            type: 'object',
+            type: 'object' as const,
             required: ['principalArn'],
             properties: {
               principalArn: {
-                type: 'string',
+                type: 'string' as const,
                 minLength: 20,
                 maxLength: 2048,
                 pattern: '^arn:aws:iam::\\d{12}:role\\/[\\w+=,.@-]+$',
@@ -52,30 +52,30 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
         content: {
           'application/json': {
             schema: {
-              type: 'object',
+              type: 'object' as const,
               required: ['accessKeyId', 'secretAccessKey'],
               properties: {
                 accessKeyId: {
-                  type: 'string',
+                  type: 'string' as const,
                   minLength: 16,
                   maxLength: 128,
                   description: 'Temporary AWS Access Key ID (starts with ASIA for temporary credentials)',
                   example: 'ASIAIOSFODNN7EXAMPLE',
                 },
                 secretAccessKey: {
-                  type: 'string',
+                  type: 'string' as const,
                   minLength: 16,
                   maxLength: 128,
                   description: 'Temporary AWS Secret Access Key',
                   example: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
                 },
                 sessionToken: {
-                  type: 'string',
+                  type: 'string' as const,
                   description: 'AWS Session Token for temporary credentials',
                   example: 'AQoEXAMPLEH4aoAH0gNCAPyJxz4BlCFFxWNE1OPTgk5TthT+FvwqnKwRcOIfrRh3c/LTo6UDdyJwOOvEVPvLXCrrrUtdnniCEXAMPLE',
                 },
                 expiration: {
-                  type: 'string',
+                  type: 'string' as const,
                   format: 'date-time',
                   description: 'ISO 8601 timestamp when credentials expire (typically 1 hour from issuance)',
                   example: '2024-01-15T14:30:00.000Z',
@@ -101,17 +101,17 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
         content: {
           'application/json': {
             schema: {
-              type: 'object',
+              type: 'object' as const,
               properties: {
                 Exception: {
-                  type: 'object',
+                  type: 'object' as const,
                   properties: {
                     Type: {
-                      type: 'string',
+                      type: 'string' as const,
                       example: 'BadRequestError',
                     },
                     Message: {
-                      type: 'string',
+                      type: 'string' as const,
                       description: 'Details about the invalid request',
                       example: 'Missing required fields.',
                     },
@@ -127,17 +127,17 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
         content: {
           'application/json': {
             schema: {
-              type: 'object',
+              type: 'object' as const,
               properties: {
                 Exception: {
-                  type: 'object',
+                  type: 'object' as const,
                   properties: {
                     Type: {
-                      type: 'string',
+                      type: 'string' as const,
                       example: 'UnauthorizedError',
                     },
                     Message: {
-                      type: 'string',
+                      type: 'string' as const,
                       description: 'Authentication error details',
                       example: 'No authenticated user email provided in request headers.',
                     },
@@ -153,17 +153,17 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
         content: {
           'application/json': {
             schema: {
-              type: 'object',
+              type: 'object' as const,
               properties: {
                 Exception: {
-                  type: 'object',
+                  type: 'object' as const,
                   properties: {
                     Type: {
-                      type: 'string',
+                      type: 'string' as const,
                       example: 'ForbiddenError',
                     },
                     Message: {
-                      type: 'string',
+                      type: 'string' as const,
                       description: 'Permission denial details',
                       example: 'User does not have permission to assume role: arn:aws:iam::123456789012:role/RestrictedRole',
                     },
@@ -179,17 +179,17 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
         content: {
           'application/json': {
             schema: {
-              type: 'object',
+              type: 'object' as const,
               properties: {
                 Exception: {
-                  type: 'object',
+                  type: 'object' as const,
                   properties: {
                     Type: {
-                      type: 'string',
+                      type: 'string' as const,
                       example: 'NotFoundError',
                     },
                     Message: {
-                      type: 'string',
+                      type: 'string' as const,
                       description: 'Role or credential chain not found',
                       example: 'Credential chain not found for principal ARN',
                     },
@@ -205,17 +205,17 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
         content: {
           'application/json': {
             schema: {
-              type: 'object',
+              type: 'object' as const,
               properties: {
                 Exception: {
-                  type: 'object',
+                  type: 'object' as const,
                   properties: {
                     Type: {
-                      type: 'string',
+                      type: 'string' as const,
                       example: 'InternalServerError',
                     },
                     Message: {
-                      type: 'string',
+                      type: 'string' as const,
                       description: 'Error description',
                       example: 'Failed to assume role due to AWS API error',
                     },

@@ -12,11 +12,11 @@ class GetCurrentUserRoute extends IActivityAPIRoute<GetCurrentUserRequest, GetCu
         content: {
           'application/json': {
             schema: {
-              type: 'object',
+              type: 'object' as const,
               required: ['email'],
               properties: {
                 email: {
-                  type: 'string',
+                  type: 'string' as const,
                   format: 'email',
                   description: 'Email address of the authenticated user as provided by Cloudflare Access',
                   example: 'user@example.com',
@@ -45,17 +45,17 @@ class GetCurrentUserRoute extends IActivityAPIRoute<GetCurrentUserRequest, GetCu
         content: {
           'application/json': {
             schema: {
-              type: 'object',
+              type: 'object' as const,
               properties: {
                 Exception: {
-                  type: 'object',
+                  type: 'object' as const,
                   properties: {
                     Type: {
-                      type: 'string',
+                      type: 'string' as const,
                       example: 'UnauthorizedError',
                     },
                     Message: {
-                      type: 'string',
+                      type: 'string' as const,
                       description: 'Authentication error details',
                       example: 'No authenticated user email provided in request headers.',
                     },
@@ -71,17 +71,17 @@ class GetCurrentUserRoute extends IActivityAPIRoute<GetCurrentUserRequest, GetCu
         content: {
           'application/json': {
             schema: {
-              type: 'object',
+              type: 'object' as const,
               properties: {
                 Exception: {
-                  type: 'object',
+                  type: 'object' as const,
                   properties: {
                     Type: {
-                      type: 'string',
+                      type: 'string' as const,
                       example: 'InternalServerError',
                     },
                     Message: {
-                      type: 'string',
+                      type: 'string' as const,
                       description: 'Error description',
                       example: 'Failed to extract user information from headers',
                     },

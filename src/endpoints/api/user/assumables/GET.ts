@@ -13,11 +13,11 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
         content: {
           'application/json': {
             schema: {
-              type: 'object',
+              type: 'object' as const,
               additionalProperties: {
-                type: 'array',
+                type: 'array' as const,
                 items: {
-                  type: 'string',
+                  type: 'string' as const,
                   minLength: 1,
                   maxLength: 64,
                   description: 'IAM Role name',
@@ -58,17 +58,17 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
         content: {
           'application/json': {
             schema: {
-              type: 'object',
+              type: 'object' as const,
               properties: {
                 Exception: {
-                  type: 'object',
+                  type: 'object' as const,
                   properties: {
                     Type: {
-                      type: 'string',
+                      type: 'string' as const,
                       example: 'UnauthorizedError',
                     },
                     Message: {
-                      type: 'string',
+                      type: 'string' as const,
                       description: 'Authentication error details',
                       example: 'No authenticated user email provided in request headers.',
                     },
@@ -84,17 +84,17 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
         content: {
           'application/json': {
             schema: {
-              type: 'object',
+              type: 'object' as const,
               properties: {
                 Exception: {
-                  type: 'object',
+                  type: 'object' as const,
                   properties: {
                     Type: {
-                      type: 'string',
+                      type: 'string' as const,
                       example: 'InternalServerError',
                     },
                     Message: {
-                      type: 'string',
+                      type: 'string' as const,
                       description: 'Error description',
                       example: 'Database error while retrieving assumable roles',
                     },
