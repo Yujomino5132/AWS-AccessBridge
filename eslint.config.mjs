@@ -5,5 +5,16 @@ import { defineConfig } from 'eslint/config';
 export default defineConfig([
   { files: ['**/*.js'], languageOptions: { sourceType: 'script' } },
   { files: ['**/*.{js,mjs,cjs,ts,mts,cts}'], languageOptions: { globals: globals.node } },
-  tseslint.configs.recommended,
+  ...tseslint.configs.recommended,
+  {
+    rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
+    },
+  },
 ]);
