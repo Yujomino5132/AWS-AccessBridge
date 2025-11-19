@@ -10,6 +10,7 @@ export default function AccountList() {
   const [modalData, setModalData] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loadingKeys, setLoadingKeys] = useState<string | null>(null);
+  const [loadingConsole, setLoadingConsole] = useState<string | null>(null);
 
   useEffect(() => {
     const backendUrl = import.meta.env.VITE_OPTIONAL_BACKEND_URL || '';
@@ -79,7 +80,9 @@ export default function AccountList() {
 
   const handleConsole = async (accountId: string, role: string) => {
     const principalArn = `arn:aws:iam::${accountId}:role/${role}`;
+    const loadingKey = `${accountId}-${role}`;
 
+    setLoadingConsole(loadingKey);
     try {
       const backendUrl = import.meta.env.VITE_OPTIONAL_BACKEND_URL || '';
       const baseUrl = backendUrl ? backendUrl : '';
@@ -122,6 +125,8 @@ export default function AccountList() {
     } catch (error) {
       console.error(error);
       alert(`Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
+    } finally {
+      setLoadingConsole(null);
     }
   };
 
@@ -159,7 +164,8 @@ export default function AccountList() {
             <div className="ml-6 mt-2 space-y-2">
               {accountData.roles.map((role) => {
                 const loadingKey = `${accountId}-${role}`;
-                const isLoading = loadingKeys === loadingKey;
+                const isLoadingKeys = loadingKeys === loadingKey;
+                const isLoadingConsole = loadingConsole === loadingKey;
 
                 return (
                   <div key={role} className="flex justify-between items-center">
@@ -167,18 +173,20 @@ export default function AccountList() {
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
-                        handleConsole(accountId, role);
+                        if (!isLoadingConsole) handleConsole(accountId, role);
                       }}
-                      className="text-blue-400 hover:underline"
+                      className={`transition-colors ${
+                        isLoadingConsole ? 'text-gray-400 cursor-not-allowed' : 'text-blue-400 hover:underline'
+                      }`}
                     >
-                      {role}
+                      {isLoadingConsole ? '⏳ Opening Console...' : role}
                     </a>
                     <button
-                      className={`text-sm transition-colors ${isLoading ? 'text-gray-400' : 'text-blue-300 hover:text-blue-500'}`}
+                      className={`text-sm transition-colors ${isLoadingKeys ? 'text-gray-400' : 'text-blue-300 hover:text-blue-500'}`}
                       onClick={() => handleAccessKeys(accountId, role)}
-                      disabled={isLoading}
+                      disabled={isLoadingKeys}
                     >
-                      {isLoading ? '⏳ Loading...' : '🔑 Access keys'}
+                      {isLoadingKeys ? '⏳ Loading...' : '🔑 Access Keys'}
                     </button>
                   </div>
                 );
