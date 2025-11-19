@@ -13,10 +13,21 @@ export default function AccountList() {
     const backendUrl = import.meta.env.VITE_OPTIONAL_BACKEND_URL || '';
     const baseUrl = backendUrl ? backendUrl : '';
     fetch(`${baseUrl}/api/user/assumables`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (res.status === 401) {
+          window.location.reload();
+          return;
+        }
+        return res.json();
+      })
       .then((data) => {
-        setRolesData(data);
-        setExpanded(Object.fromEntries(Object.keys(data).map((id) => [id, false])));
+        if (data) {
+          setRolesData(data);
+          setExpanded(Object.fromEntries(Object.keys(data).map((id) => [id, false])));
+        }
+      })
+      .catch(() => {
+        // Error handling - could show an error message
       });
   }, []);
 
@@ -35,6 +46,11 @@ export default function AccountList() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ principalArn }),
       });
+
+      if (assumeRes.status === 401) {
+        window.location.reload();
+        return;
+      }
 
       if (!assumeRes.ok) {
         const errorText = await assumeRes.text();
@@ -61,6 +77,11 @@ export default function AccountList() {
         body: JSON.stringify({ principalArn }),
       });
 
+      if (assumeRes.status === 401) {
+        window.location.reload();
+        return;
+      }
+
       if (!assumeRes.ok) {
         const errorText = await assumeRes.text();
         throw new Error(`Assume role failed: ${assumeRes.status} ${errorText}`);
@@ -73,6 +94,11 @@ export default function AccountList() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(creds),
       });
+
+      if (consoleRes.status === 401) {
+        window.location.reload();
+        return;
+      }
 
       if (!consoleRes.ok) {
         const errorText = await consoleRes.text();

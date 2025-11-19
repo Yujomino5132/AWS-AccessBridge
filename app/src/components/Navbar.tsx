@@ -5,8 +5,16 @@ export default function Navbar() {
 
   useEffect(() => {
     fetch('/api/user/me')
-      .then((res) => res.json())
-      .then((data) => setEmail(data.email));
+      .then((res) => {
+        if (res.ok) {
+          return res.json();
+        }
+        throw new Error('Failed to fetch user data');
+      })
+      .then((data) => setEmail(data.email))
+      .catch(() => {
+        // Error handling is done at the App level
+      });
   }, []);
 
   return (
