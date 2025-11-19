@@ -1,6 +1,6 @@
 import { OpenAPIRoute } from 'chanfana';
 import { Context } from 'hono';
-import { DefaultInternalServerError, InternalServerError, IServiceError, UnauthorizedError } from '../error';
+import { DefaultInternalServerError, InternalServerError, IServiceError, UnauthorizedError } from '@/error';
 
 abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IResponse, TEnv extends IEnv> extends OpenAPIRoute {
   async handle(c: ActivityContext<TEnv>) {
@@ -21,12 +21,12 @@ abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IR
       const response: TResponse = await this.handleRequest(request, c.env as TEnv, c);
       return c.json(response);
     } catch (error: unknown) {
+      if (error instanceof IServiceError) {
+        console.warn(`Responding with ${error.getErrorType()}Error: `, error.stack);
+        return c.json({ Exception: { Type: error.getErrorType(), Message: error.getErrorMessage() } }, error.getErrorCode());
+      }
       if (!(error instanceof IServiceError) || error instanceof InternalServerError) {
         console.error('Caught service error during execution: ', error);
-      }
-      if (error instanceof IServiceError) {
-        console.warn('Responding with IServiceError: ', error.stack);
-        return c.json({ Exception: { Type: error.getErrorType(), Message: error.getErrorMessage() } }, error.getErrorCode());
       }
       console.warn('Responding with DefaultInternalServerError: ', DefaultInternalServerError);
       return c.json(
