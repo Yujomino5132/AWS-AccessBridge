@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface Props {
   accessKeyId: string;
@@ -9,7 +9,17 @@ interface Props {
 }
 
 export default function AccessKeyModal({ accessKeyId, secretAccessKey, sessionToken, expiration, onClose }: Props) {
-  const copyToClipboard = (text: string) => navigator.clipboard.writeText(text);
+  const [copied, setCopied] = useState(false);
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -30,14 +40,16 @@ export default function AccessKeyModal({ accessKeyId, secretAccessKey, sessionTo
         </pre>
         <div className="mt-6 flex justify-end gap-3">
           <button
-            className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded transition"
+            className={`px-4 py-2 rounded transition-all duration-200 ${
+              copied ? 'bg-green-500 hover:bg-green-600 scale-105' : 'bg-blue-500 hover:bg-blue-600'
+            }`}
             onClick={() =>
               copyToClipboard(
                 `export AWS_ACCESS_KEY_ID="${accessKeyId}"\nexport AWS_SECRET_ACCESS_KEY="${secretAccessKey}"\nexport AWS_SESSION_TOKEN="${sessionToken}"`,
               )
             }
           >
-            📋 Copy All
+            {copied ? '✅ Copied!' : '📋 Copy All'}
           </button>
           <button className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded transition" onClick={onClose}>
             ✖ Close
