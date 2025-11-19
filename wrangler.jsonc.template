@@ -25,4 +25,8 @@
       "database_id": "00000000-0000-0000-0000-000000000000",
     },
   ],
+  "vars": {
+    "POLICY_AUD": "you-cloudflare-zero-trust-application-aud",
+    "TEAM_DOMAIN": "https://your-cloudflare-zero-trust-team-domain.cloudflareaccess.com"
+  },
 }
