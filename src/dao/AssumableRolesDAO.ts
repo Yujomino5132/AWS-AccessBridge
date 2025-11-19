@@ -34,28 +34,32 @@ class AssumableRolesDAO {
   /**
    * Retrieves all assumable roles for the specified user across all accessible AWS accounts.
    * @param userEmail The email address of the user.
-   * @returns A map of AWS account IDs to arrays of role names.
+   * @returns A map of AWS account IDs to objects containing roles and account nickname.
    */
-  public async getAllRolesByUserEmail(userEmail: string): Promise<Record<string, string[]>> {
+  public async getAllRolesByUserEmail(userEmail: string): Promise<Record<string, { roles: string[]; nickname?: string }>> {
     const results = await this.database
       .prepare(
-        `SELECT aws_account_id, role_name
-         FROM assumable_roles
-         WHERE user_email = ?`,
+        `SELECT ar.aws_account_id, ar.role_name, aa.aws_account_nickname
+         FROM assumable_roles ar
+         LEFT JOIN aws_accounts aa ON ar.aws_account_id = aa.aws_account_id
+         WHERE ar.user_email = ?`,
       )
       .bind(userEmail)
-      .all<{ aws_account_id: string; role_name: string }>();
+      .all<{ aws_account_id: string; role_name: string; aws_account_nickname: string | null }>();
 
     if (!results || !results.results) {
       return {};
     }
 
-    const roleMap: Record<string, string[]> = {};
+    const roleMap: Record<string, { roles: string[]; nickname?: string }> = {};
     for (const row of results.results) {
       if (!roleMap[row.aws_account_id]) {
-        roleMap[row.aws_account_id] = [];
+        roleMap[row.aws_account_id] = {
+          roles: [],
+          nickname: row.aws_account_nickname || undefined,
+        };
       }
-      roleMap[row.aws_account_id].push(row.role_name);
+      roleMap[row.aws_account_id].roles.push(row.role_name);
     }
 
     return roleMap;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import AccessKeyModal from './AccessKeyModal';
 
-type RoleMap = Record<string, string[]>;
+type RoleMap = Record<string, { roles: string[]; nickname?: string }>;
 
 export default function AccountList() {
   const [rolesData, setRolesData] = useState<RoleMap>({});
@@ -115,7 +115,7 @@ export default function AccountList() {
 
   return (
     <div>
-      {Object.entries(rolesData).map(([accountId, roles]) => (
+      {Object.entries(rolesData).map(([accountId, accountData]) => (
         <div key={accountId} className="bg-gray-800 rounded p-4 my-2 text-white shadow">
           <div className="flex items-center cursor-pointer" onClick={() => toggleExpand(accountId)}>
             <svg
@@ -127,11 +127,11 @@ export default function AccountList() {
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>
-            <div className="text-lg font-semibold">{accountId}</div>
+            <div className="text-lg font-semibold">{accountData.nickname ? `${accountData.nickname} (${accountId})` : accountId}</div>
           </div>
           {expanded[accountId] && (
             <div className="ml-6 mt-2 space-y-2">
-              {roles.map((role) => (
+              {accountData.roles.map((role) => (
                 <div key={role} className="flex justify-between items-center">
                   <a
                     href="#"

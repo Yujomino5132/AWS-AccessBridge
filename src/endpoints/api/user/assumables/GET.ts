@@ -15,34 +15,44 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
             schema: {
               type: 'object' as const,
               additionalProperties: {
-                type: 'array' as const,
-                items: {
-                  type: 'string' as const,
-                  minLength: 1,
-                  maxLength: 64,
-                  description: 'IAM Role name',
+                type: 'object' as const,
+                properties: {
+                  roles: {
+                    type: 'array' as const,
+                    items: {
+                      type: 'string' as const,
+                      minLength: 1,
+                      maxLength: 64,
+                      description: 'IAM Role name',
+                    },
+                  },
+                  nickname: {
+                    type: 'string' as const,
+                    description: 'Optional AWS account nickname',
+                  },
                 },
+                required: ['roles'],
               },
-              description: 'Map of AWS Account IDs (12-digit strings) to arrays of role names the user can assume',
+              description: 'Map of AWS Account IDs to objects containing role arrays and optional nicknames',
               example: {
-                '123456789012': ['ReadOnlyRole', 'DeveloperRole', 'AdminRole'],
-                '987654321098': ['CrossAccountRole'],
-                '555666777888': ['AuditorRole', 'ReadOnlyRole'],
+                '123456789012': { roles: ['ReadOnlyRole', 'DeveloperRole', 'AdminRole'], nickname: 'Production' },
+                '987654321098': { roles: ['CrossAccountRole'] },
+                '555666777888': { roles: ['AuditorRole', 'ReadOnlyRole'], nickname: 'Development' },
               },
             },
             examples: {
               'single-account': {
                 summary: 'User with roles in one account',
                 value: {
-                  '123456789012': ['ReadOnlyRole', 'DeveloperRole', 'AdminRole'],
+                  '123456789012': { roles: ['ReadOnlyRole', 'DeveloperRole', 'AdminRole'], nickname: 'Production' },
                 },
               },
               'multi-account': {
                 summary: 'User with roles across multiple accounts',
                 value: {
-                  '123456789012': ['ReadOnlyRole', 'DeveloperRole'],
-                  '987654321098': ['AdminRole'],
-                  '555666777888': ['AuditorRole', 'ReadOnlyRole'],
+                  '123456789012': { roles: ['ReadOnlyRole', 'DeveloperRole'], nickname: 'Production' },
+                  '987654321098': { roles: ['AdminRole'] },
+                  '555666777888': { roles: ['AuditorRole', 'ReadOnlyRole'], nickname: 'Development' },
                 },
               },
               'no-roles': {
@@ -128,7 +138,7 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
 type ListAssumablesRequest = IRequest;
 
 interface ListAssumablesResponse extends IResponse {
-  [key: string]: string[];
+  [key: string]: { roles: string[]; nickname?: string };
 }
 
 interface ListAssumablesEnv extends IEnv {
