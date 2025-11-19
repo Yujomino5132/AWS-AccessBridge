@@ -11,8 +11,13 @@ abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IR
       }
       c.set('AuthenticatedUserEmailAddress', userEmail);
 
-      const body: unknown = c.req.method === 'GET' ? {} : await c.req.json();
-      const request: TRequest = body as TRequest;
+      let body: unknown = {};
+      try {
+        body = await c.req.json();
+      } catch {
+        body = {};
+      }
+      const request: TRequest = { ...(body as TRequest), raw: c.req };
       const response: TResponse = await this.handleRequest(request, c.env as TEnv, c);
       return c.json(response);
     } catch (error: unknown) {
@@ -40,8 +45,9 @@ abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IR
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-interface IRequest {}
+interface IRequest {
+  raw: Request;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface IResponse {}
@@ -52,7 +58,7 @@ interface IEnv {
   };
 }
 
-type ActivityContext<TEnv extends IEnv> = Context<TEnv>;
+type ActivityContext<TEnv extends IEnv> = Context<{ Bindings: Env } & TEnv>;
 
 export { IActivityAPIRoute };
 export type { IRequest, IResponse, IEnv, ActivityContext };
