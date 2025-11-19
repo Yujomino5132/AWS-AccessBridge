@@ -8,15 +8,21 @@ export default function AccountList() {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [modalData, setModalData] = useState<any | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const backendUrl = import.meta.env.VITE_OPTIONAL_BACKEND_URL || '';
     const baseUrl = backendUrl ? backendUrl : '';
     fetch(`${baseUrl}/api/user/assumables`)
-      .then((res) => {
+      .then(async (res) => {
         if (res.status === 401) {
           window.location.reload();
           return;
+        }
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => null);
+          const errorMsg = errorData?.Exception?.Message || `Failed to load accounts: ${res.status} ${res.statusText}`;
+          throw new Error(errorMsg);
         }
         return res.json();
       })
@@ -24,10 +30,11 @@ export default function AccountList() {
         if (data) {
           setRolesData(data);
           setExpanded(Object.fromEntries(Object.keys(data).map((id) => [id, false])));
+          setError(null);
         }
       })
-      .catch(() => {
-        // Error handling - could show an error message
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : 'Failed to load AWS accounts');
       });
   }, []);
 
@@ -115,6 +122,20 @@ export default function AccountList() {
 
   return (
     <div>
+      {error && (
+        <div className="bg-red-800 border border-red-600 text-red-200 px-4 py-3 rounded mb-4">
+          <div className="flex items-center">
+            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span>{error}</span>
+          </div>
+        </div>
+      )}
       {Object.entries(rolesData).map(([accountId, accountData]) => (
         <div key={accountId} className="bg-gray-800 rounded p-4 my-2 text-white shadow">
           <div className="flex items-center cursor-pointer" onClick={() => toggleExpand(accountId)}>
