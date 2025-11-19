@@ -9,6 +9,7 @@ export default function AccountList() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [modalData, setModalData] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loadingKeys, setLoadingKeys] = useState<string | null>(null);
 
   useEffect(() => {
     const backendUrl = import.meta.env.VITE_OPTIONAL_BACKEND_URL || '';
@@ -44,7 +45,9 @@ export default function AccountList() {
 
   const handleAccessKeys = async (accountId: string, role: string) => {
     const principalArn = `arn:aws:iam::${accountId}:role/${role}`;
+    const loadingKey = `${accountId}-${role}`;
 
+    setLoadingKeys(loadingKey);
     try {
       const backendUrl = import.meta.env.VITE_OPTIONAL_BACKEND_URL || '';
       const baseUrl = backendUrl ? backendUrl : '';
@@ -69,6 +72,8 @@ export default function AccountList() {
     } catch (error) {
       console.error(error);
       alert(`Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
+    } finally {
+      setLoadingKeys(null);
     }
   };
 
@@ -152,23 +157,32 @@ export default function AccountList() {
           </div>
           {expanded[accountId] && (
             <div className="ml-6 mt-2 space-y-2">
-              {accountData.roles.map((role) => (
-                <div key={role} className="flex justify-between items-center">
-                  <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleConsole(accountId, role);
-                    }}
-                    className="text-blue-400 hover:underline"
-                  >
-                    {role}
-                  </a>
-                  <button className="text-sm text-blue-300 hover:text-blue-500" onClick={() => handleAccessKeys(accountId, role)}>
-                    🔑 Access keys
-                  </button>
-                </div>
-              ))}
+              {accountData.roles.map((role) => {
+                const loadingKey = `${accountId}-${role}`;
+                const isLoading = loadingKeys === loadingKey;
+
+                return (
+                  <div key={role} className="flex justify-between items-center">
+                    <a
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleConsole(accountId, role);
+                      }}
+                      className="text-blue-400 hover:underline"
+                    >
+                      {role}
+                    </a>
+                    <button
+                      className={`text-sm transition-colors ${isLoading ? 'text-gray-400' : 'text-blue-300 hover:text-blue-500'}`}
+                      onClick={() => handleAccessKeys(accountId, role)}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? '⏳ Loading...' : '🔑 Access keys'}
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
