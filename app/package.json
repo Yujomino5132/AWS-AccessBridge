@@ -1,6 +1,7 @@
 {
   "name": "@rexezuge/aws-access-bridge-app",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "cf-typegen": "wrangler types",
@@ -13,24 +14,22 @@
     "lint": "eslint --ext .ts,.tsx --fix ."
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.9.x",
+    "@cloudflare/vite-plugin": "^1.15.x",
     "@tailwindcss/vite": "^4.1.x",
-    "@types/node": "^24.0.x",
-    "@types/react": "^19.1.x",
-    "@types/react-dom": "^19.1.x",
-    "@vitejs/plugin-react": "^4.6.x",
-    "eslint": "^9.30.x",
-    "eslint-plugin-react-hooks": "^5.2.x",
+    "@types/node": "^24.10.x",
+    "@types/react": "^19.2.x",
+    "@types/react-dom": "^19.2.x",
+    "@vitejs/plugin-react": "^5.1.x",
+    "eslint": "^9.39.x",
+    "eslint-plugin-react-hooks": "^7.0.x",
     "eslint-plugin-react-refresh": "^0.4.x",
-    "globals": "^16.3.x",
-    "typescript": "^5.8.x",
-    "typescript-eslint": "^8.36.x",
-    "vite": "^7.0.x",
+    "globals": "^16.5.x",
+    "react": "^19.2.x",
+    "react-dom": "^19.2.x",
+    "typescript": "^5.9.x",
+    "typescript-eslint": "^8.47.x",
+    "vite": "^7.2.x",
     "wrangler": "^4.50.0"
   },
-  "dependencies": {
-    "react": "^19.1.x",
-    "react-dom": "^19.1.x"
-  },
-  "type": "module"
+  "dependencies": {}
 }
