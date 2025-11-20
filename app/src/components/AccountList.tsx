@@ -11,6 +11,7 @@ export default function AccountList() {
   const [error, setError] = useState<string | null>(null);
   const [loadingKeys, setLoadingKeys] = useState<string | null>(null);
   const [loadingConsole, setLoadingConsole] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const backendUrl = import.meta.env.VITE_OPTIONAL_BACKEND_URL || '';
@@ -37,6 +38,9 @@ export default function AccountList() {
       })
       .catch((err) => {
         setError(err instanceof Error ? err.message : 'Failed to load AWS accounts');
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }, []);
 
@@ -132,7 +136,13 @@ export default function AccountList() {
 
   return (
     <div>
-      {error && (
+      {isLoading && (
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading Accounts...</p>
+        </div>
+      )}
+      {!isLoading && error && (
         <div className="bg-red-800 border border-red-600 text-red-200 px-4 py-3 rounded mb-4">
           <div className="flex items-center">
             <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -146,7 +156,7 @@ export default function AccountList() {
           </div>
         </div>
       )}
-      {!error && Object.keys(rolesData).length === 0 && (
+      {!error && Object.keys(rolesData).length === 0 && !isLoading && (
         <div className="bg-yellow-800 border border-yellow-600 text-yellow-200 px-4 py-3 rounded mb-4">
           <div className="flex items-center">
             <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -160,55 +170,56 @@ export default function AccountList() {
           </div>
         </div>
       )}
-      {Object.entries(rolesData).map(([accountId, accountData]) => (
-        <div key={accountId} className="bg-gray-800 rounded p-4 my-2 text-white shadow">
-          <div className="flex items-center cursor-pointer" onClick={() => toggleExpand(accountId)}>
-            <svg
-              className={`w-3 h-3 mr-2 transform transition-transform ${expanded[accountId] ? 'rotate-90' : ''}`}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-            <div className="text-lg font-semibold">{accountData.nickname ? `${accountData.nickname} (${accountId})` : accountId}</div>
-          </div>
-          {expanded[accountId] && (
-            <div className="ml-6 mt-2 space-y-2">
-              {accountData.roles.map((role) => {
-                const loadingKey = `${accountId}-${role}`;
-                const isLoadingKeys = loadingKeys === loadingKey;
-                const isLoadingConsole = loadingConsole === loadingKey;
-
-                return (
-                  <div key={role} className="flex justify-between items-center">
-                    <a
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (!isLoadingConsole) handleConsole(accountId, role);
-                      }}
-                      className={`transition-colors ${
-                        isLoadingConsole ? 'text-gray-400 cursor-not-allowed' : 'text-blue-400 hover:underline'
-                      }`}
-                    >
-                      {isLoadingConsole ? '⏳ Opening Console...' : role}
-                    </a>
-                    <button
-                      className={`text-sm transition-colors ${isLoadingKeys ? 'text-gray-400' : 'text-blue-300 hover:text-blue-500'}`}
-                      onClick={() => handleAccessKeys(accountId, role)}
-                      disabled={isLoadingKeys}
-                    >
-                      {isLoadingKeys ? '⏳ Loading...' : '🔑 Access Keys'}
-                    </button>
-                  </div>
-                );
-              })}
+      {!isLoading &&
+        Object.entries(rolesData).map(([accountId, accountData]) => (
+          <div key={accountId} className="bg-gray-800 rounded p-4 my-2 text-white shadow">
+            <div className="flex items-center cursor-pointer" onClick={() => toggleExpand(accountId)}>
+              <svg
+                className={`w-3 h-3 mr-2 transform transition-transform ${expanded[accountId] ? 'rotate-90' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+              <div className="text-lg font-semibold">{accountData.nickname ? `${accountData.nickname} (${accountId})` : accountId}</div>
             </div>
-          )}
-        </div>
-      ))}
+            {expanded[accountId] && (
+              <div className="ml-6 mt-2 space-y-2">
+                {accountData.roles.map((role) => {
+                  const loadingKey = `${accountId}-${role}`;
+                  const isLoadingKeys = loadingKeys === loadingKey;
+                  const isLoadingConsole = loadingConsole === loadingKey;
+
+                  return (
+                    <div key={role} className="flex justify-between items-center">
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (!isLoadingConsole) handleConsole(accountId, role);
+                        }}
+                        className={`transition-colors ${
+                          isLoadingConsole ? 'text-gray-400 cursor-not-allowed' : 'text-blue-400 hover:underline'
+                        }`}
+                      >
+                        {isLoadingConsole ? '⏳ Opening Console...' : role}
+                      </a>
+                      <button
+                        className={`text-sm transition-colors ${isLoadingKeys ? 'text-gray-400' : 'text-blue-300 hover:text-blue-500'}`}
+                        onClick={() => handleAccessKeys(accountId, role)}
+                        disabled={isLoadingKeys}
+                      >
+                        {isLoadingKeys ? '⏳ Loading...' : '🔑 Access Keys'}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        ))}
 
       {modalData && <AccessKeyModal {...modalData} onClose={() => setModalData(null)} />}
     </div>
