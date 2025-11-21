@@ -2,7 +2,14 @@ import { AbstractWorker } from '@/base';
 import { fromHono, HonoOpenAPIRouterType } from 'chanfana';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { RotateMasterKeyRoute, GenerateConsoleUrlRoute, AssumeRoleRoute, ListAssumablesRoute, GetCurrentUserRoute } from '@/endpoints';
+import {
+  StoreCredentialRoute,
+  RotateMasterKeyRoute,
+  GenerateConsoleUrlRoute,
+  AssumeRoleRoute,
+  ListAssumablesRoute,
+  GetCurrentUserRoute,
+} from '@/endpoints';
 
 class AccessBridgeWorker extends AbstractWorker {
   protected readonly app: Hono<{ Bindings: Env }>;
@@ -27,6 +34,7 @@ class AccessBridgeWorker extends AbstractWorker {
     openapi.get('/api/user/assumables', ListAssumablesRoute);
     openapi.get('/api/user/me', GetCurrentUserRoute);
     openapi.post('/api/admin/crypto/rotate-master-key', RotateMasterKeyRoute);
+    openapi.post('/api/admin/credentials/store-credential', StoreCredentialRoute);
 
     this.app = openapi;
   }

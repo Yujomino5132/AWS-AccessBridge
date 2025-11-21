@@ -1,5 +1,6 @@
 import { AssumableRolesDAO } from '@/dao';
-import { ActivityContext, IActivityAPIRoute, IEnv, IRequest, IResponse } from '@/endpoints';
+import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
+import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
 
 class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListAssumablesResponse, ListAssumablesEnv> {
   schema = {

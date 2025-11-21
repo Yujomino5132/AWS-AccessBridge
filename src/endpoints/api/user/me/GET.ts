@@ -1,4 +1,5 @@
-import { ActivityContext, IActivityAPIRoute, IEnv, IRequest, IResponse } from '@/endpoints';
+import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
+import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
 
 class GetCurrentUserRoute extends IActivityAPIRoute<GetCurrentUserRequest, GetCurrentUserResponse, GetCurrentUserEnv> {
   schema = {

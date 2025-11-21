@@ -1,5 +1,6 @@
 import { generateAESGCMKey } from '@/crypto/aes-gcm';
-import { ActivityContext, IActivityAPIRoute, IEnv, IRequest, IResponse } from '@/endpoints';
+import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
+import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
 
 class RotateMasterKeyRoute extends IActivityAPIRoute<RotateMasterKeyRequest, RotateMasterKeyResponse, RotateMasterKeyEnv> {
   schema = {

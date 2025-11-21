@@ -1,7 +1,8 @@
 import { AssumableRolesDAO, CredentialsDAO } from '@/dao';
 import { AccessKeysWithExpiration, CredentialChain } from '@/model';
 import { ArnUtil, AssumeRoleUtil, EmailUtil } from '@/utils';
-import { ActivityContext, IActivityAPIRoute, IEnv, IRequest, IResponse } from '@/endpoints';
+import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
+import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
 import { BadRequestError } from '@/error';
 
 class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleResponse, AssumeRoleEnv> {

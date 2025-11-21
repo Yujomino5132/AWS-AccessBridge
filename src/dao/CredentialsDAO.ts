@@ -1,6 +1,6 @@
 import { ForbiddenError, InternalServerError, UnauthorizedError } from '@/error';
 import { Credential, CredentialChain, CredentialInternal } from '@/model';
-import { decryptDataOptional } from '@/crypto/aes-gcm';
+import { decryptDataOptional, encryptData } from '@/crypto/aes-gcm';
 
 class CredentialsDAO {
   protected static readonly ASSUME_ROLE_CHAIN_LIMIT: number = 3;
@@ -72,6 +72,37 @@ class CredentialsDAO {
       secretAccessKey: credential.secretAccessKey,
       sessionToken: credential.sessionToken,
     };
+  }
+
+  public async storeCredential(
+    principalArn: string,
+    accessKeyId: string,
+    secretAccessKey: string,
+    sessionToken?: string | undefined,
+  ): Promise<void> {
+    const encryptedAccessKeyId: { encrypted: string; iv: string } = await encryptData(accessKeyId, this.masterKey);
+    const encryptedSecretAccessKey: { encrypted: string; iv: string } = await encryptData(
+      secretAccessKey,
+      this.masterKey,
+      encryptedAccessKeyId.iv,
+    );
+    const encryptedSessionToken: { encrypted: string; iv: string } | null = sessionToken
+      ? await encryptData(sessionToken, this.masterKey, encryptedAccessKeyId.iv)
+      : null;
+
+    await this.database
+      .prepare(
+        `INSERT OR REPLACE INTO credentials (principal_arn, encrypted_access_key_id, encrypted_secret_access_key, encrypted_session_token, salt)
+         VALUES (?, ?, ?, ?, ?)`,
+      )
+      .bind(
+        principalArn,
+        encryptedAccessKeyId.encrypted,
+        encryptedSecretAccessKey.encrypted,
+        encryptedSessionToken?.encrypted || null,
+        encryptedAccessKeyId.iv,
+      )
+      .run();
   }
 }
 

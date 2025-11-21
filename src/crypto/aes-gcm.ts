@@ -4,10 +4,10 @@ export async function generateAESGCMKey(): Promise<string> {
   return btoa(String.fromCharCode(...new Uint8Array(exported as ArrayBuffer)));
 }
 
-export async function encryptData(data: string, keyBase64: string): Promise<{ encrypted: string; iv: string }> {
+export async function encryptData(data: string, keyBase64: string, ivBase64?: string): Promise<{ encrypted: string; iv: string }> {
   const keyBuffer = Uint8Array.from(atob(keyBase64), (c) => c.charCodeAt(0));
   const key = await crypto.subtle.importKey('raw', keyBuffer, { name: 'AES-GCM' }, false, ['encrypt']);
-  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const iv = ivBase64 ? Uint8Array.from(atob(ivBase64), (c) => c.charCodeAt(0)) : crypto.getRandomValues(new Uint8Array(12));
   const encoded = new TextEncoder().encode(data);
   const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
   return {
