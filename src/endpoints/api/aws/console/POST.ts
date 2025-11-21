@@ -1,5 +1,6 @@
 import { AwsConsoleUtil } from '@/utils';
-import { ActivityContext, IActivityAPIRoute, IEnv, IRequest, IResponse } from '@/endpoints';
+import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
+import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
 
 class GenerateConsoleUrlRoute extends IActivityAPIRoute<GenerateConsoleUrlRequest, GenerateConsoleUrlResponse, GenerateConsoleUrlEnv> {
   schema = {
