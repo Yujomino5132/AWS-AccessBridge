@@ -1,19 +1,22 @@
-import { ForbiddenError, InternalServerError, UnauthorizedError } from '../error';
-import { Credential, CredentialChain, CredentialInternal } from '../model';
+import { ForbiddenError, InternalServerError, UnauthorizedError } from '@/error';
+import { Credential, CredentialChain, CredentialInternal } from '@/model';
+import { decryptDataOptional } from '@/crypto/aes-gcm';
 
 class CredentialsDAO {
   protected static readonly ASSUME_ROLE_CHAIN_LIMIT: number = 3;
 
   protected readonly database: D1Database;
+  protected readonly masterKey: string;
 
-  constructor(database: D1Database) {
+  constructor(database: D1Database, masterKey: string) {
     this.database = database;
+    this.masterKey = masterKey;
   }
 
   public async getCredentialByPrincipalArn(principalArn: string): Promise<Credential> {
     const result: CredentialInternal | null = await this.database
       .prepare(
-        `SELECT principal_arn, assumed_by, access_key_id, secret_access_key, session_token
+        `SELECT principal_arn, assumed_by, encrypted_access_key_id, encrypted_secret_access_key, encrypted_session_token, salt
          FROM credentials
          WHERE principal_arn = ?
          LIMIT 1`,
@@ -28,9 +31,9 @@ class CredentialsDAO {
     return {
       principalArn: result.principal_arn,
       assumedBy: result.assumed_by,
-      accessKeyId: result.access_key_id,
-      secretAccessKey: result.secret_access_key,
-      sessionToken: result.session_token,
+      accessKeyId: await decryptDataOptional(result.encrypted_access_key_id, result.salt, this.masterKey),
+      secretAccessKey: await decryptDataOptional(result.encrypted_secret_access_key, result.salt, this.masterKey),
+      sessionToken: await decryptDataOptional(result.encrypted_session_token, result.salt, this.masterKey),
     };
   }
 

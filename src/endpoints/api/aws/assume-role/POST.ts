@@ -1,8 +1,8 @@
-import { AssumableRolesDAO, CredentialsDAO } from '../../../../dao';
-import { AccessKeysWithExpiration, CredentialChain } from '../../../../model';
-import { ArnUtil, AssumeRoleUtil, EmailUtil } from '../../../../utils';
-import { ActivityContext, IActivityAPIRoute, IEnv, IRequest, IResponse } from '../../../IActivityAPIRoute';
-import { BadRequestError } from '../../../../error';
+import { AssumableRolesDAO, CredentialsDAO } from '@/dao';
+import { AccessKeysWithExpiration, CredentialChain } from '@/model';
+import { ArnUtil, AssumeRoleUtil, EmailUtil } from '@/utils';
+import { ActivityContext, IActivityAPIRoute, IEnv, IRequest, IResponse } from '@/endpoints';
+import { BadRequestError } from '@/error';
 
 class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleResponse, AssumeRoleEnv> {
   schema = {
@@ -249,7 +249,8 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
 
     await new AssumableRolesDAO(env.AccessBridgeDB).verifyUserHasAccessToRole(userEmail, accountId, roleName);
 
-    const credentialsDAO: CredentialsDAO = new CredentialsDAO(env.AccessBridgeDB);
+    const masterKey: string = await env.AES_ENCRYPTION_KEY_SECRET.get();
+    const credentialsDAO: CredentialsDAO = new CredentialsDAO(env.AccessBridgeDB, masterKey);
     const credentialChain: CredentialChain = await credentialsDAO.getCredentialChainByPrincipalArn(request.principalArn);
 
     let newCredentials: AccessKeysWithExpiration = {
@@ -279,6 +280,7 @@ interface AssumeRoleResponse extends IResponse {
 
 interface AssumeRoleEnv extends IEnv {
   AccessBridgeDB: D1Database;
+  AES_ENCRYPTION_KEY_SECRET: SecretsStoreSecret;
 }
 
 export { AssumeRoleRoute };

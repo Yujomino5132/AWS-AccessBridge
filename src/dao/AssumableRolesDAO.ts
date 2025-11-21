@@ -1,4 +1,4 @@
-import { UnauthorizedError } from '../error';
+import { UnauthorizedError } from '@/error';
 
 class AssumableRolesDAO {
   protected readonly database: D1Database;
