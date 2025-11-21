@@ -15,23 +15,42 @@ class StoreCredentialRoute extends IActivityAPIRoute<StoreCredentialRequest, Sto
         'application/json': {
           schema: {
             type: 'object' as const,
-            required: ['principal_arn', 'access_key_id', 'secret_access_key'],
+            required: ['principalArn', 'accessKeyId', 'secretAccessKey'],
             properties: {
-              principal_arn: {
+              principalArn: {
                 type: 'string' as const,
                 description: 'AWS principal ARN',
               },
-              access_key_id: {
+              accessKeyId: {
                 type: 'string' as const,
                 description: 'AWS access key ID',
               },
-              secret_access_key: {
+              secretAccessKey: {
                 type: 'string' as const,
                 description: 'AWS secret access key',
               },
-              session_token: {
+              sessionToken: {
                 type: 'string' as const,
                 description: 'AWS session token (optional)',
+              },
+            },
+          },
+          examples: {
+            'permanent-credentials': {
+              summary: 'Store permanent AWS credentials',
+              value: {
+                principalArn: 'arn:aws:iam::123456789012:role/MyRole',
+                accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
+                secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+              },
+            },
+            'temporary-credentials': {
+              summary: 'Store temporary AWS credentials with session token',
+              value: {
+                principalArn: 'arn:aws:iam::123456789012:role/MyRole',
+                accessKeyId: 'ASIAIOSFODNN7EXAMPLE',
+                secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+                sessionToken: 'AQoEXAMPLEH4aoAH0gNCAPyJxz4BlCFFxWNE1OPTgk5TthT+FvwqnKwRcOIfrRh3c/LTo6UDdyJwOOvEVPvLXCrrrUtdnniCEXAMPLE',
               },
             },
           },
@@ -151,14 +170,14 @@ class StoreCredentialRoute extends IActivityAPIRoute<StoreCredentialRequest, Sto
     env: StoreCredentialEnv,
     _cxt: ActivityContext<StoreCredentialEnv>,
   ): Promise<StoreCredentialResponse> {
-    if (!request.principal_arn || !request.access_key_id || !request.secret_access_key) {
+    if (!request.principalArn || !request.accessKeyId || !request.secretAccessKey) {
       throw new BadRequestError('Missing required fields.');
     }
 
     const masterKey: string = await env.AES_ENCRYPTION_KEY_SECRET.get();
     const credentialsDAO: CredentialsDAO = new CredentialsDAO(env.AccessBridgeDB, masterKey);
 
-    await credentialsDAO.storeCredential(request.principal_arn, request.access_key_id, request.secret_access_key, request.session_token);
+    await credentialsDAO.storeCredential(request.principalArn, request.accessKeyId, request.secretAccessKey, request.sessionToken);
 
     return {
       success: true,
@@ -168,10 +187,10 @@ class StoreCredentialRoute extends IActivityAPIRoute<StoreCredentialRequest, Sto
 }
 
 interface StoreCredentialRequest extends IRequest {
-  principal_arn: string;
-  access_key_id: string;
-  secret_access_key: string;
-  session_token?: string;
+  principalArn: string;
+  accessKeyId: string;
+  secretAccessKey: string;
+  sessionToken?: string;
 }
 
 interface StoreCredentialResponse extends IResponse {
