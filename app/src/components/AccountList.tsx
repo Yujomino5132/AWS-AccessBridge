@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import AccessKeyModal from './AccessKeyModal';
 
-type RoleMap = Record<string, { roles: string[]; nickname?: string }>;
+type RoleMap = Record<string, { roles: string[]; nickname?: string; favorite: boolean }>;
 
 export default function AccountList() {
   const [rolesData, setRolesData] = useState<RoleMap>({});
@@ -46,6 +46,41 @@ export default function AccountList() {
 
   const toggleExpand = (id: string) => {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const toggleFavorite = async (accountId: string) => {
+    const isFavorite = rolesData[accountId]?.favorite;
+    const backendUrl = import.meta.env.VITE_OPTIONAL_BACKEND_URL || '';
+    const baseUrl = backendUrl ? backendUrl : '';
+
+    try {
+      const response = await fetch(`${baseUrl}/api/user/favorites`, {
+        method: isFavorite ? 'DELETE' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ awsAccountId: accountId }),
+      });
+
+      if (response.status === 401) {
+        window.location.reload();
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(`Failed to ${isFavorite ? 'unfavorite' : 'favorite'} account`);
+      }
+
+      // Update local state
+      setRolesData((prev) => ({
+        ...prev,
+        [accountId]: {
+          ...prev[accountId],
+          favorite: !isFavorite,
+        },
+      }));
+    } catch (error) {
+      console.error(error);
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
+    }
   };
 
   const handleAccessKeys = async (accountId: string, role: string) => {
@@ -173,17 +208,26 @@ export default function AccountList() {
       {!isLoading &&
         Object.entries(rolesData).map(([accountId, accountData]) => (
           <div key={accountId} className="bg-gray-800 rounded p-4 my-2 text-white shadow">
-            <div className="flex items-center cursor-pointer" onClick={() => toggleExpand(accountId)}>
-              <svg
-                className={`w-3 h-3 mr-2 transform transition-transform ${expanded[accountId] ? 'rotate-90' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                viewBox="0 0 24 24"
+            <div className="flex items-center justify-between">
+              <div className="flex items-center cursor-pointer" onClick={() => toggleExpand(accountId)}>
+                <svg
+                  className={`w-3 h-3 mr-2 transform transition-transform ${expanded[accountId] ? 'rotate-90' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+                <div className="text-lg font-semibold">{accountData.nickname ? `${accountData.nickname} (${accountId})` : accountId}</div>
+              </div>
+              <button
+                onClick={() => toggleFavorite(accountId)}
+                className="text-2xl hover:scale-110 transition-transform"
+                title={accountData.favorite ? 'Remove from favorites' : 'Add to favorites'}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-              <div className="text-lg font-semibold">{accountData.nickname ? `${accountData.nickname} (${accountId})` : accountId}</div>
+                {accountData.favorite ? '⭐' : '☆'}
+              </button>
             </div>
             {expanded[accountId] && (
               <div className="ml-6 mt-2 space-y-2">
