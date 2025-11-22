@@ -1,4 +1,4 @@
-import { UserFavoriteAccountsDAO } from '@/dao';
+import { UserFavoriteAccountsDAO, AwsAccountsDAO } from '@/dao';
 import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
 import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
 
@@ -49,10 +49,12 @@ class FavoriteAccountRoute extends IActivityAPIRoute<FavoriteAccountRequest, Fav
     env: FavoriteAccountEnv,
     cxt: ActivityContext<FavoriteAccountEnv>,
   ): Promise<FavoriteAccountResponse> {
-    const userEmail = this.getAuthenticatedUserEmailAddress(cxt);
-    const dao = new UserFavoriteAccountsDAO(env.AccessBridgeDB);
+    const userEmail: string = this.getAuthenticatedUserEmailAddress(cxt);
+    const favoritesDAO: UserFavoriteAccountsDAO = new UserFavoriteAccountsDAO(env.AccessBridgeDB);
+    const accountsDAO: AwsAccountsDAO = new AwsAccountsDAO(env.AccessBridgeDB);
 
-    await dao.favoriteAccount(userEmail, request.awsAccountId);
+    await accountsDAO.ensureAccountExists(request.awsAccountId);
+    await favoritesDAO.favoriteAccount(userEmail, request.awsAccountId);
     return { success: true };
   }
 }

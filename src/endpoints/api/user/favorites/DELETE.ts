@@ -49,10 +49,10 @@ class UnfavoriteAccountRoute extends IActivityAPIRoute<UnfavoriteAccountRequest,
     env: UnfavoriteAccountEnv,
     cxt: ActivityContext<UnfavoriteAccountEnv>,
   ): Promise<UnfavoriteAccountResponse> {
-    const userEmail = this.getAuthenticatedUserEmailAddress(cxt);
-    const dao = new UserFavoriteAccountsDAO(env.AccessBridgeDB);
+    const userEmail: string = this.getAuthenticatedUserEmailAddress(cxt);
+    const favoritesDAO: UserFavoriteAccountsDAO = new UserFavoriteAccountsDAO(env.AccessBridgeDB);
 
-    await dao.unfavoriteAccount(userEmail, request.awsAccountId);
+    await favoritesDAO.unfavoriteAccount(userEmail, request.awsAccountId);
     return { success: true };
   }
 }
