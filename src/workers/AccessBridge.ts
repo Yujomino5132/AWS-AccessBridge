@@ -3,6 +3,8 @@ import { fromHono, HonoOpenAPIRouterType } from 'chanfana';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import {
+  FavoriteAccountRoute,
+  UnfavoriteAccountRoute,
   StoreCredentialRoute,
   RotateMasterKeyRoute,
   GenerateConsoleUrlRoute,
@@ -29,10 +31,17 @@ class AccessBridgeWorker extends AbstractWorker {
       docs_url: '/docs',
     });
 
+    // AWS Routes
     openapi.post('/api/aws/console', GenerateConsoleUrlRoute);
     openapi.post('/api/aws/assume-role', AssumeRoleRoute);
+
+    // User Routes
     openapi.get('/api/user/assumables', ListAssumablesRoute);
     openapi.get('/api/user/me', GetCurrentUserRoute);
+    openapi.post('/api/user/favorites', FavoriteAccountRoute);
+    openapi.delete('/api/user/favorites', UnfavoriteAccountRoute);
+
+    // Admin Routes
     openapi.post('/api/admin/crypto/rotate-master-key', RotateMasterKeyRoute);
     openapi.post('/api/admin/credentials/store-credential', StoreCredentialRoute);
 

@@ -1,4 +1,4 @@
-import { AssumableRolesDAO } from '@/dao';
+import { AssumableRolesDAO, UserFavoriteAccountsDAO } from '@/dao';
 import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
 import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
 
@@ -31,29 +31,33 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
                     type: 'string' as const,
                     description: 'Optional AWS account nickname',
                   },
+                  favorite: {
+                    type: 'boolean' as const,
+                    description: 'Whether this account is favorited by the user',
+                  },
                 },
                 required: ['roles'],
               },
               description: 'Map of AWS Account IDs to objects containing role arrays and optional nicknames',
               example: {
-                '123456789012': { roles: ['ReadOnlyRole', 'DeveloperRole', 'AdminRole'], nickname: 'Production' },
-                '987654321098': { roles: ['CrossAccountRole'] },
-                '555666777888': { roles: ['AuditorRole', 'ReadOnlyRole'], nickname: 'Development' },
+                '123456789012': { roles: ['ReadOnlyRole', 'DeveloperRole', 'AdminRole'], nickname: 'Production', favorite: true },
+                '987654321098': { roles: ['CrossAccountRole'], favorite: false },
+                '555666777888': { roles: ['AuditorRole', 'ReadOnlyRole'], nickname: 'Development', favorite: true },
               },
             },
             examples: {
               'single-account': {
                 summary: 'User with roles in one account',
                 value: {
-                  '123456789012': { roles: ['ReadOnlyRole', 'DeveloperRole', 'AdminRole'], nickname: 'Production' },
+                  '123456789012': { roles: ['ReadOnlyRole', 'DeveloperRole', 'AdminRole'], nickname: 'Production', favorite: true },
                 },
               },
               'multi-account': {
                 summary: 'User with roles across multiple accounts',
                 value: {
-                  '123456789012': { roles: ['ReadOnlyRole', 'DeveloperRole'], nickname: 'Production' },
-                  '987654321098': { roles: ['AdminRole'] },
-                  '555666777888': { roles: ['AuditorRole', 'ReadOnlyRole'], nickname: 'Development' },
+                  '123456789012': { roles: ['ReadOnlyRole', 'DeveloperRole'], nickname: 'Production', favorite: true },
+                  '987654321098': { roles: ['AdminRole'], favorite: false },
+                  '555666777888': { roles: ['AuditorRole', 'ReadOnlyRole'], nickname: 'Development', favorite: true },
                 },
               },
               'no-roles': {
@@ -131,15 +135,28 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
   ): Promise<ListAssumablesResponse> {
     const userEmail: string = this.getAuthenticatedUserEmailAddress(cxt);
     const assumableRolesDAO: AssumableRolesDAO = new AssumableRolesDAO(env.AccessBridgeDB);
+    const favoritesDAO: UserFavoriteAccountsDAO = new UserFavoriteAccountsDAO(env.AccessBridgeDB);
 
-    return assumableRolesDAO.getAllRolesByUserEmail(userEmail);
+    const roles = await assumableRolesDAO.getAllRolesByUserEmail(userEmail);
+    const favorites = await favoritesDAO.getFavoriteAccounts(userEmail);
+    const favoriteAccountIds = new Set(favorites.map((f) => f.awsAccountId));
+
+    const result: ListAssumablesResponse = {};
+    for (const [accountId, accountData] of Object.entries(roles)) {
+      result[accountId] = {
+        ...accountData,
+        favorite: favoriteAccountIds.has(accountId),
+      };
+    }
+
+    return result;
   }
 }
 
 type ListAssumablesRequest = IRequest;
 
 interface ListAssumablesResponse extends IResponse {
-  [key: string]: { roles: string[]; nickname?: string };
+  [key: string]: { roles: string[]; nickname?: string; favorite: boolean };
 }
 
 interface ListAssumablesEnv extends IEnv {
