@@ -1,4 +1,4 @@
-import { AssumableRolesDAO, UserFavoriteAccountsDAO } from '@/dao';
+import { AssumableRolesDAO } from '@/dao';
 import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
 import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
 
@@ -135,21 +135,8 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
   ): Promise<ListAssumablesResponse> {
     const userEmail: string = this.getAuthenticatedUserEmailAddress(cxt);
     const assumableRolesDAO: AssumableRolesDAO = new AssumableRolesDAO(env.AccessBridgeDB);
-    const favoritesDAO: UserFavoriteAccountsDAO = new UserFavoriteAccountsDAO(env.AccessBridgeDB);
 
-    const roles = await assumableRolesDAO.getAllRolesByUserEmail(userEmail);
-    const favorites = await favoritesDAO.getFavoriteAccounts(userEmail);
-    const favoriteAccountIds = new Set(favorites.map((f) => f.awsAccountId));
-
-    const result: ListAssumablesResponse = {};
-    for (const [accountId, accountData] of Object.entries(roles)) {
-      result[accountId] = {
-        ...accountData,
-        favorite: favoriteAccountIds.has(accountId),
-      };
-    }
-
-    return result;
+    return assumableRolesDAO.getAllRolesByUserEmail(userEmail);
   }
 }
 

@@ -36,27 +36,32 @@ class AssumableRolesDAO {
    * @param userEmail The email address of the user.
    * @returns A map of AWS account IDs to objects containing roles and account nickname.
    */
-  public async getAllRolesByUserEmail(userEmail: string): Promise<Record<string, { roles: string[]; nickname?: string }>> {
+  public async getAllRolesByUserEmail(
+    userEmail: string,
+  ): Promise<Record<string, { roles: string[]; nickname?: string; favorite: boolean }>> {
     const results = await this.database
       .prepare(
-        `SELECT ar.aws_account_id, ar.role_name, aa.aws_account_nickname
+        `SELECT ar.aws_account_id, ar.role_name, aa.aws_account_nickname, 
+                CASE WHEN ufa.aws_account_id IS NOT NULL THEN 1 ELSE 0 END as is_favorite
          FROM assumable_roles ar
          LEFT JOIN aws_accounts aa ON ar.aws_account_id = aa.aws_account_id
+         LEFT JOIN user_favorite_accounts ufa ON ar.aws_account_id = ufa.aws_account_id AND ufa.user_email = ?
          WHERE ar.user_email = ?`,
       )
-      .bind(userEmail)
-      .all<{ aws_account_id: string; role_name: string; aws_account_nickname: string | null }>();
+      .bind(userEmail, userEmail)
+      .all<{ aws_account_id: string; role_name: string; aws_account_nickname: string | null; is_favorite: number }>();
 
     if (!results || !results.results) {
       return {};
     }
 
-    const roleMap: Record<string, { roles: string[]; nickname?: string }> = {};
+    const roleMap: Record<string, { roles: string[]; nickname?: string; favorite: boolean }> = {};
     for (const row of results.results) {
       if (!roleMap[row.aws_account_id]) {
         roleMap[row.aws_account_id] = {
           roles: [],
           nickname: row.aws_account_nickname || undefined,
+          favorite: row.is_favorite === 1,
         };
       }
       roleMap[row.aws_account_id].roles.push(row.role_name);
