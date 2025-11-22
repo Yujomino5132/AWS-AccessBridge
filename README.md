@@ -9,41 +9,66 @@ A secure, web-based AWS role assumption bridge built on Cloudflare Workers that 
 AWS Access Bridge is a full-stack application that consists of:
 
 - **Backend API**: Built with Hono framework running on Cloudflare Workers
-- **Frontend Web App**: React-based SPA with Tailwind CSS styling
-- **Database**: Cloudflare D1 for storing credentials and role mappings
-- **Authentication**: User-based access control for role assumptions
+- **Frontend Web App**: React 19-based SPA with Tailwind CSS v4 styling
+- **Database**: Cloudflare D1 with encrypted credential storage
+- **Authentication**: Cloudflare Zero Trust integration for secure access control
+- **Security**: AES-GCM encryption for sensitive credential data
 
 ### Key Features
 
 - **Role Assumption**: Securely assume AWS roles across multiple accounts
 - **Console URL Generation**: Generate temporary AWS Console login URLs
-- **User Management**: Email-based user authentication and authorization
+- **User Management**: Email-based user authentication via Cloudflare Zero Trust
 - **Role Mapping**: Configure which users can assume which roles
-- **Credential Chaining**: Support for complex role assumption chains
+- **Account Management**: AWS account nicknames and user favorites
+- **Credential Encryption**: AES-GCM encrypted storage of AWS credentials
+- **Admin Interface**: Administrative endpoints for credential and crypto management
 - **OpenAPI Documentation**: Auto-generated API documentation at `/docs`
 
 ### Architecture
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   React SPA     │───▶│ Cloudflare       │───▶│   AWS STS       │
+│   React 19 SPA  │───▶│ Cloudflare       │───▶│   AWS STS       │
 │   (Frontend)    │    │ Workers API      │    │   (Role         │
-│                 │    │ (Backend)        │    │   Assumption)   │
+│   + Tailwind v4 │    │ (Hono + Chanfana)│    │   Assumption)   │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
                               │
                               ▼
                        ┌──────────────────┐
                        │   Cloudflare D1  │
-                       │   (Database)     │
+                       │   (Encrypted DB) │
+                       └──────────────────┘
+                              │
+                              ▼
+                       ┌──────────────────┐
+                       │ Cloudflare Zero  │
+                       │ Trust (Auth)     │
                        └──────────────────┘
 ```
 
 ## API Endpoints
 
+### AWS Operations
+
 - `POST /api/aws/console` - Generate AWS Console URL with temporary credentials
 - `POST /api/aws/assume-role` - Assume an AWS role and return temporary credentials
-- `GET /api/user/assumables` - List roles that the current user can assume
+
+### User Operations
+
 - `GET /api/user/me` - Get current user information
+- `GET /api/user/assumables` - List roles that the current user can assume
+- `GET /api/user/favorites` - Get user's favorite AWS accounts
+- `POST /api/user/favorites` - Add account to favorites
+- `DELETE /api/user/favorites` - Remove account from favorites
+
+### Admin Operations
+
+- `POST /api/admin/credentials/store-credential` - Store AWS credentials
+- `POST /api/admin/rotate-master-key` - Initialize/rotate the encryption key
+
+### Documentation
+
 - `GET /docs` - OpenAPI documentation
 
 ## Prerequisites
@@ -75,38 +100,71 @@ npx wrangler login
 Create a new D1 database:
 
 ```bash
-npx wrangler d1 create aws_access_bridge_db
+npx wrangler d1 create aws-access-bridge-db
 ```
 
 Update the `database_id` field in `wrangler.jsonc` with the new database ID returned from the command above.
 
-### 4. Run Database Migrations
+### 4. Create Cloudflare Secrets Store
+
+Create a secrets store for encryption keys:
+
+```bash
+npx wrangler secret-store create aws-access-bridge-secrets
+```
+
+Create the AES encryption key secret:
+
+```bash
+# Create the secret (you'll be prompted to enter the key value)
+npx wrangler secret-store put aws-access-bridge-aes-encryption-key --store-id YOUR_STORE_ID
+
+# Call the rotate-master-key endpoint to initialize the encryption key
+curl -X POST https://your-worker-domain.workers.dev/api/admin/rotate-master-key
+```
+
+Update the `store_id` field in `wrangler.jsonc` with your secrets store ID.
+
+### 5. Run Database Migrations
 
 Initialize the database schema:
 
 ```bash
-npx wrangler d1 migrations apply --remote aws_access_bridge_db
+npx wrangler d1 migrations apply --remote aws-access-bridge-db
 ```
 
-This creates two tables:
+This creates the following tables:
 
-- `credentials`: Stores AWS credentials and role chains
+- `credentials`: Stores encrypted AWS credentials and role chains
 - `assumable_roles`: Maps users to roles they can assume
+- `aws_accounts`: Stores AWS account nicknames
+- `user_favorite_accounts`: Tracks user's favorite accounts
 
-### 5. Configure Environment
+### 6. Configure Environment
 
 Update `wrangler.jsonc` with your specific configuration:
 
 ```jsonc
 {
-  "name": "your-worker-name",
+  "name": "aws-access-bridge",
   "d1_databases": [
     {
       "binding": "AccessBridgeDB",
-      "database_name": "aws_access_bridge_db",
+      "database_name": "aws-access-bridge-db",
       "database_id": "your-database-id",
     },
   ],
+  "secrets_store_secrets": [
+    {
+      "binding": "AES_ENCRYPTION_KEY_SECRET",
+      "store_id": "your-secrets-store-id",
+      "secret_name": "aws-access-bridge-aes-encryption-key",
+    },
+  ],
+  "vars": {
+    "POLICY_AUD": "your-cloudflare-zero-trust-application-aud",
+    "TEAM_DOMAIN": "https://your-team.cloudflareaccess.com",
+  },
 }
 ```
 
@@ -192,11 +250,17 @@ Create an IAM user named `DO-NOT-DELETE-Federated-SSO-AccessBridge` with the fol
 ### 2. Create Access Key Pair
 
 1. Generate an access key pair for the IAM user created above
-2. Store the credentials in the D1 database `credentials` table:
-   - `principal_arn`: The ARN of the intermediate role
-   - `access_key_id`: The access key ID
-   - `secret_access_key`: The secret access key
-   - `session_token`: Leave empty for permanent credentials
+2. Store the credentials using the API endpoint:
+
+```bash
+curl -X POST https://your-worker-domain.workers.dev/api/admin/credentials/store-credential \
+  -H "Content-Type: application/json" \
+  -d '{
+    "principal_arn": "arn:aws:iam::<your-aws-account>:user/DO-NOT-DELETE-Federated-SSO-AccessBridge",
+    "access_key_id": "YOUR_ACCESS_KEY_ID",
+    "secret_access_key": "YOUR_SECRET_ACCESS_KEY"
+  }'
+```
 
 ### 3. Create Intermediate IAM Role
 
@@ -270,9 +334,15 @@ This intermediate layer approach provides several security advantages:
 ├── src/                    # Backend API source code
 │   ├── dao/               # Data Access Objects
 │   ├── endpoints/         # API route handlers
+│   │   └── api/          # API endpoints
+│   │       ├── admin/    # Admin operations
+│   │       ├── aws/      # AWS operations
+│   │       └── user/     # User operations
 │   ├── error/            # Error handling
 │   ├── model/            # Data models and types
 │   ├── utils/            # Utility functions
+│   ├── crypto/           # Encryption utilities
+│   ├── workers/          # Worker implementations
 │   └── index.ts          # Main application entry
 ├── app/                   # Frontend React application
 │   ├── src/
@@ -311,6 +381,8 @@ This intermediate layer approach provides several security advantages:
 - `npm run deploy` - Deploy to Cloudflare Workers
 - `npm run prettier` - Format code
 - `npm run lint` - Lint TypeScript code
+- `npm run tsc` - Type check without emitting files
+- `npm run cf-typegen` - Generate Cloudflare Worker types
 
 **Frontend (app/):**
 
@@ -318,6 +390,7 @@ This intermediate layer approach provides several security advantages:
 - `npm run release` - Clean and build
 - `npm run prettier` - Format frontend code
 - `npm run lint` - Lint frontend code
+- `npm run cf-typegen` - Generate Cloudflare Worker types
 
 ### Database Schema
 
@@ -327,9 +400,10 @@ This intermediate layer approach provides several security advantages:
 CREATE TABLE credentials (
     principal_arn VARCHAR(256) PRIMARY KEY,
     assumed_by VARCHAR(256),
-    access_key_id VARCHAR(128),
-    secret_access_key VARCHAR(256),
-    session_token VARCHAR(2048)
+    encrypted_access_key_id VARCHAR(128),
+    encrypted_secret_access_key VARCHAR(256),
+    encrypted_session_token VARCHAR(2048),
+    salt VARCHAR(128)
 );
 ```
 
@@ -340,7 +414,28 @@ CREATE TABLE assumable_roles (
     user_email VARCHAR(120),
     aws_account_id CHAR(12),
     role_name VARCHAR(128),
-    PRIMARY KEY (user_email, aws_account_id, role_name)
+    PRIMARY KEY (user_email, aws_account_id, role_name),
+    FOREIGN KEY (aws_account_id) REFERENCES aws_accounts(aws_account_id)
+);
+```
+
+**aws_accounts table:**
+
+```sql
+CREATE TABLE aws_accounts (
+    aws_account_id CHAR(12) PRIMARY KEY,
+    aws_account_nickname VARCHAR(255)
+);
+```
+
+**user_favorite_accounts table:**
+
+```sql
+CREATE TABLE user_favorite_accounts (
+    user_email VARCHAR(120),
+    aws_account_id CHAR(12),
+    PRIMARY KEY (user_email, aws_account_id),
+    FOREIGN KEY (aws_account_id) REFERENCES aws_accounts(aws_account_id)
 );
 ```
 
@@ -372,23 +467,25 @@ npm run lint
 **Frontend:**
 
 - React 19 with TypeScript
-- Tailwind CSS for styling
+- Tailwind CSS v4 for styling
 - Vite for build tooling
 
 **Infrastructure:**
 
 - Cloudflare Workers for serverless compute
 - Cloudflare D1 for SQL database
-- Cloudflare Pages for static asset hosting
+- Cloudflare Zero Trust for authentication
+- Cloudflare Secrets Store for secure key management
 
 ## Security Considerations
 
 - Application is protected by Cloudflare Zero Trust authentication
-- All AWS credentials are stored securely in Cloudflare D1
+- All AWS credentials are encrypted using AES-GCM and stored securely in Cloudflare D1
 - User authentication is required for all role assumptions
 - Role access is controlled via database mappings
 - Temporary credentials have limited lifespans
 - All API requests are validated and sanitized
+- Encryption keys are stored in Cloudflare Secrets Store
 
 ## Contributing
 
