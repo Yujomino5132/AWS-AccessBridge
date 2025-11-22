@@ -1,6 +1,7 @@
 import { AssumableRolesDAO } from '@/dao';
 import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
 import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
+import type { AssumableAccountsMap } from '@/model';
 
 class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListAssumablesResponse, ListAssumablesEnv> {
   schema = {
@@ -142,9 +143,7 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
 
 type ListAssumablesRequest = IRequest;
 
-interface ListAssumablesResponse extends IResponse {
-  [key: string]: { roles: string[]; nickname?: string; favorite: boolean };
-}
+interface ListAssumablesResponse extends IResponse, AssumableAccountsMap {}
 
 interface ListAssumablesEnv extends IEnv {
   AccessBridgeDB: D1Database;

@@ -1,4 +1,5 @@
 import { UnauthorizedError } from '@/error';
+import type { AssumableAccountsMap } from '@/model';
 
 class AssumableRolesDAO {
   protected readonly database: D1Database;
@@ -36,9 +37,7 @@ class AssumableRolesDAO {
    * @param userEmail The email address of the user.
    * @returns A map of AWS account IDs to objects containing roles and account nickname.
    */
-  public async getAllRolesByUserEmail(
-    userEmail: string,
-  ): Promise<Record<string, { roles: string[]; nickname?: string; favorite: boolean }>> {
+  public async getAllRolesByUserEmail(userEmail: string): Promise<AssumableAccountsMap> {
     const results = await this.database
       .prepare(
         `SELECT ar.aws_account_id, ar.role_name, aa.aws_account_nickname, 
@@ -55,7 +54,7 @@ class AssumableRolesDAO {
       return {};
     }
 
-    const roleMap: Record<string, { roles: string[]; nickname?: string; favorite: boolean }> = {};
+    const roleMap: AssumableAccountsMap = {};
     for (const row of results.results) {
       if (!roleMap[row.aws_account_id]) {
         roleMap[row.aws_account_id] = {
