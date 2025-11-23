@@ -118,49 +118,13 @@ export default function AccountList() {
   };
 
   const handleConsole = async (accountId: string, role: string) => {
-    const principalArn = `arn:aws:iam::${accountId}:role/${role}`;
     const loadingKey = `${accountId}-${role}`;
-
     setLoadingConsole(loadingKey);
     try {
       const backendUrl = import.meta.env.VITE_OPTIONAL_BACKEND_URL || '';
       const baseUrl = backendUrl ? backendUrl : '';
-      const assumeRes = await fetch(`${baseUrl}/api/aws/assume-role`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ principalArn }),
-      });
-
-      if (assumeRes.status === 401) {
-        window.location.reload();
-        return;
-      }
-
-      if (!assumeRes.ok) {
-        const errorText = await assumeRes.text();
-        throw new Error(`Assume role failed: ${assumeRes.status} ${errorText}`);
-      }
-
-      const creds = await assumeRes.json();
-
-      const consoleRes = await fetch(`${baseUrl}/api/aws/console`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(creds),
-      });
-
-      if (consoleRes.status === 401) {
-        window.location.reload();
-        return;
-      }
-
-      if (!consoleRes.ok) {
-        const errorText = await consoleRes.text();
-        throw new Error(`Console login failed: ${consoleRes.status} ${errorText}`);
-      }
-
-      const { url } = await consoleRes.json();
-      window.open(url, '_blank');
+      const federateUrl = `${baseUrl}/api/aws/federate?awsAccountId=${accountId}&role=${encodeURIComponent(role)}`;
+      window.open(federateUrl, '_blank');
     } catch (error) {
       console.error(error);
       alert(`Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
