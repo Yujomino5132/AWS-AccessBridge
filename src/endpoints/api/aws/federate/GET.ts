@@ -10,7 +10,8 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
   schema = {
     tags: ['AWS'],
     summary: 'Federate AWS Access',
-    description: 'Assumes an AWS role and generates a console URL in a single request',
+    description:
+      'Assumes an AWS role and generates a console URL in a single request. This endpoint combines role assumption and console URL generation into one operation, returning a redirect to the AWS Console.',
     parameters: [
       {
         name: 'awsAccountId',
@@ -43,6 +44,112 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
             schema: {
               type: 'string' as const,
               format: 'uri',
+              example:
+                'https://signin.aws.amazon.com/federation?Action=login&Issuer=AccessBridge&Destination=https%3A%2F%2Fconsole.aws.amazon.com%2F&SigninToken=VCaXjShAlpsXGHeOP1HnSjxuJMd1c1YvwjKNsKGKigo',
+            },
+          },
+        },
+      },
+      '400': {
+        description: 'Missing required query parameters',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object' as const,
+              properties: {
+                Exception: {
+                  type: 'object' as const,
+                  properties: {
+                    Type: {
+                      type: 'string' as const,
+                      example: 'BadRequestError',
+                    },
+                    Message: {
+                      type: 'string' as const,
+                      description: 'Details about the missing or invalid parameters',
+                      example: 'Missing required query parameters.',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      '401': {
+        description: 'Unauthorized - Missing or invalid Cloudflare Access authentication',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object' as const,
+              properties: {
+                Exception: {
+                  type: 'object' as const,
+                  properties: {
+                    Type: {
+                      type: 'string' as const,
+                      example: 'UnauthorizedError',
+                    },
+                    Message: {
+                      type: 'string' as const,
+                      description: 'Authentication error details',
+                      example: 'No authenticated user email provided in request headers.',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      '403': {
+        description: 'Forbidden - User not authorized to assume the specified role',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object' as const,
+              properties: {
+                Exception: {
+                  type: 'object' as const,
+                  properties: {
+                    Type: {
+                      type: 'string' as const,
+                      example: 'ForbiddenError',
+                    },
+                    Message: {
+                      type: 'string' as const,
+                      description: 'Authorization error details',
+                      example: 'User not authorized to assume role: arn:aws:iam::123456789012:role/DeveloperRole',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      '500': {
+        description: 'Internal server error during role assumption or URL generation',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object' as const,
+              properties: {
+                Exception: {
+                  type: 'object' as const,
+                  properties: {
+                    Type: {
+                      type: 'string' as const,
+                      example: 'InternalServerError',
+                    },
+                    Message: {
+                      type: 'string' as const,
+                      description: 'Error description',
+                      example: 'Failed to assume AWS role',
+                    },
+                  },
+                },
+              },
             },
           },
         },
