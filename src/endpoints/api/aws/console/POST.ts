@@ -65,6 +65,16 @@ class GenerateConsoleUrlRoute extends IActivityAPIRoute<GenerateConsoleUrlReques
                 sessionToken: 'AQoEXAMPLEH4aoAH0gNCAPyJxz4BlCFFxWNE1OPTgk5TthT+FvwqnKwRcOIfrRh3c/LTo6UDdyJwOOvEVPvLXCrrrUtdnniCEXAMPLE',
               },
             },
+            'with-federate-params': {
+              summary: 'Using credentials with federate URL generation parameters',
+              value: {
+                accessKeyId: 'ASIAIOSFODNN7EXAMPLE',
+                secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+                sessionToken: 'AQoEXAMPLEH4aoAH0gNCAPyJxz4BlCFFxWNE1OPTgk5TthT+FvwqnKwRcOIfrRh3c/LTo6UDdyJwOOvEVPvLXCrrrUtdnniCEXAMPLE',
+                awsAccountId: '123456789012',
+                roleName: 'DeveloperRole',
+              },
+            },
           },
         },
       },
