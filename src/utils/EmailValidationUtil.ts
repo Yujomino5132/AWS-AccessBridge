@@ -1,8 +1,19 @@
 import { jwtVerify, createRemoteJWKSet } from 'jose';
-import { UnauthorizedError } from '@/error';
+import { UnauthorizedError, InternalServerError } from '@/error';
+import { INTERNAL_USER_EMAIL_HEADER, SELF_WORKER_BASE_HOSTNAME } from '@/constants';
 
 class EmailValidationUtil {
   public static async getAuthenticatedUserEmail(request: Request, teamDomain?: string, policyAud?: string): Promise<string> {
+    // Check if this is an internal call
+    const url: URL = new URL(request.url);
+    if (url.hostname === SELF_WORKER_BASE_HOSTNAME) {
+      const internalEmail: string | null = request.headers.get(INTERNAL_USER_EMAIL_HEADER);
+      if (internalEmail) {
+        return internalEmail;
+      }
+      throw new InternalServerError('Internal call missing required user email header.');
+    }
+
     // Try email header first
     const userEmail = request.headers.get('Cf-Access-Authenticated-User-Email');
     if (userEmail) {

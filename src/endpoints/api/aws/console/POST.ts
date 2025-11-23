@@ -194,3 +194,4 @@ interface GenerateConsoleUrlResponse extends IResponse {
 type GenerateConsoleUrlEnv = IEnv;
 
 export { GenerateConsoleUrlRoute };
+export type { GenerateConsoleUrlRequest, GenerateConsoleUrlResponse };

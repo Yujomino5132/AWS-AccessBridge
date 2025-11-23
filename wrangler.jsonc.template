@@ -17,6 +17,12 @@
   "assets": {
     "directory": "./app/dist/",
   },
+  "services": [
+    {
+      "binding": "SELF",
+      "service": "aws-access-bridge",
+    },
+  ],
   "d1_databases": [
     {
       "binding": "AccessBridgeDB",

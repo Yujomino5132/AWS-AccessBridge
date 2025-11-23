@@ -6,7 +6,6 @@ import { DefaultInternalServerError, InternalServerError, IServiceError } from '
 abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IResponse, TEnv extends IEnv> extends OpenAPIRoute {
   async handle(c: ActivityContext<TEnv>) {
     try {
-      console.debug('DEBUG: request header:', btoa(JSON.stringify(c.req)));
       const userEmail: string = await EmailValidationUtil.getAuthenticatedUserEmail(c.req.raw, c.env.TEAM_DOMAIN, c.env.POLICY_AUD);
       c.set('AuthenticatedUserEmailAddress', userEmail);
       let body: unknown = {};

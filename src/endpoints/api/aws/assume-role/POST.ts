@@ -285,3 +285,4 @@ interface AssumeRoleEnv extends IEnv {
 }
 
 export { AssumeRoleRoute };
+export type { AssumeRoleRequest, AssumeRoleResponse };

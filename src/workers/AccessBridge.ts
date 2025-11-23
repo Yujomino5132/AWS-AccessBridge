@@ -9,6 +9,7 @@ import {
   RotateMasterKeyRoute,
   GenerateConsoleUrlRoute,
   AssumeRoleRoute,
+  FederateRoute,
   ListAssumablesRoute,
   GetCurrentUserRoute,
 } from '@/endpoints';
@@ -34,6 +35,7 @@ class AccessBridgeWorker extends AbstractWorker {
     // AWS Routes
     openapi.post('/api/aws/console', GenerateConsoleUrlRoute);
     openapi.post('/api/aws/assume-role', AssumeRoleRoute);
+    openapi.get('/api/aws/federate', FederateRoute);
 
     // User Routes
     openapi.get('/api/user/assumables', ListAssumablesRoute);
