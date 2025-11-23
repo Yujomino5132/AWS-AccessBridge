@@ -169,11 +169,11 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
   ): Promise<ExtendedResponse<FederateResponse>> {
     const url: URL = new URL(request.raw.url);
     const awsAccountId: string | null = url.searchParams.get('awsAccountId');
-    const role: string | null = url.searchParams.get('role');
-    if (!awsAccountId || !role) {
+    const roleName: string | null = url.searchParams.get('role');
+    if (!awsAccountId || !roleName) {
       throw new BadRequestError('Missing required query parameters.');
     }
-    const principalArn: string = `arn:aws:iam::${awsAccountId}:role/${role}`;
+    const principalArn: string = `arn:aws:iam::${awsAccountId}:role/${roleName}`;
     const userEmail: string = this.getAuthenticatedUserEmailAddress(cxt);
     const assumeRoleResponse: Response = await env.SELF.fetch(`${SELF_WORKER_BASE_URL}/api/aws/assume-role`, {
       method: 'POST',
@@ -197,6 +197,8 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
         accessKeyId: credentials.accessKeyId,
         secretAccessKey: credentials.secretAccessKey,
         sessionToken: credentials.sessionToken,
+        awsAccountId: awsAccountId,
+        roleName: roleName,
       }),
     });
     if (!consoleResponse.ok) {
