@@ -17,14 +17,16 @@ abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IR
       }
       const request: TRequest = { ...(body as TRequest), raw: c.req };
       const response: TResponse | ExtendedResponse<TResponse> = await this.handleRequest(request, c.env as TEnv, c);
-      if (response && typeof response === 'object' && 'body' in response) {
+      if (response && typeof response === 'object' && ('body' in response || 'statusCode' in response || 'headers' in response)) {
         const extendedResponse: ExtendedResponse<TResponse> = response as ExtendedResponse<TResponse>;
+        const statusCode: StatusCode = extendedResponse.statusCode || 200;
         const headers: Record<string, string> = extendedResponse.headers || {};
         Object.entries(headers).forEach(([key, value]) => {
           c.header(key, value);
         });
-        if (extendedResponse.statusCode) {
-          c.status(extendedResponse.statusCode);
+        c.status(statusCode);
+        if (statusCode >= 300 && statusCode < 400) {
+          return c.body(null);
         }
         return c.json(extendedResponse.body);
       }
@@ -72,8 +74,8 @@ interface ExtendedResponse<TResponse extends IResponse> {
 }
 
 interface IEnv {
-  TEAM_DOMAIN?: string;
-  POLICY_AUD?: string;
+  TEAM_DOMAIN?: string | undefined;
+  POLICY_AUD?: string | undefined;
   Variables: {
     AuthenticatedUserEmailAddress: string;
   };
