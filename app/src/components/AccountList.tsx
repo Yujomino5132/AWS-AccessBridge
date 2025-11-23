@@ -12,6 +12,7 @@ export default function AccountList() {
   const [loadingKeys, setLoadingKeys] = useState<string | null>(null);
   const [loadingConsole, setLoadingConsole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const backendUrl = import.meta.env.VITE_OPTIONAL_BACKEND_URL || '';
@@ -69,7 +70,6 @@ export default function AccountList() {
         throw new Error(`Failed to ${isFavorite ? 'unfavorite' : 'favorite'} account`);
       }
 
-      // Update local state
       setRolesData((prev) => ({
         ...prev,
         [accountId]: {
@@ -169,8 +169,24 @@ export default function AccountList() {
     }
   };
 
+  const filteredAccounts = Object.entries(rolesData).filter(([accountId, accountData]) => {
+    const term = searchTerm.toLowerCase();
+    return accountId.includes(term) || (accountData.nickname?.toLowerCase().includes(term) ?? false);
+  });
+
   return (
     <div>
+      {!isLoading && Object.keys(rolesData).length > 0 && (
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search by account id or nickname"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-400 focus:outline-none"
+          />
+        </div>
+      )}
       {isLoading && (
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto mb-4"></div>
@@ -206,7 +222,7 @@ export default function AccountList() {
         </div>
       )}
       {!isLoading &&
-        Object.entries(rolesData).map(([accountId, accountData]) => (
+        filteredAccounts.map(([accountId, accountData]) => (
           <div key={accountId} className="bg-gray-800 rounded p-4 my-2 text-white shadow">
             <div className="flex items-center justify-between">
               <div className="flex items-center cursor-pointer" onClick={() => toggleExpand(accountId)}>
