@@ -66,9 +66,9 @@ interface IRequest {
 interface IResponse {}
 
 interface ExtendedResponse<TResponse extends IResponse> {
-  body: TResponse;
-  statusCode?: StatusCode;
-  headers?: Record<string, string>;
+  body?: TResponse | undefined;
+  statusCode?: StatusCode | undefined;
+  headers?: Record<string, string> | undefined;
 }
 
 interface IEnv {

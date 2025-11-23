@@ -3,8 +3,8 @@ import type { ActivityContext, IEnv, IRequest, IResponse, ExtendedResponse } fro
 import { BadRequestError } from '@/error';
 import type { AssumeRoleResponse } from '@/endpoints/api/aws/assume-role/POST';
 import type { GenerateConsoleUrlResponse } from '@/endpoints/api/aws/console/POST';
-import { INTERNAL_USER_EMAIL_HEADER } from '@/constants';
-import { SELF_WORKER_BASE_URL } from '@/constants';
+import { INTERNAL_USER_EMAIL_HEADER, CONTENT_TYPE, APPLICATION_JSON, SELF_WORKER_BASE_URL } from '@/constants';
+import { ErrorDeserializer } from '@/utils';
 
 class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse, FederateEnv> {
   schema = {
@@ -63,34 +63,27 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
     const url: URL = new URL(request.raw.url);
     const awsAccountId: string | null = url.searchParams.get('awsAccountId');
     const role: string | null = url.searchParams.get('role');
-
     if (!awsAccountId || !role) {
       throw new BadRequestError('Missing required query parameters.');
     }
-
     const principalArn: string = `arn:aws:iam::${awsAccountId}:role/${role}`;
     const userEmail: string = this.getAuthenticatedUserEmailAddress(cxt);
-
     const assumeRoleResponse: Response = await env.SELF.fetch(`${SELF_WORKER_BASE_URL}/api/aws/assume-role`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        [CONTENT_TYPE]: APPLICATION_JSON,
         [INTERNAL_USER_EMAIL_HEADER]: userEmail,
       },
       body: JSON.stringify({ principalArn }),
     });
-
     if (!assumeRoleResponse.ok) {
-      throw new Error(`Failed to assume role: ${assumeRoleResponse.statusText}`);
+      throw await ErrorDeserializer.deserializeError(assumeRoleResponse);
     }
-
     const credentials: AssumeRoleResponse = await assumeRoleResponse.json();
-
-    // Call console endpoint
     const consoleResponse: Response = await env.SELF.fetch(`${SELF_WORKER_BASE_URL}/api/aws/console`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        [CONTENT_TYPE]: APPLICATION_JSON,
         [INTERNAL_USER_EMAIL_HEADER]: userEmail,
       },
       body: JSON.stringify({
@@ -99,15 +92,11 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
         sessionToken: credentials.sessionToken,
       }),
     });
-
     if (!consoleResponse.ok) {
-      throw new Error(`Failed to generate console URL: ${consoleResponse.statusText}`);
+      throw await ErrorDeserializer.deserializeError(consoleResponse);
     }
-
     const consoleData: GenerateConsoleUrlResponse = await consoleResponse.json();
-
     return {
-      body: { url: consoleData.url },
       statusCode: 302,
       headers: {
         Location: consoleData.url,
@@ -118,9 +107,7 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
 
 type FederateRequest = IRequest;
 
-interface FederateResponse extends IResponse {
-  url: string;
-}
+type FederateResponse = IResponse;
 
 interface FederateEnv extends IEnv {
   SELF: Fetcher;
