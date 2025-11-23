@@ -1,7 +1,7 @@
 import { ErrorCode, IServiceError } from './IServiceError';
 
 class ForbiddenError extends IServiceError {
-  constructor(message?: string) {
+  constructor(message?: string | undefined) {
     super(message ?? 'You do not have permission to access this resource.');
   }
 

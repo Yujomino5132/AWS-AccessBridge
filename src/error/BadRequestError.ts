@@ -1,7 +1,7 @@
 import { ErrorCode, IServiceError } from './IServiceError';
 
 class BadRequestError extends IServiceError {
-  constructor(message?: string) {
+  constructor(message?: string | undefined) {
     super(message ?? 'The request could not be understood by the server due to malformed syntax.');
   }
 

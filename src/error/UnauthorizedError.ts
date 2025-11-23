@@ -1,7 +1,7 @@
 import { ErrorCode, IServiceError } from './IServiceError';
 
 class UnauthorizedError extends IServiceError {
-  constructor(message?: string) {
+  constructor(message?: string | undefined) {
     super(message ?? 'Authentication is required and has failed or has not yet been provided.');
   }
 

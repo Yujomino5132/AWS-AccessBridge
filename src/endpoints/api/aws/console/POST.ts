@@ -36,6 +36,17 @@ class GenerateConsoleUrlRoute extends IActivityAPIRoute<GenerateConsoleUrlReques
                 description: 'AWS Session Token (required for temporary credentials from STS, typically 1000+ characters)',
                 example: 'AQoEXAMPLEH4aoAH0gNCAPyJxz4BlCFFxWNE1OPTgk5TthT+FvwqnKwRcOIfrRh3c/LTo6UDdyJwOOvEVPvLXCrrrUtdnniCEXAMPLE',
               },
+              awsAccountId: {
+                type: 'string' as const,
+                pattern: '^\\d{12}$',
+                description: 'AWS Account ID (12 digits) - optional, used for federate URL generation',
+                example: '123456789012',
+              },
+              roleName: {
+                type: 'string' as const,
+                description: 'AWS IAM Role name - optional, used for federate URL generation',
+                example: 'DeveloperRole',
+              },
             },
           },
           examples: {
@@ -171,7 +182,10 @@ class GenerateConsoleUrlRoute extends IActivityAPIRoute<GenerateConsoleUrlReques
     _cxt: ActivityContext<IEnv>,
   ): Promise<GenerateConsoleUrlResponse> {
     const signinToken: string = await AwsConsoleUtil.getSigninToken(request.accessKeyId, request.secretAccessKey, request.sessionToken);
-    const federateUrl: string = `${new URL(request.raw.url).origin}/api/aws/federate`;
+    let federateUrl: string = new URL(request.raw.url).origin;
+    if (request.awsAccountId && request.roleName) {
+      federateUrl = `${federateUrl}/api/aws/federate?awsAccountId=${request.awsAccountId}&role=${request.roleName}`;
+    }
     const loginUrl: string = AwsConsoleUtil.getLoginUrl(signinToken, federateUrl);
 
     return {
@@ -184,6 +198,8 @@ interface GenerateConsoleUrlRequest extends IRequest {
   accessKeyId: string;
   secretAccessKey: string;
   sessionToken?: string | undefined;
+  awsAccountId?: string | undefined;
+  roleName?: string | undefined;
 }
 
 interface GenerateConsoleUrlResponse extends IResponse {
