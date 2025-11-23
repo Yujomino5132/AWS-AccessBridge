@@ -1,6 +1,6 @@
-# AWS Access Bridge
+# AWS AccessBridge
 
-![AWS Access Bridge](https://raw.githubusercontent.com/Rexezuge-CloudflareWorkers/AWS-AccessBridge-Assets/refs/heads/main/pictures/2.jpg)
+![AWS AccessBridge](https://raw.githubusercontent.com/Rexezuge-CloudflareWorkers/AWS-AccessBridge-Assets/refs/heads/main/pictures/2.jpg)
 
 A secure, web-based AWS role assumption bridge built on Cloudflare Workers that simplifies AWS multi-account access management. This application provides a centralized interface for users to assume AWS roles across multiple accounts and generate AWS Console URLs with temporary credentials.
 
