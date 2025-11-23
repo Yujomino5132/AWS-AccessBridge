@@ -26,6 +26,7 @@
     "globals": "^16.5.x",
     "react": "^19.2.x",
     "react-dom": "^19.2.x",
+    "terser": "^5.36.x",
     "typescript": "^5.9.x",
     "typescript-eslint": "^8.47.x",
     "vite": "^7.2.x",

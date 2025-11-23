@@ -6,6 +6,7 @@
   "compatibility_flags": [],
   "preview_urls": false,
   "workers_dev": true,
+  "minify": true,
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1,
