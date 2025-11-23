@@ -167,13 +167,12 @@ class GenerateConsoleUrlRoute extends IActivityAPIRoute<GenerateConsoleUrlReques
 
   protected async handleRequest(
     request: GenerateConsoleUrlRequest,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    env: IEnv,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    cxt: ActivityContext<IEnv>,
+    _env: IEnv,
+    _cxt: ActivityContext<IEnv>,
   ): Promise<GenerateConsoleUrlResponse> {
     const signinToken: string = await AwsConsoleUtil.getSigninToken(request.accessKeyId, request.secretAccessKey, request.sessionToken);
-    const loginUrl: string = AwsConsoleUtil.getLoginUrl(signinToken);
+    const federateUrl: string = `${new URL(request.raw.url).origin}/api/aws/federate`;
+    const loginUrl: string = AwsConsoleUtil.getLoginUrl(signinToken, federateUrl);
 
     return {
       url: loginUrl,

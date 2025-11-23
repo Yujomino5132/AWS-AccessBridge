@@ -1,7 +1,8 @@
 import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
-import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
+import type { ActivityContext, IEnv, IRequest, IResponse, ExtendedResponse } from '@/endpoints/IActivityAPIRoute';
 import { BadRequestError } from '@/error';
 import type { AssumeRoleResponse } from '@/endpoints/api/aws/assume-role/POST';
+import type { GenerateConsoleUrlResponse } from '@/endpoints/api/aws/console/POST';
 import { INTERNAL_USER_EMAIL_HEADER } from '@/constants';
 import { SELF_WORKER_BASE_URL } from '@/constants';
 
@@ -34,20 +35,14 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
       },
     ],
     responses: {
-      '200': {
-        description: 'Successfully generated AWS Console URL',
-        content: {
-          'application/json': {
+      '302': {
+        description: 'Redirect to AWS Console URL',
+        headers: {
+          Location: {
+            description: 'Pre-authenticated AWS Console URL that expires after 15 minutes',
             schema: {
-              type: 'object' as const,
-              required: ['url'],
-              properties: {
-                url: {
-                  type: 'string' as const,
-                  format: 'uri',
-                  description: 'Pre-authenticated AWS Console URL that expires after 15 minutes',
-                },
-              },
+              type: 'string' as const,
+              format: 'uri',
             },
           },
         },
@@ -60,7 +55,11 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
     ],
   };
 
-  protected async handleRequest(request: FederateRequest, env: FederateEnv, cxt: ActivityContext<FederateEnv>): Promise<FederateResponse> {
+  protected async handleRequest(
+    request: FederateRequest,
+    env: FederateEnv,
+    cxt: ActivityContext<FederateEnv>,
+  ): Promise<ExtendedResponse<FederateResponse>> {
     const url: URL = new URL(request.raw.url);
     const awsAccountId: string | null = url.searchParams.get('awsAccountId');
     const role: string | null = url.searchParams.get('role');
@@ -105,7 +104,15 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
       throw new Error(`Failed to generate console URL: ${consoleResponse.statusText}`);
     }
 
-    return await consoleResponse.json();
+    const consoleData: GenerateConsoleUrlResponse = await consoleResponse.json();
+
+    return {
+      body: { url: consoleData.url },
+      statusCode: 302,
+      headers: {
+        Location: consoleData.url,
+      },
+    };
   }
 }
 

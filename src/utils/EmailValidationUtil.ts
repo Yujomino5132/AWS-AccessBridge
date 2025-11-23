@@ -3,7 +3,11 @@ import { UnauthorizedError, InternalServerError } from '@/error';
 import { INTERNAL_USER_EMAIL_HEADER, SELF_WORKER_BASE_HOSTNAME } from '@/constants';
 
 class EmailValidationUtil {
-  public static async getAuthenticatedUserEmail(request: Request, teamDomain?: string, policyAud?: string): Promise<string> {
+  public static async getAuthenticatedUserEmail(
+    request: Request,
+    teamDomain?: string | undefined,
+    policyAud?: string | undefined,
+  ): Promise<string> {
     // Check if this is an internal call
     const url: URL = new URL(request.url);
     if (url.hostname === SELF_WORKER_BASE_HOSTNAME) {

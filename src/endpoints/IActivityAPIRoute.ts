@@ -1,5 +1,6 @@
 import { OpenAPIRoute } from 'chanfana';
 import { Context } from 'hono';
+import type { StatusCode } from 'hono/utils/http-status';
 import { EmailValidationUtil } from '@/utils';
 import { DefaultInternalServerError, InternalServerError, IServiceError } from '@/error';
 
@@ -15,7 +16,18 @@ abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IR
         body = {};
       }
       const request: TRequest = { ...(body as TRequest), raw: c.req };
-      const response: TResponse = await this.handleRequest(request, c.env as TEnv, c);
+      const response: TResponse | ExtendedResponse<TResponse> = await this.handleRequest(request, c.env as TEnv, c);
+      if (response && typeof response === 'object' && 'body' in response) {
+        const extendedResponse: ExtendedResponse<TResponse> = response as ExtendedResponse<TResponse>;
+        const headers: Record<string, string> = extendedResponse.headers || {};
+        Object.entries(headers).forEach(([key, value]) => {
+          c.header(key, value);
+        });
+        if (extendedResponse.statusCode) {
+          c.status(extendedResponse.statusCode);
+        }
+        return c.json(extendedResponse.body);
+      }
       return c.json(response);
     } catch (error: unknown) {
       if (error instanceof IServiceError) {
@@ -35,7 +47,11 @@ abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IR
     }
   }
 
-  protected abstract handleRequest(request: TRequest, env: TEnv, cxt: ActivityContext<TEnv>): Promise<TResponse>;
+  protected abstract handleRequest(
+    request: TRequest,
+    env: TEnv,
+    cxt: ActivityContext<TEnv>,
+  ): Promise<TResponse | ExtendedResponse<TResponse>>;
 
   protected getAuthenticatedUserEmailAddress(c: ActivityContext<TEnv>): string {
     return c.get('AuthenticatedUserEmailAddress');
@@ -49,6 +65,12 @@ interface IRequest {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface IResponse {}
 
+interface ExtendedResponse<TResponse extends IResponse> {
+  body: TResponse;
+  statusCode?: StatusCode;
+  headers?: Record<string, string>;
+}
+
 interface IEnv {
   TEAM_DOMAIN?: string;
   POLICY_AUD?: string;
@@ -60,4 +82,4 @@ interface IEnv {
 type ActivityContext<TEnv extends IEnv> = Context<{ Bindings: Env } & TEnv>;
 
 export { IActivityAPIRoute };
-export type { IRequest, IResponse, IEnv, ActivityContext };
+export type { IRequest, IResponse, IEnv, ActivityContext, ExtendedResponse };

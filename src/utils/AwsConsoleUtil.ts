@@ -27,10 +27,10 @@ class AwsConsoleUtil {
     }
   }
 
-  public static getLoginUrl(signinToken: string, destination = 'https://console.aws.amazon.com/'): string {
+  public static getLoginUrl(signinToken: string, issuer: string, destination = 'https://console.aws.amazon.com/'): string {
     const params: URLSearchParams = new URLSearchParams({
       Action: 'login',
-      Issuer: 'example.com',
+      Issuer: issuer,
       Destination: destination,
       SigninToken: signinToken,
     });
