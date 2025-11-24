@@ -72,3 +72,4 @@ interface FavoriteAccountEnv extends IEnv {
 }
 
 export { FavoriteAccountRoute };
+export type { FavoriteAccountRequest, FavoriteAccountResponse };

@@ -150,3 +150,4 @@ interface ListAssumablesEnv extends IEnv {
 }
 
 export { ListAssumablesRoute };
+export type { ListAssumablesRequest, ListAssumablesResponse };

@@ -1,7 +1,7 @@
 import { OpenAPIRoute } from 'chanfana';
 import { Context } from 'hono';
 import type { StatusCode } from 'hono/utils/http-status';
-import { EmailValidationUtil } from '@/utils';
+import { EmailValidationUtil, BaseUrlUtil } from '@/utils';
 import { DefaultInternalServerError, InternalServerError, IServiceError } from '@/error';
 
 abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IResponse, TEnv extends IEnv> extends OpenAPIRoute {
@@ -57,6 +57,10 @@ abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IR
 
   protected getAuthenticatedUserEmailAddress(c: ActivityContext<TEnv>): string {
     return c.get('AuthenticatedUserEmailAddress');
+  }
+
+  protected getBaseUrl(c: ActivityContext<TEnv>): string {
+    return BaseUrlUtil.getBaseUrl(c.req.raw);
   }
 }
 

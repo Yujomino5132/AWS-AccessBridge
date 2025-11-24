@@ -189,15 +189,14 @@ class GenerateConsoleUrlRoute extends IActivityAPIRoute<GenerateConsoleUrlReques
   protected async handleRequest(
     request: GenerateConsoleUrlRequest,
     _env: IEnv,
-    _cxt: ActivityContext<IEnv>,
+    cxt: ActivityContext<IEnv>,
   ): Promise<GenerateConsoleUrlResponse> {
     const signinToken: string = await AwsConsoleUtil.getSigninToken(request.accessKeyId, request.secretAccessKey, request.sessionToken);
-    let federateUrl: string = new URL(request.raw.url).origin;
+    let federateUrl: string = this.getBaseUrl(cxt);
     if (request.awsAccountId && request.roleName) {
       federateUrl = `${federateUrl}/api/aws/federate?awsAccountId=${request.awsAccountId}&role=${request.roleName}`;
     }
     const loginUrl: string = AwsConsoleUtil.getLoginUrl(signinToken, federateUrl);
-
     return {
       url: loginUrl,
     };

@@ -3,7 +3,7 @@ import type { ActivityContext, IEnv, IRequest, IResponse, ExtendedResponse } fro
 import { BadRequestError } from '@/error';
 import type { AssumeRoleResponse } from '@/endpoints/api/aws/assume-role/POST';
 import type { GenerateConsoleUrlResponse } from '@/endpoints/api/aws/console/POST';
-import { INTERNAL_USER_EMAIL_HEADER, CONTENT_TYPE, APPLICATION_JSON, SELF_WORKER_BASE_URL } from '@/constants';
+import { INTERNAL_USER_EMAIL_HEADER, INTERNAL_BASE_URL_HEADER, CONTENT_TYPE, APPLICATION_JSON, SELF_WORKER_BASE_URL } from '@/constants';
 import { ErrorDeserializer } from '@/utils';
 
 class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse, FederateEnv> {
@@ -175,11 +175,13 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
     }
     const principalArn: string = `arn:aws:iam::${awsAccountId}:role/${roleName}`;
     const userEmail: string = this.getAuthenticatedUserEmailAddress(cxt);
+    const baseUrl: string = this.getBaseUrl(cxt);
     const assumeRoleResponse: Response = await env.SELF.fetch(`${SELF_WORKER_BASE_URL}/api/aws/assume-role`, {
       method: 'POST',
       headers: {
         [CONTENT_TYPE]: APPLICATION_JSON,
         [INTERNAL_USER_EMAIL_HEADER]: userEmail,
+        [INTERNAL_BASE_URL_HEADER]: baseUrl,
       },
       body: JSON.stringify({ principalArn }),
     });
@@ -192,6 +194,7 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
       headers: {
         [CONTENT_TYPE]: APPLICATION_JSON,
         [INTERNAL_USER_EMAIL_HEADER]: userEmail,
+        [INTERNAL_BASE_URL_HEADER]: baseUrl,
       },
       body: JSON.stringify({
         accessKeyId: credentials.accessKeyId,

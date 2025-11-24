@@ -70,3 +70,4 @@ interface UnfavoriteAccountEnv extends IEnv {
 }
 
 export { UnfavoriteAccountRoute };
+export type { UnfavoriteAccountRequest, UnfavoriteAccountResponse };
