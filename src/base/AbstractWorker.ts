@@ -13,7 +13,7 @@ abstract class AbstractWorker {
     }
 
     this.printExecId();
-    console.log('🔁 Worker triggered by HTTP request');
+    console.log('🎯 Worker triggered by HTTP request');
     try {
       return await this.handleFetch(request, env, ctx);
     } catch (err: unknown) {
