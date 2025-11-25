@@ -19,6 +19,7 @@ export default function AccountList({ showHidden }: AccountListProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
+    setIsLoading(true);
     const backendUrl = import.meta.env.VITE_OPTIONAL_BACKEND_URL || '';
     const baseUrl = backendUrl ? backendUrl : '';
     const url = `${baseUrl}/api/user/assumables${showHidden ? '?showHidden=true' : ''}`;
