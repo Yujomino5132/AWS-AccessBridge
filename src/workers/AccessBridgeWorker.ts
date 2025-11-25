@@ -32,7 +32,7 @@ class AccessBridgeWorker extends AbstractWorker {
       Bindings: Env;
     }> = new Hono<{ Bindings: Env }>();
 
-    app.use('*', cors());
+    // app.use('*', cors());
 
     const openapi: HonoOpenAPIRouterType<{
       Bindings: Env;
