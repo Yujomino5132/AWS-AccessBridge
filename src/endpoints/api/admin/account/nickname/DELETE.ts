@@ -1,9 +1,9 @@
 import { AwsAccountsDAO } from '@/dao';
 import { BadRequestError } from '@/error';
-import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
-import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
+import { IAdminActivityAPIRoute } from '@/endpoints/IAdminActivityAPIRoute';
+import type { ActivityContext, IAdminEnv, IRequest, IResponse } from '@/endpoints/IAdminActivityAPIRoute';
 
-class RemoveAccountNicknameRoute extends IActivityAPIRoute<
+class RemoveAccountNicknameRoute extends IAdminActivityAPIRoute<
   RemoveAccountNicknameRequest,
   RemoveAccountNicknameResponse,
   RemoveAccountNicknameEnv
@@ -156,7 +156,7 @@ class RemoveAccountNicknameRoute extends IActivityAPIRoute<
     ],
   };
 
-  protected async handleRequest(
+  protected async handleAdminRequest(
     request: RemoveAccountNicknameRequest,
     env: RemoveAccountNicknameEnv,
     _cxt: ActivityContext<RemoveAccountNicknameEnv>,
@@ -192,7 +192,7 @@ interface RemoveAccountNicknameResponse extends IResponse {
   accountId: string;
 }
 
-interface RemoveAccountNicknameEnv extends IEnv {
+interface RemoveAccountNicknameEnv extends IAdminEnv {
   AccessBridgeDB: D1Database;
 }
 

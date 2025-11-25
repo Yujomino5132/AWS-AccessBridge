@@ -1,9 +1,9 @@
 import { AssumableRolesDAO, AwsAccountsDAO } from '@/dao';
 import { BadRequestError } from '@/error';
-import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
-import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
+import { IAdminActivityAPIRoute } from '@/endpoints/IAdminActivityAPIRoute';
+import type { ActivityContext, IAdminEnv, IRequest, IResponse } from '@/endpoints/IAdminActivityAPIRoute';
 
-class RevokeAccessRoute extends IActivityAPIRoute<RevokeAccessRequest, RevokeAccessResponse, RevokeAccessEnv> {
+class RevokeAccessRoute extends IAdminActivityAPIRoute<RevokeAccessRequest, RevokeAccessResponse, RevokeAccessEnv> {
   schema = {
     tags: ['Admin'],
     summary: 'Revoke User Access to Role',
@@ -229,7 +229,7 @@ class RevokeAccessRoute extends IActivityAPIRoute<RevokeAccessRequest, RevokeAcc
     ],
   };
 
-  protected async handleRequest(
+  protected async handleAdminRequest(
     request: RevokeAccessRequest,
     env: RevokeAccessEnv,
     _cxt: ActivityContext<RevokeAccessEnv>,
@@ -262,7 +262,7 @@ interface RevokeAccessResponse extends IResponse {
   message: string;
 }
 
-interface RevokeAccessEnv extends IEnv {
+interface RevokeAccessEnv extends IAdminEnv {
   AccessBridgeDB: D1Database;
 }
 

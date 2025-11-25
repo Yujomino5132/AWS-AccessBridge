@@ -1,9 +1,9 @@
 import { AwsAccountsDAO } from '@/dao';
 import { BadRequestError } from '@/error';
-import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
-import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
+import { IAdminActivityAPIRoute } from '@/endpoints/IAdminActivityAPIRoute';
+import type { ActivityContext, IAdminEnv, IRequest, IResponse } from '@/endpoints/IAdminActivityAPIRoute';
 
-class SetAccountNicknameRoute extends IActivityAPIRoute<SetAccountNicknameRequest, SetAccountNicknameResponse, SetAccountNicknameEnv> {
+class SetAccountNicknameRoute extends IAdminActivityAPIRoute<SetAccountNicknameRequest, SetAccountNicknameResponse, SetAccountNicknameEnv> {
   schema = {
     tags: ['Admin'],
     summary: 'Set AWS Account Nickname',
@@ -172,7 +172,7 @@ class SetAccountNicknameRoute extends IActivityAPIRoute<SetAccountNicknameReques
     ],
   };
 
-  protected async handleRequest(
+  protected async handleAdminRequest(
     request: SetAccountNicknameRequest,
     env: SetAccountNicknameEnv,
     _cxt: ActivityContext<SetAccountNicknameEnv>,
@@ -219,7 +219,7 @@ interface SetAccountNicknameResponse extends IResponse {
   nickname: string;
 }
 
-interface SetAccountNicknameEnv extends IEnv {
+interface SetAccountNicknameEnv extends IAdminEnv {
   AccessBridgeDB: D1Database;
 }
 

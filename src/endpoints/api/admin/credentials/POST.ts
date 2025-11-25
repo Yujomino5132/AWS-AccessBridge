@@ -1,9 +1,9 @@
 import { CredentialsDAO } from '@/dao';
 import { BadRequestError } from '@/error';
-import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
-import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
+import { IAdminActivityAPIRoute } from '@/endpoints/IAdminActivityAPIRoute';
+import type { ActivityContext, IAdminEnv, IRequest, IResponse } from '@/endpoints/IAdminActivityAPIRoute';
 
-class StoreCredentialRoute extends IActivityAPIRoute<StoreCredentialRequest, StoreCredentialResponse, StoreCredentialEnv> {
+class StoreCredentialRoute extends IAdminActivityAPIRoute<StoreCredentialRequest, StoreCredentialResponse, StoreCredentialEnv> {
   schema = {
     tags: ['Admin'],
     summary: 'Store AWS Credentials',
@@ -165,7 +165,7 @@ class StoreCredentialRoute extends IActivityAPIRoute<StoreCredentialRequest, Sto
     ],
   };
 
-  protected async handleRequest(
+  protected async handleAdminRequest(
     request: StoreCredentialRequest,
     env: StoreCredentialEnv,
     _cxt: ActivityContext<StoreCredentialEnv>,
@@ -198,7 +198,7 @@ interface StoreCredentialResponse extends IResponse {
   message: string;
 }
 
-interface StoreCredentialEnv extends IEnv {
+interface StoreCredentialEnv extends IAdminEnv {
   AccessBridgeDB: D1Database;
   AES_ENCRYPTION_KEY_SECRET: SecretsStoreSecret;
 }

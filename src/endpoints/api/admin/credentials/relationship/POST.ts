@@ -1,9 +1,9 @@
 import { CredentialsDAO } from '@/dao';
 import { BadRequestError } from '@/error';
-import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
-import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
+import { IAdminActivityAPIRoute } from '@/endpoints/IAdminActivityAPIRoute';
+import type { ActivityContext, IAdminEnv, IRequest, IResponse } from '@/endpoints/IAdminActivityAPIRoute';
 
-class StoreCredentialRelationshipRoute extends IActivityAPIRoute<
+class StoreCredentialRelationshipRoute extends IAdminActivityAPIRoute<
   StoreCredentialRelationshipRequest,
   StoreCredentialRelationshipResponse,
   StoreCredentialRelationshipEnv
@@ -205,7 +205,7 @@ class StoreCredentialRelationshipRoute extends IActivityAPIRoute<
     ],
   };
 
-  protected async handleRequest(
+  protected async handleAdminRequest(
     request: StoreCredentialRelationshipRequest,
     env: StoreCredentialRelationshipEnv,
     _cxt: ActivityContext<StoreCredentialRelationshipEnv>,
@@ -245,7 +245,7 @@ interface StoreCredentialRelationshipResponse extends IResponse {
   message: string;
 }
 
-interface StoreCredentialRelationshipEnv extends IEnv {
+interface StoreCredentialRelationshipEnv extends IAdminEnv {
   AccessBridgeDB: D1Database;
   AES_ENCRYPTION_KEY_SECRET: SecretsStoreSecret;
 }

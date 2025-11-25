@@ -1,8 +1,8 @@
 import { generateAESGCMKey } from '@/crypto/aes-gcm';
-import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
-import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
+import { IAdminActivityAPIRoute } from '@/endpoints/IAdminActivityAPIRoute';
+import type { ActivityContext, IAdminEnv, IRequest, IResponse } from '@/endpoints/IAdminActivityAPIRoute';
 
-class RotateMasterKeyRoute extends IActivityAPIRoute<RotateMasterKeyRequest, RotateMasterKeyResponse, RotateMasterKeyEnv> {
+class RotateMasterKeyRoute extends IAdminActivityAPIRoute<RotateMasterKeyRequest, RotateMasterKeyResponse, RotateMasterKeyEnv> {
   schema = {
     tags: ['Admin'],
     summary: 'Rotate Master Encryption Key',
@@ -43,7 +43,7 @@ class RotateMasterKeyRoute extends IActivityAPIRoute<RotateMasterKeyRequest, Rot
     ],
   };
 
-  protected async handleRequest(
+  protected async handleAdminRequest(
     _request: RotateMasterKeyRequest,
     _env: RotateMasterKeyEnv,
     _cxt: ActivityContext<RotateMasterKeyEnv>,
@@ -69,7 +69,7 @@ interface RotateMasterKeyResponse extends IResponse {
   key: string;
 }
 
-interface RotateMasterKeyEnv extends IEnv {
+interface RotateMasterKeyEnv extends IAdminEnv {
   AES_ENCRYPTION_KEY_SECRET: SecretsStoreSecret;
 }
 

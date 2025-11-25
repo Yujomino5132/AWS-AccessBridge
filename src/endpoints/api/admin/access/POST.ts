@@ -1,9 +1,9 @@
 import { AssumableRolesDAO, AwsAccountsDAO } from '@/dao';
 import { BadRequestError } from '@/error';
-import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
-import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
+import { IAdminActivityAPIRoute } from '@/endpoints/IAdminActivityAPIRoute';
+import type { ActivityContext, IAdminEnv, IRequest, IResponse } from '@/endpoints/IAdminActivityAPIRoute';
 
-class GrantAccessRoute extends IActivityAPIRoute<GrantAccessRequest, GrantAccessResponse, GrantAccessEnv> {
+class GrantAccessRoute extends IAdminActivityAPIRoute<GrantAccessRequest, GrantAccessResponse, GrantAccessEnv> {
   schema = {
     tags: ['Admin'],
     summary: 'Grant User Access to Role',
@@ -220,7 +220,7 @@ class GrantAccessRoute extends IActivityAPIRoute<GrantAccessRequest, GrantAccess
     ],
   };
 
-  protected async handleRequest(
+  protected async handleAdminRequest(
     request: GrantAccessRequest,
     env: GrantAccessEnv,
     _cxt: ActivityContext<GrantAccessEnv>,
@@ -253,7 +253,7 @@ interface GrantAccessResponse extends IResponse {
   message: string;
 }
 
-interface GrantAccessEnv extends IEnv {
+interface GrantAccessEnv extends IAdminEnv {
   AccessBridgeDB: D1Database;
 }
 

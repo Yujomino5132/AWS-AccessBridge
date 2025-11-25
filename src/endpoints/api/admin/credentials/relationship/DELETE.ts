@@ -1,9 +1,9 @@
 import { CredentialsDAO } from '@/dao';
 import { BadRequestError } from '@/error';
-import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
-import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
+import { IAdminActivityAPIRoute } from '@/endpoints/IAdminActivityAPIRoute';
+import type { ActivityContext, IAdminEnv, IRequest, IResponse } from '@/endpoints/IAdminActivityAPIRoute';
 
-class RemoveCredentialRelationshipRoute extends IActivityAPIRoute<
+class RemoveCredentialRelationshipRoute extends IAdminActivityAPIRoute<
   RemoveCredentialRelationshipRequest,
   RemoveCredentialRelationshipResponse,
   RemoveCredentialRelationshipEnv
@@ -188,7 +188,7 @@ class RemoveCredentialRelationshipRoute extends IActivityAPIRoute<
     ],
   };
 
-  protected async handleRequest(
+  protected async handleAdminRequest(
     request: RemoveCredentialRelationshipRequest,
     env: RemoveCredentialRelationshipEnv,
     _cxt: ActivityContext<RemoveCredentialRelationshipEnv>,
@@ -224,7 +224,7 @@ interface RemoveCredentialRelationshipResponse extends IResponse {
   message: string;
 }
 
-interface RemoveCredentialRelationshipEnv extends IEnv {
+interface RemoveCredentialRelationshipEnv extends IAdminEnv {
   AccessBridgeDB: D1Database;
   AES_ENCRYPTION_KEY_SECRET: SecretsStoreSecret;
 }

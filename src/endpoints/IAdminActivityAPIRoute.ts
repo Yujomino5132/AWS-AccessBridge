@@ -1,0 +1,39 @@
+import { IActivityAPIRoute } from './IActivityAPIRoute';
+import type { ActivityContext, IEnv, IRequest, IResponse, ExtendedResponse } from './IActivityAPIRoute';
+import { UserMetadataDAO } from '@/dao';
+import { UnauthorizedError } from '@/error';
+
+abstract class IAdminActivityAPIRoute<
+  TRequest extends IRequest,
+  TResponse extends IResponse,
+  TEnv extends IAdminEnv,
+> extends IActivityAPIRoute<TRequest, TResponse, TEnv> {
+  protected async handleRequest(
+    request: TRequest,
+    env: TEnv,
+    cxt: ActivityContext<TEnv>,
+  ): Promise<TResponse | ExtendedResponse<TResponse>> {
+    const userEmail: string = this.getAuthenticatedUserEmailAddress(cxt);
+    const userMetadataDAO: UserMetadataDAO = new UserMetadataDAO(env.AccessBridgeDB);
+    const isSuperAdmin: boolean = await userMetadataDAO.isSuperAdmin(userEmail);
+    if (!isSuperAdmin) {
+      throw new UnauthorizedError(
+        'Your account does not have permission to perform this action. Please contact an administrator if you believe this is an error.',
+      );
+    }
+    return this.handleAdminRequest(request, env, cxt);
+  }
+
+  protected abstract handleAdminRequest(
+    request: TRequest,
+    env: TEnv,
+    cxt: ActivityContext<TEnv>,
+  ): Promise<TResponse | ExtendedResponse<TResponse>>;
+}
+
+interface IAdminEnv extends IEnv {
+  AccessBridgeDB: D1Database;
+}
+
+export { IAdminActivityAPIRoute };
+export type { IAdminEnv, ActivityContext, IRequest, IResponse, ExtendedResponse };
