@@ -104,6 +104,20 @@ class CredentialsDAO {
       )
       .run();
   }
+
+  public async storeCredentialRelationship(principalArn: string, assumedBy: string): Promise<void> {
+    await this.database
+      .prepare(
+        `INSERT OR REPLACE INTO credentials (principal_arn, assumed_by)
+         VALUES (?, ?)`,
+      )
+      .bind(principalArn, assumedBy)
+      .run();
+  }
+
+  public async removeCredential(principalArn: string): Promise<void> {
+    await this.database.prepare(`DELETE FROM credentials WHERE principal_arn = ?`).bind(principalArn).run();
+  }
 }
 
 export { CredentialsDAO };
