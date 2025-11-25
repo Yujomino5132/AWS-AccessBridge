@@ -35,9 +35,12 @@ class AssumableRolesDAO {
   /**
    * Retrieves all assumable roles for the specified user across all accessible AWS accounts.
    * @param userEmail The email address of the user.
+   * @param showHidden Whether to include hidden roles in the results. Defaults to false.
    * @returns A map of AWS account IDs to objects containing roles and account nickname.
    */
-  public async getAllRolesByUserEmail(userEmail: string): Promise<AssumableAccountsMap> {
+  public async getAllRolesByUserEmail(userEmail: string, showHidden: boolean = false): Promise<AssumableAccountsMap> {
+    const hiddenFilter = showHidden ? '' : 'AND (ar.hidden IS NULL OR ar.hidden = FALSE)';
+
     const results = await this.database
       .prepare(
         `SELECT ar.aws_account_id, ar.role_name, aa.aws_account_nickname, 
@@ -45,7 +48,7 @@ class AssumableRolesDAO {
          FROM assumable_roles ar
          LEFT JOIN aws_accounts aa ON ar.aws_account_id = aa.aws_account_id
          LEFT JOIN user_favorite_accounts ufa ON ar.aws_account_id = ufa.aws_account_id AND ufa.user_email = ?
-         WHERE ar.user_email = ?
+         WHERE ar.user_email = ? ${hiddenFilter}
          ORDER BY is_favorite DESC, ar.aws_account_id`,
       )
       .bind(userEmail, userEmail)

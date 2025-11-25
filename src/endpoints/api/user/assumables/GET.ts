@@ -8,7 +8,19 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
     tags: ['User'],
     summary: 'List Assumable Roles',
     description:
-      'Returns a list of AWS IAM roles that the authenticated user is authorized to assume, organized by AWS account ID. This endpoint helps users discover which roles they can access across different AWS accounts.',
+      'Returns a list of AWS IAM roles that the authenticated user is authorized to assume, organized by AWS account ID. This endpoint helps users discover which roles they can access across different AWS accounts. By default, hidden roles are excluded from the results. Use the showHidden query parameter to include hidden roles.',
+    parameters: [
+      {
+        name: 'showHidden',
+        in: 'query' as const,
+        description: 'Whether to include hidden roles in the results. Defaults to false.',
+        required: false,
+        schema: {
+          type: 'boolean' as const,
+          default: false,
+        },
+      },
+    ],
     responses: {
       '200': {
         description: 'Successfully retrieved list of assumable roles',
@@ -47,18 +59,24 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
               },
             },
             examples: {
+              'visible-roles-only': {
+                summary: 'User with visible roles only (default behavior)',
+                value: {
+                  '123456789012': { roles: ['ReadOnlyRole', 'DeveloperRole'], nickname: 'Production', favorite: true },
+                  '987654321098': { roles: ['AdminRole'], favorite: false },
+                },
+              },
+              'with-hidden-roles': {
+                summary: 'User with hidden roles included (showHidden=true)',
+                value: {
+                  '123456789012': { roles: ['ReadOnlyRole', 'DeveloperRole', 'HiddenRole'], nickname: 'Production', favorite: true },
+                  '987654321098': { roles: ['AdminRole', 'AnotherHiddenRole'], favorite: false },
+                },
+              },
               'single-account': {
                 summary: 'User with roles in one account',
                 value: {
                   '123456789012': { roles: ['ReadOnlyRole', 'DeveloperRole', 'AdminRole'], nickname: 'Production', favorite: true },
-                },
-              },
-              'multi-account': {
-                summary: 'User with roles across multiple accounts',
-                value: {
-                  '123456789012': { roles: ['ReadOnlyRole', 'DeveloperRole'], nickname: 'Production', favorite: true },
-                  '987654321098': { roles: ['AdminRole'], favorite: false },
-                  '555666777888': { roles: ['AuditorRole', 'ReadOnlyRole'], nickname: 'Development', favorite: true },
                 },
               },
               'no-roles': {
@@ -137,7 +155,10 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
     const userEmail: string = this.getAuthenticatedUserEmailAddress(cxt);
     const assumableRolesDAO: AssumableRolesDAO = new AssumableRolesDAO(env.AccessBridgeDB);
 
-    return assumableRolesDAO.getAllRolesByUserEmail(userEmail);
+    const url = new URL(request.raw.url);
+    const showHidden = url.searchParams.get('showHidden') === 'true';
+
+    return assumableRolesDAO.getAllRolesByUserEmail(userEmail, showHidden);
   }
 }
 
