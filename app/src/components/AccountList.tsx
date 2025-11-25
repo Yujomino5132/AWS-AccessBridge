@@ -3,7 +3,11 @@ import AccessKeyModal from './AccessKeyModal';
 
 type RoleMap = Record<string, { roles: string[]; nickname?: string; favorite: boolean }>;
 
-export default function AccountList() {
+interface AccountListProps {
+  showHidden: boolean;
+}
+
+export default function AccountList({ showHidden }: AccountListProps) {
   const [rolesData, setRolesData] = useState<RoleMap>({});
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,7 +21,8 @@ export default function AccountList() {
   useEffect(() => {
     const backendUrl = import.meta.env.VITE_OPTIONAL_BACKEND_URL || '';
     const baseUrl = backendUrl ? backendUrl : '';
-    fetch(`${baseUrl}/api/user/assumables`)
+    const url = `${baseUrl}/api/user/assumables${showHidden ? '?showHidden=true' : ''}`;
+    fetch(url)
       .then(async (res) => {
         if (res.status === 401) {
           window.location.reload();
@@ -43,7 +48,7 @@ export default function AccountList() {
       .finally(() => {
         setIsLoading(false);
       });
-  }, []);
+  }, [showHidden]);
 
   const toggleExpand = (id: string) => {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
