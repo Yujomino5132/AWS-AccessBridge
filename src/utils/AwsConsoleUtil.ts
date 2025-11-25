@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios';
-import { UnauthorizedError } from '../error';
+import { UnauthorizedError } from '@/error';
 
 class AwsConsoleUtil {
   public static async getSigninToken(accessKeyId: string, secretAccessKey: string, sessionToken?: string | undefined): Promise<string> {

@@ -155,8 +155,8 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
     const userEmail: string = this.getAuthenticatedUserEmailAddress(cxt);
     const assumableRolesDAO: AssumableRolesDAO = new AssumableRolesDAO(env.AccessBridgeDB);
 
-    const url = new URL(request.raw.url);
-    const showHidden = url.searchParams.get('showHidden') === 'true';
+    const url: URL = new URL(request.raw.url);
+    const showHidden: boolean = url.searchParams.get('showHidden') === 'true';
 
     return assumableRolesDAO.getAllRolesByUserEmail(userEmail, showHidden);
   }

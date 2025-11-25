@@ -1,7 +1,6 @@
 import { AbstractWorker } from '@/base';
 import { fromHono, HonoOpenAPIRouterType } from 'chanfana';
 import { Hono } from 'hono';
-import { cors } from 'hono/cors';
 import {
   FavoriteAccountRoute,
   UnfavoriteAccountRoute,
@@ -31,8 +30,6 @@ class AccessBridgeWorker extends AbstractWorker {
     const app: Hono<{
       Bindings: Env;
     }> = new Hono<{ Bindings: Env }>();
-
-    // app.use('*', cors());
 
     const openapi: HonoOpenAPIRouterType<{
       Bindings: Env;

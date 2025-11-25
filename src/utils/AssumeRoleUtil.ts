@@ -1,6 +1,6 @@
 import { AwsClient } from 'aws4fetch';
-import { AccessKeys, AccessKeysWithExpiration } from '../model';
-import { InternalServerError, UnauthorizedError } from '../error';
+import { AccessKeys, AccessKeysWithExpiration } from '@/model';
+import { InternalServerError, UnauthorizedError } from '@/error';
 
 class AssumeRoleUtil {
   public static async assumeRole(

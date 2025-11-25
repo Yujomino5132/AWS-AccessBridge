@@ -1,4 +1,4 @@
-import { BadRequestError } from '../error';
+import { BadRequestError } from '@/error';
 
 class ArnUtil {
   public static getAccountIdFromArn(arn: string): string {
