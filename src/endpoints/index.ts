@@ -8,7 +8,7 @@ import { GetCurrentUserRoute as OriginalGetCurrentUserRoute } from './api/user/m
 import { FavoriteAccountRoute as OriginalFavoriteAccountRoute } from './api/user/favorites/POST';
 import { UnfavoriteAccountRoute as OriginalUnfavoriteAccountRoute } from './api/user/favorites/DELETE';
 import { RotateMasterKeyRoute as OriginalRotateMasterKeyRoute } from './api/admin/crypto/rotate-master-key/POST';
-import { StoreCredentialRoute as OriginalStoreCredentialRoute } from './api/admin/credentials/store-credential/POST';
+import { StoreCredentialRoute as OriginalStoreCredentialRoute } from './api/admin/credentials/POST';
 import { GrantAccessRoute as OriginalGrantAccessRoute } from './api/admin/access/POST';
 import { RevokeAccessRoute as OriginalRevokeAccessRoute } from './api/admin/access/DELETE';
 import { SetAccountNicknameRoute as OriginalSetAccountNicknameRoute } from './api/admin/account/nickname/PUT';

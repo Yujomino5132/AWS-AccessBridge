@@ -51,7 +51,7 @@ class AccessBridgeWorker extends AbstractWorker {
 
     // Admin Routes
     openapi.post('/api/admin/crypto/rotate-master-key', RotateMasterKeyRoute);
-    openapi.post('/api/admin/credentials/store-credential', StoreCredentialRoute);
+    openapi.post('/api/admin/credentials', StoreCredentialRoute);
     openapi.post('/api/admin/credentials/relationship', StoreCredentialRelationshipRoute);
     openapi.delete('/api/admin/credentials/relationship', RemoveCredentialRelationshipRoute);
     openapi.post('/api/admin/access', GrantAccessRoute);

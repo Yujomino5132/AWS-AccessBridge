@@ -64,7 +64,7 @@ AWS Access Bridge is a full-stack application that consists of:
 
 ### Admin Operations
 
-- `POST /api/admin/credentials/store-credential` - Store AWS credentials
+- `POST /api/admin/credentials` - Store AWS credentials
 - `POST /api/admin/rotate-master-key` - Initialize/rotate the encryption key
 
 ### Documentation
@@ -253,7 +253,7 @@ Create an IAM user named `DO-NOT-DELETE-Federated-SSO-AccessBridge` with the fol
 2. Store the credentials using the API endpoint:
 
 ```bash
-curl -X POST https://your-worker-domain.workers.dev/api/admin/credentials/store-credential \
+curl -X POST https://your-worker-domain.workers.dev/api/admin/credentials \
   -H "Content-Type: application/json" \
   -d '{
     "principal_arn": "arn:aws:iam::<your-aws-account>:user/DO-NOT-DELETE-Federated-SSO-AccessBridge",
