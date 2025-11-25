@@ -1,1 +1,1 @@
-export { AccessBridgeWorker } from './AccessBridge';
+export { AccessBridgeWorker } from './AccessBridgeWorker';
