@@ -1,10 +1,26 @@
 # AWS AccessBridge
 
-![AWS AccessBridge](https://raw.githubusercontent.com/Rexezuge-CloudflareWorkers/AWS-AccessBridge-Assets/refs/heads/main/pictures/2.jpg)
+![Accounts Page Preview](https://raw.githubusercontent.com/Rexezuge-CloudflareWorkers/AWS-AccessBridge-Assets/refs/heads/main/pictures/3.jpg)
 
 A secure, web-based AWS role assumption bridge built on Cloudflare Workers that simplifies AWS multi-account access management. This application provides a centralized interface for users to assume AWS roles across multiple accounts and generate AWS Console URLs with temporary credentials.
 
-## Overview
+## Table of Contents
+
+_(Click on any section to expand/collapse)_
+
+- [Overview](#overview)
+- [API Endpoints](#api-endpoints)
+- [Prerequisites](#prerequisites)
+- [Deployment](#deployment)
+- [AWS IAM Setup](#aws-iam-setup)
+- [Development](#development)
+- [Security Considerations](#security-considerations)
+- [Contributing](#contributing)
+- [License](#license)
+- [Support](#support)
+
+<details open>
+<summary>Overview (click to expand/collapse)</summary>
 
 AWS Access Bridge is a full-stack application that consists of:
 
@@ -21,8 +37,11 @@ AWS Access Bridge is a full-stack application that consists of:
 - **User Management**: Email-based user authentication via Cloudflare Zero Trust
 - **Role Mapping**: Configure which users can assume which roles
 - **Account Management**: AWS account nicknames and user favorites
+- **Role Visibility Control**: Hide/unhide roles for individual users
+- **Super Admin System**: Enhanced administrative privileges with user metadata
+- **Credential Chain Management**: Support for complex credential relationships
 - **Credential Encryption**: AES-GCM encrypted storage of AWS credentials
-- **Admin Interface**: Administrative endpoints for credential and crypto management
+- **Admin Interface**: Comprehensive administrative endpoints for user and credential management
 - **OpenAPI Documentation**: Auto-generated API documentation at `/docs`
 
 ### Architecture
@@ -47,12 +66,16 @@ AWS Access Bridge is a full-stack application that consists of:
                        └──────────────────┘
 ```
 
-## API Endpoints
+</details>
+
+<details open>
+<summary>API Endpoints (click to expand/collapse)</summary>
 
 ### AWS Operations
 
 - `POST /api/aws/console` - Generate AWS Console URL with temporary credentials
 - `POST /api/aws/assume-role` - Assume an AWS role and return temporary credentials
+- `GET /api/aws/federate` - Federate to AWS Console with temporary credentials
 
 ### User Operations
 
@@ -61,17 +84,28 @@ AWS Access Bridge is a full-stack application that consists of:
 - `GET /api/user/favorites` - Get user's favorite AWS accounts
 - `POST /api/user/favorites` - Add account to favorites
 - `DELETE /api/user/favorites` - Remove account from favorites
+- `POST /api/user/assumable/hidden` - Hide a role from user's view
+- `DELETE /api/user/assumable/hidden` - Unhide a role for user's view
 
 ### Admin Operations
 
 - `POST /api/admin/credentials` - Store AWS credentials
-- `POST /api/admin/rotate-master-key` - Initialize/rotate the encryption key
+- `POST /api/admin/credentials/relationship` - Create credential chain relationships
+- `DELETE /api/admin/credentials/relationship` - Remove credential chain relationships
+- `POST /api/admin/access` - Grant user access to roles
+- `DELETE /api/admin/access` - Revoke user access to roles
+- `PUT /api/admin/account/nickname` - Set AWS account nickname
+- `DELETE /api/admin/account/nickname` - Remove AWS account nickname
+- `POST /api/admin/crypto/rotate-master-key` - Initialize/rotate the encryption key
 
 ### Documentation
 
 - `GET /docs` - OpenAPI documentation
 
-## Prerequisites
+</details>
+
+<details open>
+<summary>Prerequisites (click to expand/collapse)</summary>
 
 - Node.js 18+ and npm
 - Cloudflare account with Workers, D1, and Zero Trust enabled
@@ -79,7 +113,10 @@ AWS Access Bridge is a full-stack application that consists of:
 - AWS accounts and roles configured for cross-account access
 - Cloudflare Zero Trust team configured for application security
 
-## Deployment
+</details>
+
+<details open>
+<summary>Deployment (click to expand/collapse)</summary>
 
 ### 1. Install Dependencies
 
@@ -136,9 +173,10 @@ npx wrangler d1 migrations apply --remote aws-access-bridge-db
 This creates the following tables:
 
 - `credentials`: Stores encrypted AWS credentials and role chains
-- `assumable_roles`: Maps users to roles they can assume
+- `assumable_roles`: Maps users to roles they can assume (with hidden field)
 - `aws_accounts`: Stores AWS account nicknames
 - `user_favorite_accounts`: Tracks user's favorite accounts
+- `user_metadata`: Stores user metadata including super admin status
 
 ### 6. Configure Environment
 
@@ -225,7 +263,10 @@ The deployment process includes:
 3. Building the React frontend
 4. Deploying to Cloudflare Workers
 
-## AWS IAM Setup
+</details>
+
+<details open>
+<summary>AWS IAM Setup (click to expand/collapse)</summary>
 
 For security considerations, AWS Access Bridge implements an intermediate layer role assumption architecture. This setup requires creating specific IAM users and roles in your AWS account.
 
@@ -264,23 +305,7 @@ curl -X POST https://your-worker-domain.workers.dev/api/admin/credentials \
 
 ### 3. Create Intermediate IAM Role
 
-Create an IAM role named `DO-NOT-DELETE-AccessBridge-Intermediate` with the following permissions policy:
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "AssumeAnyRole",
-      "Effect": "Allow",
-      "Action": "sts:AssumeRole",
-      "Resource": ["arn:aws:iam::<your-aws-account>:role/*"]
-    }
-  ]
-}
-```
-
-And the following trust policy (replace `<your-aws-account>` with your actual AWS account ID):
+Create an IAM role named `DO-NOT-DELETE-AccessBridge-Intermediate` with the following trust policy (replace `<your-aws-account>` with your actual AWS account ID):
 
 ```json
 {
@@ -293,6 +318,22 @@ And the following trust policy (replace `<your-aws-account>` with your actual AW
       },
       "Action": "sts:AssumeRole",
       "Condition": {}
+    }
+  ]
+}
+```
+
+And the following permissions policy:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AssumeAnyRole",
+      "Effect": "Allow",
+      "Action": "sts:AssumeRole",
+      "Resource": ["arn:aws:iam::<your-aws-account>:role/*"]
     }
   ]
 }
@@ -326,7 +367,10 @@ This intermediate layer approach provides several security advantages:
 - **Audit Trail**: Clear separation between the bridge service and target roles
 - **Reduced Attack Surface**: Limits the scope of potential credential compromise
 
-## Development
+</details>
+
+<details open>
+<summary>Development (click to expand/collapse)</summary>
 
 ### Project Structure
 
@@ -414,7 +458,9 @@ CREATE TABLE assumable_roles (
     user_email VARCHAR(120),
     aws_account_id CHAR(12),
     role_name VARCHAR(128),
+    hidden BOOLEAN DEFAULT FALSE,
     PRIMARY KEY (user_email, aws_account_id, role_name),
+    FOREIGN KEY (user_email) REFERENCES user_metadata(user_email),
     FOREIGN KEY (aws_account_id) REFERENCES aws_accounts(aws_account_id)
 );
 ```
@@ -435,7 +481,17 @@ CREATE TABLE user_favorite_accounts (
     user_email VARCHAR(120),
     aws_account_id CHAR(12),
     PRIMARY KEY (user_email, aws_account_id),
+    FOREIGN KEY (user_email) REFERENCES user_metadata(user_email),
     FOREIGN KEY (aws_account_id) REFERENCES aws_accounts(aws_account_id)
+);
+```
+
+**user_metadata table:**
+
+```sql
+CREATE TABLE user_metadata (
+    user_email VARCHAR(120) PRIMARY KEY,
+    is_superadmin BOOLEAN DEFAULT FALSE
 );
 ```
 
@@ -476,6 +532,8 @@ npm run lint
 - Cloudflare D1 for SQL database
 - Cloudflare Zero Trust for authentication
 - Cloudflare Secrets Store for secure key management
+
+</details>
 
 ## Security Considerations
 
