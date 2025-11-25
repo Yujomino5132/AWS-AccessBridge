@@ -15,6 +15,8 @@ import { SetAccountNicknameRoute as OriginalSetAccountNicknameRoute } from './ap
 import { RemoveAccountNicknameRoute as OriginalRemoveAccountNicknameRoute } from './api/admin/account/nickname/DELETE';
 import { StoreCredentialRelationshipRoute as OriginalStoreCredentialRelationshipRoute } from './api/admin/credentials/relationship/POST';
 import { RemoveCredentialRelationshipRoute as OriginalRemoveCredentialRelationshipRoute } from './api/admin/credentials/relationship/DELETE';
+import { HideRoleRoute as OriginalHideRoleRoute } from './api/user/assumable/hidden/POST';
+import { UnhideRoleRoute as OriginalUnhideRoleRoute } from './api/user/assumable/hidden/DELETE';
 
 export const GenerateConsoleUrlRoute: any = OriginalGenerateConsoleUrlRoute;
 export const AssumeRoleRoute: any = OriginalAssumeRoleRoute;
@@ -31,3 +33,5 @@ export const SetAccountNicknameRoute: any = OriginalSetAccountNicknameRoute;
 export const RemoveAccountNicknameRoute: any = OriginalRemoveAccountNicknameRoute;
 export const StoreCredentialRelationshipRoute: any = OriginalStoreCredentialRelationshipRoute;
 export const RemoveCredentialRelationshipRoute: any = OriginalRemoveCredentialRelationshipRoute;
+export const HideRoleRoute: any = OriginalHideRoleRoute;
+export const UnhideRoleRoute: any = OriginalUnhideRoleRoute;

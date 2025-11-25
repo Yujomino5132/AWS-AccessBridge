@@ -18,6 +18,8 @@ import {
   RemoveAccountNicknameRoute,
   StoreCredentialRelationshipRoute,
   RemoveCredentialRelationshipRoute,
+  HideRoleRoute,
+  UnhideRoleRoute,
 } from '@/endpoints';
 
 class AccessBridgeWorker extends AbstractWorker {
@@ -48,6 +50,8 @@ class AccessBridgeWorker extends AbstractWorker {
     openapi.get('/api/user/me', GetCurrentUserRoute);
     openapi.post('/api/user/favorites', FavoriteAccountRoute);
     openapi.delete('/api/user/favorites', UnfavoriteAccountRoute);
+    openapi.post('/api/user/assumable/hidden', HideRoleRoute);
+    openapi.delete('/api/user/assumable/hidden', UnhideRoleRoute);
 
     // Admin Routes
     openapi.post('/api/admin/crypto/rotate-master-key', RotateMasterKeyRoute);

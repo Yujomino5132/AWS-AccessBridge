@@ -129,6 +129,40 @@ class AssumableRolesDAO {
       .bind(userEmail, awsAccountId, roleName)
       .run();
   }
+
+  /**
+   * Hides a role for a specific user.
+   * @param userEmail The email address of the user.
+   * @param awsAccountId The AWS account ID.
+   * @param roleName The name of the role to hide.
+   */
+  public async hideRole(userEmail: string, awsAccountId: string, roleName: string): Promise<void> {
+    await this.database
+      .prepare(
+        `UPDATE assumable_roles 
+         SET hidden = TRUE 
+         WHERE user_email = ? AND aws_account_id = ? AND role_name = ?`,
+      )
+      .bind(userEmail, awsAccountId, roleName)
+      .run();
+  }
+
+  /**
+   * Unhides a role for a specific user.
+   * @param userEmail The email address of the user.
+   * @param awsAccountId The AWS account ID.
+   * @param roleName The name of the role to unhide.
+   */
+  public async unhideRole(userEmail: string, awsAccountId: string, roleName: string): Promise<void> {
+    await this.database
+      .prepare(
+        `UPDATE assumable_roles 
+         SET hidden = FALSE 
+         WHERE user_email = ? AND aws_account_id = ? AND role_name = ?`,
+      )
+      .bind(userEmail, awsAccountId, roleName)
+      .run();
+  }
 }
 
 export { AssumableRolesDAO };

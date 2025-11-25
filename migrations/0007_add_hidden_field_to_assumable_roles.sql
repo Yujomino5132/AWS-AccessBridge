@@ -1,0 +1,1 @@
+ALTER TABLE assumable_roles ADD COLUMN hidden BOOLEAN DEFAULT FALSE;
