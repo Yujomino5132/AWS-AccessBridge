@@ -71,14 +71,14 @@ export default function App() {
                   d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
                 />
               </svg>
-              Filter
+              Filters
             </button>
             {filterOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-600 rounded shadow-lg z-10">
                 <div className="p-3">
                   <label className="flex items-center cursor-pointer">
                     <input type="checkbox" checked={showHidden} onChange={(e) => setShowHidden(e.target.checked)} className="mr-2" />
-                    Show hidden
+                    Include Hidden
                   </label>
                 </div>
               </div>
