@@ -12,6 +12,8 @@ import {
   FederateRoute,
   ListAssumablesRoute,
   GetCurrentUserRoute,
+  GrantAccessRoute,
+  RevokeAccessRoute,
 } from '@/endpoints';
 
 class AccessBridgeWorker extends AbstractWorker {
@@ -46,6 +48,8 @@ class AccessBridgeWorker extends AbstractWorker {
     // Admin Routes
     openapi.post('/api/admin/crypto/rotate-master-key', RotateMasterKeyRoute);
     openapi.post('/api/admin/credentials/store-credential', StoreCredentialRoute);
+    openapi.post('/api/admin/access', GrantAccessRoute);
+    openapi.delete('/api/admin/access', RevokeAccessRoute);
 
     this.app = openapi;
   }

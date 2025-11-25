@@ -97,6 +97,38 @@ class AssumableRolesDAO {
     }
     return;
   }
+
+  /**
+   * Grants a user access to assume a specific role in an AWS account.
+   * @param userEmail The email address of the user.
+   * @param awsAccountId The AWS account ID.
+   * @param roleName The name of the role to grant access to.
+   */
+  public async grantUserAccessToRole(userEmail: string, awsAccountId: string, roleName: string): Promise<void> {
+    await this.database
+      .prepare(
+        `INSERT OR IGNORE INTO assumable_roles (user_email, aws_account_id, role_name)
+         VALUES (?, ?, ?)`,
+      )
+      .bind(userEmail, awsAccountId, roleName)
+      .run();
+  }
+
+  /**
+   * Revokes a user's access to assume a specific role in an AWS account.
+   * @param userEmail The email address of the user.
+   * @param awsAccountId The AWS account ID.
+   * @param roleName The name of the role to revoke access from.
+   */
+  public async revokeUserAccessToRole(userEmail: string, awsAccountId: string, roleName: string): Promise<void> {
+    await this.database
+      .prepare(
+        `DELETE FROM assumable_roles 
+         WHERE user_email = ? AND aws_account_id = ? AND role_name = ?`,
+      )
+      .bind(userEmail, awsAccountId, roleName)
+      .run();
+  }
 }
 
 export { AssumableRolesDAO };

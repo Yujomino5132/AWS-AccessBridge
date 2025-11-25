@@ -9,6 +9,8 @@ import { FavoriteAccountRoute as OriginalFavoriteAccountRoute } from './api/user
 import { UnfavoriteAccountRoute as OriginalUnfavoriteAccountRoute } from './api/user/favorites/DELETE';
 import { RotateMasterKeyRoute as OriginalRotateMasterKeyRoute } from './api/admin/crypto/rotate-master-key/POST';
 import { StoreCredentialRoute as OriginalStoreCredentialRoute } from './api/admin/credentials/store-credential/POST';
+import { GrantAccessRoute as OriginalGrantAccessRoute } from './api/admin/access/POST';
+import { RevokeAccessRoute as OriginalRevokeAccessRoute } from './api/admin/access/DELETE';
 
 export const GenerateConsoleUrlRoute: any = OriginalGenerateConsoleUrlRoute;
 export const AssumeRoleRoute: any = OriginalAssumeRoleRoute;
@@ -19,3 +21,5 @@ export const FavoriteAccountRoute: any = OriginalFavoriteAccountRoute;
 export const UnfavoriteAccountRoute: any = OriginalUnfavoriteAccountRoute;
 export const RotateMasterKeyRoute: any = OriginalRotateMasterKeyRoute;
 export const StoreCredentialRoute: any = OriginalStoreCredentialRoute;
+export const GrantAccessRoute: any = OriginalGrantAccessRoute;
+export const RevokeAccessRoute: any = OriginalRevokeAccessRoute;

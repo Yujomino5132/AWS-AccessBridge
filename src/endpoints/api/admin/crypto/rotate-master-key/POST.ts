@@ -74,3 +74,4 @@ interface RotateMasterKeyEnv extends IEnv {
 }
 
 export { RotateMasterKeyRoute };
+export type { RotateMasterKeyRequest, RotateMasterKeyResponse };

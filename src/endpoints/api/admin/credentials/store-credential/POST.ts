@@ -204,3 +204,4 @@ interface StoreCredentialEnv extends IEnv {
 }
 
 export { StoreCredentialRoute };
+export type { StoreCredentialRequest, StoreCredentialResponse };
