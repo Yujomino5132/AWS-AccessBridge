@@ -11,6 +11,8 @@ import { RotateMasterKeyRoute as OriginalRotateMasterKeyRoute } from './api/admi
 import { StoreCredentialRoute as OriginalStoreCredentialRoute } from './api/admin/credentials/store-credential/POST';
 import { GrantAccessRoute as OriginalGrantAccessRoute } from './api/admin/access/POST';
 import { RevokeAccessRoute as OriginalRevokeAccessRoute } from './api/admin/access/DELETE';
+import { SetAccountNicknameRoute as OriginalSetAccountNicknameRoute } from './api/admin/account/nickname/PUT';
+import { RemoveAccountNicknameRoute as OriginalRemoveAccountNicknameRoute } from './api/admin/account/nickname/DELETE';
 
 export const GenerateConsoleUrlRoute: any = OriginalGenerateConsoleUrlRoute;
 export const AssumeRoleRoute: any = OriginalAssumeRoleRoute;
@@ -23,3 +25,5 @@ export const RotateMasterKeyRoute: any = OriginalRotateMasterKeyRoute;
 export const StoreCredentialRoute: any = OriginalStoreCredentialRoute;
 export const GrantAccessRoute: any = OriginalGrantAccessRoute;
 export const RevokeAccessRoute: any = OriginalRevokeAccessRoute;
+export const SetAccountNicknameRoute: any = OriginalSetAccountNicknameRoute;
+export const RemoveAccountNicknameRoute: any = OriginalRemoveAccountNicknameRoute;

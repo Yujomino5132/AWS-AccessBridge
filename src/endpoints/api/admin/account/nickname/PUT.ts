@@ -1,71 +1,51 @@
-import { AssumableRolesDAO, AwsAccountsDAO } from '@/dao';
+import { AwsAccountsDAO } from '@/dao';
 import { BadRequestError } from '@/error';
 import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
 import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
 
-class GrantAccessRoute extends IActivityAPIRoute<GrantAccessRequest, GrantAccessResponse, GrantAccessEnv> {
+class SetAccountNicknameRoute extends IActivityAPIRoute<SetAccountNicknameRequest, SetAccountNicknameResponse, SetAccountNicknameEnv> {
   schema = {
     tags: ['Admin'],
-    summary: 'Grant User Access to Role',
+    summary: 'Set AWS Account Nickname',
     description:
-      'Grants a user permission to assume a specific AWS role in an account. This creates a mapping in the assumable_roles table that allows the specified user to assume the role through the AWS Access Bridge. If the AWS account does not exist in the database, it will be created automatically. This operation is idempotent - granting access to a role that a user already has access to will not cause an error.',
+      'Sets or updates a friendly nickname for an AWS account. The nickname helps users identify accounts more easily in the interface. If the account does not exist in the database, it will be created automatically.',
     requestBody: {
-      description: 'User access details to grant',
+      description: 'Account nickname details',
       required: true,
       content: {
         'application/json': {
           schema: {
             type: 'object' as const,
-            required: ['userEmail', 'awsAccountId', 'roleName'],
+            required: ['awsAccountId', 'nickname'],
             properties: {
-              userEmail: {
-                type: 'string' as const,
-                format: 'email',
-                description: 'Email address of the user to grant access to (must be a valid email format)',
-                example: 'developer@example.com',
-                maxLength: 120,
-              },
               awsAccountId: {
                 type: 'string' as const,
                 pattern: '^[0-9]{12}$',
                 description: 'AWS Account ID (exactly 12 digits)',
                 example: '123456789012',
               },
-              roleName: {
+              nickname: {
                 type: 'string' as const,
-                description: 'Name of the AWS IAM role (without ARN prefix)',
-                example: 'DeveloperRole',
-                maxLength: 128,
                 minLength: 1,
+                maxLength: 255,
+                description: 'Friendly nickname for the AWS account (1-255 characters)',
+                example: 'Production Environment',
               },
             },
           },
           examples: {
-            'grant-developer-access': {
-              summary: 'Grant developer access to a role',
-              description: 'Allows a developer to assume a development role in a specific AWS account',
+            'production-account': {
+              summary: 'Set nickname for production account',
               value: {
-                userEmail: 'developer@example.com',
                 awsAccountId: '123456789012',
-                roleName: 'DeveloperRole',
+                nickname: 'Production Environment',
               },
             },
-            'grant-admin-access': {
-              summary: 'Grant admin access to a role',
-              description: 'Allows an administrator to assume an admin role in a production account',
+            'development-account': {
+              summary: 'Set nickname for development account',
               value: {
-                userEmail: 'admin@example.com',
                 awsAccountId: '987654321098',
-                roleName: 'AdminRole',
-              },
-            },
-            'grant-readonly-access': {
-              summary: 'Grant read-only access to a role',
-              description: 'Allows a user to assume a read-only role for monitoring purposes',
-              value: {
-                userEmail: 'monitor@example.com',
-                awsAccountId: '555666777888',
-                roleName: 'ReadOnlyRole',
+                nickname: 'Development & Testing',
               },
             },
           },
@@ -74,12 +54,12 @@ class GrantAccessRoute extends IActivityAPIRoute<GrantAccessRequest, GrantAccess
     },
     responses: {
       '200': {
-        description: 'Successfully granted user access to the specified role',
+        description: 'Successfully set or updated the account nickname',
         content: {
           'application/json': {
             schema: {
               type: 'object' as const,
-              required: ['success', 'message'],
+              required: ['success', 'message', 'accountId', 'nickname'],
               properties: {
                 success: {
                   type: 'boolean' as const,
@@ -89,16 +69,17 @@ class GrantAccessRoute extends IActivityAPIRoute<GrantAccessRequest, GrantAccess
                 message: {
                   type: 'string' as const,
                   description: 'Human-readable success message',
-                  example: 'Access granted successfully',
+                  example: 'Account nickname set successfully',
                 },
-              },
-            },
-            examples: {
-              'access-granted': {
-                summary: 'Successful access grant',
-                value: {
-                  success: true,
-                  message: 'Access granted successfully',
+                accountId: {
+                  type: 'string' as const,
+                  description: 'The AWS Account ID that was updated',
+                  example: '123456789012',
+                },
+                nickname: {
+                  type: 'string' as const,
+                  description: 'The nickname that was set',
+                  example: 'Production Environment',
                 },
               },
             },
@@ -124,35 +105,6 @@ class GrantAccessRoute extends IActivityAPIRoute<GrantAccessRequest, GrantAccess
                       description: 'Details about the invalid request parameters',
                       example: 'Missing required fields.',
                     },
-                  },
-                },
-              },
-            },
-            examples: {
-              'missing-fields': {
-                summary: 'Missing required fields',
-                value: {
-                  Exception: {
-                    Type: 'BadRequestError',
-                    Message: 'Missing required fields.',
-                  },
-                },
-              },
-              'invalid-email': {
-                summary: 'Invalid email format',
-                value: {
-                  Exception: {
-                    Type: 'BadRequestError',
-                    Message: 'Invalid email format for userEmail.',
-                  },
-                },
-              },
-              'invalid-account-id': {
-                summary: 'Invalid AWS Account ID',
-                value: {
-                  Exception: {
-                    Type: 'BadRequestError',
-                    Message: 'AWS Account ID must be exactly 12 digits.',
                   },
                 },
               },
@@ -187,7 +139,7 @@ class GrantAccessRoute extends IActivityAPIRoute<GrantAccessRequest, GrantAccess
         },
       },
       '500': {
-        description: 'Internal server error during access grant operation',
+        description: 'Internal server error during nickname update',
         content: {
           'application/json': {
             schema: {
@@ -203,7 +155,7 @@ class GrantAccessRoute extends IActivityAPIRoute<GrantAccessRequest, GrantAccess
                     Message: {
                       type: 'string' as const,
                       description: 'Error description',
-                      example: 'Failed to grant user access to role in database',
+                      example: 'Failed to update account nickname in database',
                     },
                   },
                 },
@@ -221,41 +173,55 @@ class GrantAccessRoute extends IActivityAPIRoute<GrantAccessRequest, GrantAccess
   };
 
   protected async handleRequest(
-    request: GrantAccessRequest,
-    env: GrantAccessEnv,
-    _cxt: ActivityContext<GrantAccessEnv>,
-  ): Promise<GrantAccessResponse> {
-    if (!request.userEmail || !request.awsAccountId || !request.roleName) {
+    request: SetAccountNicknameRequest,
+    env: SetAccountNicknameEnv,
+    _cxt: ActivityContext<SetAccountNicknameEnv>,
+  ): Promise<SetAccountNicknameResponse> {
+    if (!request.awsAccountId || !request.nickname) {
       throw new BadRequestError('Missing required fields.');
     }
 
-    const assumableRolesDAO = new AssumableRolesDAO(env.AccessBridgeDB);
+    if (!/^[0-9]{12}$/.test(request.awsAccountId)) {
+      throw new BadRequestError('Invalid AWS Account ID format. Must be exactly 12 digits.');
+    }
+
+    if (request.nickname.trim().length === 0) {
+      throw new BadRequestError('Nickname cannot be empty.');
+    }
+
+    if (request.nickname.length > 255) {
+      throw new BadRequestError('Nickname cannot exceed 255 characters.');
+    }
+
     const accountsDAO = new AwsAccountsDAO(env.AccessBridgeDB);
 
     await accountsDAO.ensureAccountExists(request.awsAccountId);
-    await assumableRolesDAO.grantUserAccessToRole(request.userEmail, request.awsAccountId, request.roleName);
+    await accountsDAO.setAccountNickname(request.awsAccountId, request.nickname.trim());
 
     return {
       success: true,
-      message: 'Access granted successfully',
+      message: 'Account nickname set successfully',
+      accountId: request.awsAccountId,
+      nickname: request.nickname.trim(),
     };
   }
 }
 
-interface GrantAccessRequest extends IRequest {
-  userEmail: string;
+interface SetAccountNicknameRequest extends IRequest {
   awsAccountId: string;
-  roleName: string;
+  nickname: string;
 }
 
-interface GrantAccessResponse extends IResponse {
+interface SetAccountNicknameResponse extends IResponse {
   success: boolean;
   message: string;
+  accountId: string;
+  nickname: string;
 }
 
-interface GrantAccessEnv extends IEnv {
+interface SetAccountNicknameEnv extends IEnv {
   AccessBridgeDB: D1Database;
 }
 
-export { GrantAccessRoute };
-export type { GrantAccessRequest, GrantAccessResponse };
+export { SetAccountNicknameRoute };
+export type { SetAccountNicknameRequest, SetAccountNicknameResponse };

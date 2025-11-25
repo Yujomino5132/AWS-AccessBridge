@@ -14,6 +14,8 @@ import {
   GetCurrentUserRoute,
   GrantAccessRoute,
   RevokeAccessRoute,
+  SetAccountNicknameRoute,
+  RemoveAccountNicknameRoute,
 } from '@/endpoints';
 
 class AccessBridgeWorker extends AbstractWorker {
@@ -50,6 +52,8 @@ class AccessBridgeWorker extends AbstractWorker {
     openapi.post('/api/admin/credentials/store-credential', StoreCredentialRoute);
     openapi.post('/api/admin/access', GrantAccessRoute);
     openapi.delete('/api/admin/access', RevokeAccessRoute);
+    openapi.put('/api/admin/account/nickname', SetAccountNicknameRoute);
+    openapi.delete('/api/admin/account/nickname', RemoveAccountNicknameRoute);
 
     this.app = openapi;
   }
