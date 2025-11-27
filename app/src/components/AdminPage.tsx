@@ -165,7 +165,7 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
           />
           <input
             type="password"
-            placeholder="Session Token (optional)"
+            placeholder="Session Token (Optional)"
             value={credForm.sessionToken}
             onChange={(e) => setCredForm({ ...credForm, sessionToken: e.target.value })}
             className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
@@ -271,14 +271,6 @@ function AccessTab({ showMessage }: { showMessage: (type: 'success' | 'error', t
       <h3 className="text-xl font-semibold mb-4">Manage User Access</h3>
       <form className="space-y-4">
         <input
-          type="email"
-          placeholder="User Email"
-          value={accessForm.userEmail}
-          onChange={(e) => setAccessForm({ ...accessForm, userEmail: e.target.value })}
-          className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
-          required
-        />
-        <input
           type="text"
           placeholder="AWS Account ID (12 digits)"
           value={accessForm.awsAccountId}
@@ -294,6 +286,13 @@ function AccessTab({ showMessage }: { showMessage: (type: 'success' | 'error', t
           onChange={(e) => setAccessForm({ ...accessForm, roleName: e.target.value })}
           className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
           required
+        />
+        <input
+          type="email"
+          placeholder="User Email (Optional, defaults to current user)"
+          value={accessForm.userEmail}
+          onChange={(e) => setAccessForm({ ...accessForm, userEmail: e.target.value })}
+          className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
         />
         <div className="flex space-x-4">
           <button type="button" onClick={handleGrantAccess} className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-white">
