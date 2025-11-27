@@ -18,8 +18,6 @@ export default function AdminPage() {
 
   return (
     <div className="max-w-6xl mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">Admin Panel</h1>
-
       {message && (
         <div className={`mb-6 p-4 rounded ${message.type === 'success' ? 'bg-green-900 text-green-100' : 'bg-red-900 text-red-100'}`}>
           {message.text}
