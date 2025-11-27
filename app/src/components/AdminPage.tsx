@@ -60,14 +60,13 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
     assumedBy: '',
   });
 
+  const isCredFormValid =
+    credForm.principalArn.trim() !== '' && credForm.accessKeyId.trim() !== '' && credForm.secretAccessKey.trim() !== '';
+  const isRelationFormValid = relationForm.principalArn.trim() !== '' && relationForm.assumedBy.trim() !== '';
+
   const handleAddCredentials = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validate required fields
-    if (!credForm.principalArn.trim() || !credForm.accessKeyId.trim() || !credForm.secretAccessKey.trim()) {
-      showMessage('error', 'Please fill in all required fields (Principal ARN, Access Key ID, and Secret Access Key)');
-      return;
-    }
+    if (!isCredFormValid) return;
 
     try {
       const response = await fetch('/api/admin/credentials', {
@@ -106,12 +105,7 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
 
   const handleAddRelation = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validate required fields
-    if (!relationForm.principalArn.trim() || !relationForm.assumedBy.trim()) {
-      showMessage('error', 'Please fill in both Principal ARN and Assumed By ARN fields');
-      return;
-    }
+    if (!isRelationFormValid) return;
 
     try {
       const response = await fetch('/api/admin/credentials/relationship', {
@@ -147,12 +141,7 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
 
   const handleRemoveRelation = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validate required fields
-    if (!relationForm.principalArn.trim() || !relationForm.assumedBy.trim()) {
-      showMessage('error', 'Please fill in both Principal ARN and Assumed By ARN fields');
-      return;
-    }
+    if (!isRelationFormValid) return;
 
     try {
       const response = await fetch('/api/admin/credentials/relationship', {
@@ -222,7 +211,11 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
             onChange={(e) => setCredForm({ ...credForm, sessionToken: e.target.value })}
             className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
           />
-          <button type="submit" className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white">
+          <button
+            type="submit"
+            disabled={!isCredFormValid}
+            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
+          >
             Add Credentials
           </button>
         </form>
@@ -248,10 +241,20 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
             required
           />
           <div className="flex space-x-4">
-            <button type="button" onClick={handleAddRelation} className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-white">
+            <button
+              type="button"
+              onClick={handleAddRelation}
+              disabled={!isRelationFormValid}
+              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
+            >
               Add Relationship
             </button>
-            <button type="button" onClick={handleRemoveRelation} className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white">
+            <button
+              type="button"
+              onClick={handleRemoveRelation}
+              disabled={!isRelationFormValid}
+              className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
+            >
               Remove Relationship
             </button>
           </div>
@@ -395,14 +398,12 @@ function AccountsTab({ showMessage }: { showMessage: (type: 'success' | 'error',
     nickname: '',
   });
 
+  const isSetNicknameValid = nicknameForm.awsAccountId.trim() !== '' && nicknameForm.nickname.trim() !== '';
+  const isRemoveNicknameValid = nicknameForm.awsAccountId.trim() !== '';
+
   const handleSetNickname = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validate required fields
-    if (!nicknameForm.awsAccountId.trim() || !nicknameForm.nickname.trim()) {
-      showMessage('error', 'Please fill in both AWS Account ID and Account Nickname fields');
-      return;
-    }
+    if (!isSetNicknameValid) return;
 
     try {
       const response = await fetch('/api/admin/account/nickname', {
@@ -438,12 +439,7 @@ function AccountsTab({ showMessage }: { showMessage: (type: 'success' | 'error',
 
   const handleRemoveNickname = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validate required field
-    if (!nicknameForm.awsAccountId.trim()) {
-      showMessage('error', 'Please fill in the AWS Account ID field');
-      return;
-    }
+    if (!isRemoveNicknameValid) return;
 
     try {
       const response = await fetch('/api/admin/account/nickname', {
@@ -497,10 +493,20 @@ function AccountsTab({ showMessage }: { showMessage: (type: 'success' | 'error',
           className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
         />
         <div className="flex space-x-4">
-          <button type="button" onClick={handleSetNickname} className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white">
+          <button
+            type="button"
+            onClick={handleSetNickname}
+            disabled={!isSetNicknameValid}
+            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
+          >
             Set Nickname
           </button>
-          <button type="button" onClick={handleRemoveNickname} className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white">
+          <button
+            type="button"
+            onClick={handleRemoveNickname}
+            disabled={!isRemoveNicknameValid}
+            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
+          >
             Remove Nickname
           </button>
         </div>
