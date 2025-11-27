@@ -63,6 +63,7 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
   const isCredFormValid =
     credForm.principalArn.trim() !== '' && credForm.accessKeyId.trim() !== '' && credForm.secretAccessKey.trim() !== '';
   const isRelationFormValid = relationForm.principalArn.trim() !== '' && relationForm.assumedBy.trim() !== '';
+  const isRemoveRelationFormValid = relationForm.principalArn.trim() !== '';
 
   const handleAddCredentials = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,7 +142,7 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
 
   const handleRemoveRelation = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isRelationFormValid) return;
+    if (!isRemoveRelationFormValid) return;
 
     try {
       const response = await fetch('/api/admin/credentials/relationship', {
@@ -149,7 +150,6 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           principalArn: relationForm.principalArn,
-          assumedBy: relationForm.assumedBy,
         }),
       });
 
@@ -252,7 +252,7 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
             <button
               type="button"
               onClick={handleRemoveRelation}
-              disabled={!isRelationFormValid}
+              disabled={!isRemoveRelationFormValid}
               className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
             >
               Remove Relationship
