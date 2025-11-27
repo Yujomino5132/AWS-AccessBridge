@@ -62,6 +62,13 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
 
   const handleAddCredentials = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate required fields
+    if (!credForm.principalArn.trim() || !credForm.accessKeyId.trim() || !credForm.secretAccessKey.trim()) {
+      showMessage('error', 'Please fill in all required fields (Principal ARN, Access Key ID, and Secret Access Key)');
+      return;
+    }
+
     try {
       const response = await fetch('/api/admin/credentials', {
         method: 'POST',
@@ -99,6 +106,13 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
 
   const handleAddRelation = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate required fields
+    if (!relationForm.principalArn.trim() || !relationForm.assumedBy.trim()) {
+      showMessage('error', 'Please fill in both Principal ARN and Assumed By ARN fields');
+      return;
+    }
+
     try {
       const response = await fetch('/api/admin/credentials/relationship', {
         method: 'POST',
@@ -133,6 +147,13 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
 
   const handleRemoveRelation = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate required fields
+    if (!relationForm.principalArn.trim() || !relationForm.assumedBy.trim()) {
+      showMessage('error', 'Please fill in both Principal ARN and Assumed By ARN fields');
+      return;
+    }
+
     try {
       const response = await fetch('/api/admin/credentials/relationship', {
         method: 'DELETE',
@@ -376,6 +397,13 @@ function AccountsTab({ showMessage }: { showMessage: (type: 'success' | 'error',
 
   const handleSetNickname = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate required fields
+    if (!nicknameForm.awsAccountId.trim() || !nicknameForm.nickname.trim()) {
+      showMessage('error', 'Please fill in both AWS Account ID and Account Nickname fields');
+      return;
+    }
+
     try {
       const response = await fetch('/api/admin/account/nickname', {
         method: 'PUT',
@@ -410,6 +438,13 @@ function AccountsTab({ showMessage }: { showMessage: (type: 'success' | 'error',
 
   const handleRemoveNickname = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate required field
+    if (!nicknameForm.awsAccountId.trim()) {
+      showMessage('error', 'Please fill in the AWS Account ID field');
+      return;
+    }
+
     try {
       const response = await fetch('/api/admin/account/nickname', {
         method: 'DELETE',
