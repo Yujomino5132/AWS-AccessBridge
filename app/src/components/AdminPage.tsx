@@ -67,22 +67,33 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          principal_arn: credForm.principalArn,
-          access_key_id: credForm.accessKeyId,
-          secret_access_key: credForm.secretAccessKey,
-          ...(credForm.sessionToken && { session_token: credForm.sessionToken }),
+          principalArn: credForm.principalArn,
+          accessKeyId: credForm.accessKeyId,
+          secretAccessKey: credForm.secretAccessKey,
+          ...(credForm.sessionToken && { sessionToken: credForm.sessionToken }),
         }),
       });
+
+      const responseText = await response.text();
+      console.log('Response status:', response.status);
+      console.log('Response text:', responseText);
 
       if (response.ok) {
         showMessage('success', 'Credentials added successfully');
         setCredForm({ principalArn: '', accessKeyId: '', secretAccessKey: '', sessionToken: '' });
       } else {
-        const error = await response.json();
-        showMessage('error', error.Exception?.Message || 'Failed to add credentials');
+        let errorMessage = 'Failed to add credentials';
+        try {
+          const error = JSON.parse(responseText);
+          errorMessage = error.Exception?.Message || error.message || errorMessage;
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${responseText}`;
+        }
+        showMessage('error', errorMessage);
       }
-    } catch {
-      showMessage('error', 'Network error occurred');
+    } catch (err) {
+      console.error('Network error:', err);
+      showMessage('error', `Network error: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   };
 
@@ -93,20 +104,30 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          principal_arn: relationForm.principalArn,
-          assumed_by: relationForm.assumedBy,
+          principalArn: relationForm.principalArn,
+          assumedBy: relationForm.assumedBy,
         }),
       });
+
+      const responseText = await response.text();
+      console.log('Relationship response:', response.status, responseText);
 
       if (response.ok) {
         showMessage('success', 'Credential relationship added successfully');
         setRelationForm({ principalArn: '', assumedBy: '' });
       } else {
-        const error = await response.json();
-        showMessage('error', error.Exception?.Message || 'Failed to add relationship');
+        let errorMessage = 'Failed to add relationship';
+        try {
+          const error = JSON.parse(responseText);
+          errorMessage = error.Exception?.Message || error.message || errorMessage;
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${responseText}`;
+        }
+        showMessage('error', errorMessage);
       }
-    } catch {
-      showMessage('error', 'Network error occurred');
+    } catch (err) {
+      console.error('Network error:', err);
+      showMessage('error', `Network error: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   };
 
@@ -117,20 +138,30 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          principal_arn: relationForm.principalArn,
-          assumed_by: relationForm.assumedBy,
+          principalArn: relationForm.principalArn,
+          assumedBy: relationForm.assumedBy,
         }),
       });
+
+      const responseText = await response.text();
+      console.log('Remove relationship response:', response.status, responseText);
 
       if (response.ok) {
         showMessage('success', 'Credential relationship removed successfully');
         setRelationForm({ principalArn: '', assumedBy: '' });
       } else {
-        const error = await response.json();
-        showMessage('error', error.Exception?.Message || 'Failed to remove relationship');
+        let errorMessage = 'Failed to remove relationship';
+        try {
+          const error = JSON.parse(responseText);
+          errorMessage = error.Exception?.Message || error.message || errorMessage;
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${responseText}`;
+        }
+        showMessage('error', errorMessage);
       }
-    } catch {
-      showMessage('error', 'Network error occurred');
+    } catch (err) {
+      console.error('Network error:', err);
+      showMessage('error', `Network error: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   };
 
@@ -226,21 +257,31 @@ function AccessTab({ showMessage }: { showMessage: (type: 'success' | 'error', t
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userEmail: accessForm.userEmail,
+          userEmail: accessForm.userEmail || undefined,
           awsAccountId: accessForm.awsAccountId,
           roleName: accessForm.roleName,
         }),
       });
 
+      const responseText = await response.text();
+      console.log('Grant access response:', response.status, responseText);
+
       if (response.ok) {
         showMessage('success', 'Access granted successfully');
         setAccessForm({ userEmail: '', awsAccountId: '', roleName: '' });
       } else {
-        const error = await response.json();
-        showMessage('error', error.Exception?.Message || 'Failed to grant access');
+        let errorMessage = 'Failed to grant access';
+        try {
+          const error = JSON.parse(responseText);
+          errorMessage = error.Exception?.Message || error.message || errorMessage;
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${responseText}`;
+        }
+        showMessage('error', errorMessage);
       }
-    } catch {
-      showMessage('error', 'Network error occurred');
+    } catch (err) {
+      console.error('Network error:', err);
+      showMessage('error', `Network error: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   };
 
@@ -252,21 +293,31 @@ function AccessTab({ showMessage }: { showMessage: (type: 'success' | 'error', t
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userEmail: accessForm.userEmail,
+          userEmail: accessForm.userEmail || undefined,
           awsAccountId: accessForm.awsAccountId,
           roleName: accessForm.roleName,
         }),
       });
 
+      const responseText = await response.text();
+      console.log('Revoke access response:', response.status, responseText);
+
       if (response.ok) {
         showMessage('success', 'Access revoked successfully');
         setAccessForm({ userEmail: '', awsAccountId: '', roleName: '' });
       } else {
-        const error = await response.json();
-        showMessage('error', error.Exception?.Message || 'Failed to revoke access');
+        let errorMessage = 'Failed to revoke access';
+        try {
+          const error = JSON.parse(responseText);
+          errorMessage = error.Exception?.Message || error.message || errorMessage;
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${responseText}`;
+        }
+        showMessage('error', errorMessage);
       }
-    } catch {
-      showMessage('error', 'Network error occurred');
+    } catch (err) {
+      console.error('Network error:', err);
+      showMessage('error', `Network error: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   };
 
@@ -330,20 +381,30 @@ function AccountsTab({ showMessage }: { showMessage: (type: 'success' | 'error',
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          aws_account_id: nicknameForm.awsAccountId,
-          aws_account_nickname: nicknameForm.nickname,
+          awsAccountId: nicknameForm.awsAccountId,
+          awsAccountNickname: nicknameForm.nickname,
         }),
       });
+
+      const responseText = await response.text();
+      console.log('Set nickname response:', response.status, responseText);
 
       if (response.ok) {
         showMessage('success', 'Account nickname set successfully');
         setNicknameForm({ awsAccountId: '', nickname: '' });
       } else {
-        const error = await response.json();
-        showMessage('error', error.Exception?.Message || 'Failed to set nickname');
+        let errorMessage = 'Failed to set nickname';
+        try {
+          const error = JSON.parse(responseText);
+          errorMessage = error.Exception?.Message || error.message || errorMessage;
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${responseText}`;
+        }
+        showMessage('error', errorMessage);
       }
-    } catch {
-      showMessage('error', 'Network error occurred');
+    } catch (err) {
+      console.error('Network error:', err);
+      showMessage('error', `Network error: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   };
 
@@ -354,19 +415,29 @@ function AccountsTab({ showMessage }: { showMessage: (type: 'success' | 'error',
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          aws_account_id: nicknameForm.awsAccountId,
+          awsAccountId: nicknameForm.awsAccountId,
         }),
       });
+
+      const responseText = await response.text();
+      console.log('Remove nickname response:', response.status, responseText);
 
       if (response.ok) {
         showMessage('success', 'Account nickname removed successfully');
         setNicknameForm({ awsAccountId: '', nickname: '' });
       } else {
-        const error = await response.json();
-        showMessage('error', error.Exception?.Message || 'Failed to remove nickname');
+        let errorMessage = 'Failed to remove nickname';
+        try {
+          const error = JSON.parse(responseText);
+          errorMessage = error.Exception?.Message || error.message || errorMessage;
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${responseText}`;
+        }
+        showMessage('error', errorMessage);
       }
-    } catch {
-      showMessage('error', 'Network error occurred');
+    } catch (err) {
+      console.error('Network error:', err);
+      showMessage('error', `Network error: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   };
 
@@ -413,14 +484,24 @@ function CryptoTab({ showMessage }: { showMessage: (type: 'success' | 'error', t
         method: 'POST',
       });
 
+      const responseText = await response.text();
+      console.log('Rotate key response:', response.status, responseText);
+
       if (response.ok) {
         showMessage('success', 'Encryption key rotated successfully');
       } else {
-        const error = await response.json();
-        showMessage('error', error.Exception?.Message || 'Failed to rotate encryption key');
+        let errorMessage = 'Failed to rotate encryption key';
+        try {
+          const error = JSON.parse(responseText);
+          errorMessage = error.Exception?.Message || error.message || errorMessage;
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${responseText}`;
+        }
+        showMessage('error', errorMessage);
       }
-    } catch {
-      showMessage('error', 'Network error occurred');
+    } catch (err) {
+      console.error('Network error:', err);
+      showMessage('error', `Network error: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setIsRotating(false);
     }
