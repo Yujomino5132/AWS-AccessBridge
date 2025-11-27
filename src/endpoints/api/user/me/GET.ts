@@ -1,5 +1,6 @@
 import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
 import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
+import { UserMetadataDAO } from '@/dao';
 
 class GetCurrentUserRoute extends IActivityAPIRoute<GetCurrentUserRequest, GetCurrentUserResponse, GetCurrentUserEnv> {
   schema = {
@@ -14,13 +15,18 @@ class GetCurrentUserRoute extends IActivityAPIRoute<GetCurrentUserRequest, GetCu
           'application/json': {
             schema: {
               type: 'object' as const,
-              required: ['email'],
+              required: ['email', 'isSuperAdmin'],
               properties: {
                 email: {
                   type: 'string' as const,
                   format: 'email',
                   description: 'Email address of the authenticated user as provided by Cloudflare Access',
                   example: 'user@example.com',
+                },
+                isSuperAdmin: {
+                  type: 'boolean' as const,
+                  description: 'Whether the user has super admin privileges',
+                  example: false,
                 },
               },
             },
@@ -29,12 +35,14 @@ class GetCurrentUserRoute extends IActivityAPIRoute<GetCurrentUserRequest, GetCu
                 summary: 'Current user information',
                 value: {
                   email: 'john.doe@company.com',
+                  isSuperAdmin: false,
                 },
               },
               'admin-user': {
                 summary: 'Admin user information',
                 value: {
                   email: 'admin@company.com',
+                  isSuperAdmin: true,
                 },
               },
             },
@@ -107,8 +115,12 @@ class GetCurrentUserRoute extends IActivityAPIRoute<GetCurrentUserRequest, GetCu
     cxt: ActivityContext<GetCurrentUserEnv>,
   ): Promise<GetCurrentUserResponse> {
     const userEmail: string = this.getAuthenticatedUserEmailAddress(cxt);
+    const userMetadataDAO: UserMetadataDAO = new UserMetadataDAO(env.AccessBridgeDB);
+    const isSuperAdmin: boolean = await userMetadataDAO.isSuperAdmin(userEmail);
+
     return {
       email: userEmail,
+      isSuperAdmin,
     };
   }
 }
@@ -117,9 +129,12 @@ type GetCurrentUserRequest = IRequest;
 
 interface GetCurrentUserResponse extends IResponse {
   email: string;
+  isSuperAdmin: boolean;
 }
 
-type GetCurrentUserEnv = IEnv;
+interface GetCurrentUserEnv extends IEnv {
+  AccessBridgeDB: D1Database;
+}
 
 export { GetCurrentUserRoute };
 export type { GetCurrentUserRequest, GetCurrentUserResponse };
