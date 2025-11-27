@@ -8,7 +8,7 @@ class RevokeAccessRoute extends IAdminActivityAPIRoute<RevokeAccessRequest, Revo
     tags: ['Admin'],
     summary: 'Revoke User Access to Role',
     description:
-      "Revokes a user's permission to assume a specific AWS role in an account. This removes the mapping from the assumable_roles table, preventing the user from assuming the role through the AWS Access Bridge. If the AWS account does not exist in the database, it will be created automatically (though this is primarily for consistency). This operation is idempotent - revoking access from a role that a user doesn't have access to will not cause an error.",
+      "Revokes a user's permission to assume a specific AWS role in an account. This removes the mapping from the assumable_roles table, preventing the user from assuming the role through the AWS Access Bridge. If the AWS account does not exist in the database, it will be created automatically (though this is primarily for consistency). If userEmail is not provided, access is revoked from the current admin user. This operation is idempotent - revoking access from a role that a user doesn't have access to will not cause an error.",
     requestBody: {
       description: 'User access details to revoke',
       required: true,
@@ -16,12 +16,12 @@ class RevokeAccessRoute extends IAdminActivityAPIRoute<RevokeAccessRequest, Revo
         'application/json': {
           schema: {
             type: 'object' as const,
-            required: ['userEmail', 'awsAccountId', 'roleName'],
+            required: ['awsAccountId', 'roleName'],
             properties: {
               userEmail: {
                 type: 'string' as const,
                 format: 'email',
-                description: 'Email address of the user to revoke access from (must be a valid email format)',
+                description: 'Email address of the user to revoke access from (optional - defaults to current admin user)',
                 example: 'developer@example.com',
                 maxLength: 120,
               },
@@ -41,6 +41,14 @@ class RevokeAccessRoute extends IAdminActivityAPIRoute<RevokeAccessRequest, Revo
             },
           },
           examples: {
+            'revoke-self-access': {
+              summary: 'Revoke access from current admin user',
+              description: 'Revokes access from the current admin user when no userEmail is specified',
+              value: {
+                awsAccountId: '123456789012',
+                roleName: 'DeveloperRole',
+              },
+            },
             'revoke-developer-access': {
               summary: 'Revoke developer access from a role',
               description: "Removes a developer's ability to assume a development role in a specific AWS account",
@@ -57,15 +65,6 @@ class RevokeAccessRoute extends IAdminActivityAPIRoute<RevokeAccessRequest, Revo
                 userEmail: 'contractor@external.com',
                 awsAccountId: '987654321098',
                 roleName: 'ContractorRole',
-              },
-            },
-            'revoke-temporary-access': {
-              summary: 'Revoke temporary elevated access',
-              description: 'Removes temporary admin access after incident resolution',
-              value: {
-                userEmail: 'engineer@example.com',
-                awsAccountId: '555666777888',
-                roleName: 'EmergencyAdminRole',
               },
             },
           },
@@ -232,17 +231,18 @@ class RevokeAccessRoute extends IAdminActivityAPIRoute<RevokeAccessRequest, Revo
   protected async handleAdminRequest(
     request: RevokeAccessRequest,
     env: RevokeAccessEnv,
-    _cxt: ActivityContext<RevokeAccessEnv>,
+    cxt: ActivityContext<RevokeAccessEnv>,
   ): Promise<RevokeAccessResponse> {
-    if (!request.userEmail || !request.awsAccountId || !request.roleName) {
+    if (!request.awsAccountId || !request.roleName) {
       throw new BadRequestError('Missing required fields.');
     }
 
-    const assumableRolesDAO = new AssumableRolesDAO(env.AccessBridgeDB);
-    const accountsDAO = new AwsAccountsDAO(env.AccessBridgeDB);
+    const userEmail: string = request.userEmail || this.getAuthenticatedUserEmailAddress(cxt);
+    const assumableRolesDAO: AssumableRolesDAO = new AssumableRolesDAO(env.AccessBridgeDB);
+    const accountsDAO: AwsAccountsDAO = new AwsAccountsDAO(env.AccessBridgeDB);
 
     await accountsDAO.ensureAccountExists(request.awsAccountId);
-    await assumableRolesDAO.revokeUserAccessToRole(request.userEmail, request.awsAccountId, request.roleName);
+    await assumableRolesDAO.revokeUserAccessToRole(userEmail, request.awsAccountId, request.roleName);
 
     return {
       success: true,
@@ -252,7 +252,7 @@ class RevokeAccessRoute extends IAdminActivityAPIRoute<RevokeAccessRequest, Revo
 }
 
 interface RevokeAccessRequest extends IRequest {
-  userEmail: string;
+  userEmail?: string | undefined;
   awsAccountId: string;
   roleName: string;
 }

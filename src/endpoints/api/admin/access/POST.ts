@@ -8,7 +8,7 @@ class GrantAccessRoute extends IAdminActivityAPIRoute<GrantAccessRequest, GrantA
     tags: ['Admin'],
     summary: 'Grant User Access to Role',
     description:
-      'Grants a user permission to assume a specific AWS role in an account. This creates a mapping in the assumable_roles table that allows the specified user to assume the role through the AWS Access Bridge. If the AWS account does not exist in the database, it will be created automatically. This operation is idempotent - granting access to a role that a user already has access to will not cause an error.',
+      'Grants a user permission to assume a specific AWS role in an account. This creates a mapping in the assumable_roles table that allows the specified user to assume the role through the AWS Access Bridge. If the AWS account does not exist in the database, it will be created automatically. If userEmail is not provided, access is granted to the current admin user. This operation is idempotent - granting access to a role that a user already has access to will not cause an error.',
     requestBody: {
       description: 'User access details to grant',
       required: true,
@@ -16,12 +16,12 @@ class GrantAccessRoute extends IAdminActivityAPIRoute<GrantAccessRequest, GrantA
         'application/json': {
           schema: {
             type: 'object' as const,
-            required: ['userEmail', 'awsAccountId', 'roleName'],
+            required: ['awsAccountId', 'roleName'],
             properties: {
               userEmail: {
                 type: 'string' as const,
                 format: 'email',
-                description: 'Email address of the user to grant access to (must be a valid email format)',
+                description: 'Email address of the user to grant access to (optional - defaults to current admin user)',
                 example: 'developer@example.com',
                 maxLength: 120,
               },
@@ -41,6 +41,14 @@ class GrantAccessRoute extends IAdminActivityAPIRoute<GrantAccessRequest, GrantA
             },
           },
           examples: {
+            'grant-self-access': {
+              summary: 'Grant access to current admin user',
+              description: 'Grants access to the current admin user when no userEmail is specified',
+              value: {
+                awsAccountId: '123456789012',
+                roleName: 'DeveloperRole',
+              },
+            },
             'grant-developer-access': {
               summary: 'Grant developer access to a role',
               description: 'Allows a developer to assume a development role in a specific AWS account',
@@ -57,15 +65,6 @@ class GrantAccessRoute extends IAdminActivityAPIRoute<GrantAccessRequest, GrantA
                 userEmail: 'admin@example.com',
                 awsAccountId: '987654321098',
                 roleName: 'AdminRole',
-              },
-            },
-            'grant-readonly-access': {
-              summary: 'Grant read-only access to a role',
-              description: 'Allows a user to assume a read-only role for monitoring purposes',
-              value: {
-                userEmail: 'monitor@example.com',
-                awsAccountId: '555666777888',
-                roleName: 'ReadOnlyRole',
               },
             },
           },
@@ -223,17 +222,18 @@ class GrantAccessRoute extends IAdminActivityAPIRoute<GrantAccessRequest, GrantA
   protected async handleAdminRequest(
     request: GrantAccessRequest,
     env: GrantAccessEnv,
-    _cxt: ActivityContext<GrantAccessEnv>,
+    cxt: ActivityContext<GrantAccessEnv>,
   ): Promise<GrantAccessResponse> {
-    if (!request.userEmail || !request.awsAccountId || !request.roleName) {
+    if (!request.awsAccountId || !request.roleName) {
       throw new BadRequestError('Missing required fields.');
     }
 
-    const assumableRolesDAO = new AssumableRolesDAO(env.AccessBridgeDB);
-    const accountsDAO = new AwsAccountsDAO(env.AccessBridgeDB);
+    const userEmail: string = request.userEmail || this.getAuthenticatedUserEmailAddress(cxt);
+    const assumableRolesDAO: AssumableRolesDAO = new AssumableRolesDAO(env.AccessBridgeDB);
+    const accountsDAO: AwsAccountsDAO = new AwsAccountsDAO(env.AccessBridgeDB);
 
     await accountsDAO.ensureAccountExists(request.awsAccountId);
-    await assumableRolesDAO.grantUserAccessToRole(request.userEmail, request.awsAccountId, request.roleName);
+    await assumableRolesDAO.grantUserAccessToRole(userEmail, request.awsAccountId, request.roleName);
 
     return {
       success: true,
@@ -243,7 +243,7 @@ class GrantAccessRoute extends IAdminActivityAPIRoute<GrantAccessRequest, GrantA
 }
 
 interface GrantAccessRequest extends IRequest {
-  userEmail: string;
+  userEmail?: string | undefined;
   awsAccountId: string;
   roleName: string;
 }
