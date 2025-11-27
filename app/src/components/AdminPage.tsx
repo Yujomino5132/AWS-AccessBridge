@@ -216,16 +216,19 @@ function AccessTab({ showMessage }: { showMessage: (type: 'success' | 'error', t
     roleName: '',
   });
 
-  const handleGrantAccess = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const isFormValid = accessForm.awsAccountId.trim() !== '' && accessForm.roleName.trim() !== '';
+
+  const handleGrantAccess = async () => {
+    if (!isFormValid) return;
+
     try {
       const response = await fetch('/api/admin/access', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_email: accessForm.userEmail,
-          aws_account_id: accessForm.awsAccountId,
-          role_name: accessForm.roleName,
+          userEmail: accessForm.userEmail,
+          awsAccountId: accessForm.awsAccountId,
+          roleName: accessForm.roleName,
         }),
       });
 
@@ -241,16 +244,17 @@ function AccessTab({ showMessage }: { showMessage: (type: 'success' | 'error', t
     }
   };
 
-  const handleRevokeAccess = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleRevokeAccess = async () => {
+    if (!isFormValid) return;
+
     try {
       const response = await fetch('/api/admin/access', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_email: accessForm.userEmail,
-          aws_account_id: accessForm.awsAccountId,
-          role_name: accessForm.roleName,
+          userEmail: accessForm.userEmail,
+          awsAccountId: accessForm.awsAccountId,
+          roleName: accessForm.roleName,
         }),
       });
 
@@ -269,7 +273,7 @@ function AccessTab({ showMessage }: { showMessage: (type: 'success' | 'error', t
   return (
     <div className="bg-gray-800 p-6 rounded">
       <h3 className="text-xl font-semibold mb-4">Manage User Access</h3>
-      <form className="space-y-4">
+      <div className="space-y-4">
         <input
           type="text"
           placeholder="AWS Account ID (12 digits)"
@@ -277,7 +281,6 @@ function AccessTab({ showMessage }: { showMessage: (type: 'success' | 'error', t
           onChange={(e) => setAccessForm({ ...accessForm, awsAccountId: e.target.value })}
           className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
           pattern="[0-9]{12}"
-          required
         />
         <input
           type="text"
@@ -285,7 +288,6 @@ function AccessTab({ showMessage }: { showMessage: (type: 'success' | 'error', t
           value={accessForm.roleName}
           onChange={(e) => setAccessForm({ ...accessForm, roleName: e.target.value })}
           className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
-          required
         />
         <input
           type="email"
@@ -295,14 +297,22 @@ function AccessTab({ showMessage }: { showMessage: (type: 'success' | 'error', t
           className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
         />
         <div className="flex space-x-4">
-          <button type="button" onClick={handleGrantAccess} className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-white">
+          <button
+            onClick={handleGrantAccess}
+            disabled={!isFormValid}
+            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
+          >
             Grant Access
           </button>
-          <button type="button" onClick={handleRevokeAccess} className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white">
+          <button
+            onClick={handleRevokeAccess}
+            disabled={!isFormValid}
+            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
+          >
             Revoke Access
           </button>
         </div>
-      </form>
+      </div>
     </div>
   );
 }
