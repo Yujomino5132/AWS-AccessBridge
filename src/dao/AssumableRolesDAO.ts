@@ -49,7 +49,9 @@ class AssumableRolesDAO {
          LEFT JOIN aws_accounts aa ON ar.aws_account_id = aa.aws_account_id
          LEFT JOIN user_favorite_accounts ufa ON ar.aws_account_id = ufa.aws_account_id AND ufa.user_email = ?
          WHERE ar.user_email = ? ${hiddenFilter}
-         ORDER BY is_favorite DESC, ar.aws_account_id`,
+         ORDER BY is_favorite DESC, 
+                  CASE WHEN aa.aws_account_nickname IS NOT NULL THEN 0 ELSE 1 END,
+                  COALESCE(aa.aws_account_nickname, ar.aws_account_id)`,
       )
       .bind(userEmail, userEmail)
       .all<{ aws_account_id: string; role_name: string; aws_account_nickname: string | null; is_favorite: number }>();
