@@ -411,7 +411,7 @@ function AccountsTab({ showMessage }: { showMessage: (type: 'success' | 'error',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           awsAccountId: nicknameForm.awsAccountId,
-          awsAccountNickname: nicknameForm.nickname,
+          nickname: nicknameForm.nickname,
         }),
       });
 
