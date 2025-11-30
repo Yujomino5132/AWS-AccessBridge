@@ -199,7 +199,7 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
       sessionToken: credentials.sessionToken,
       awsAccountId: awsAccountId,
       roleName: roleName,
-      destinationUrl: roleConfig?.destinationUrl,
+      destinationPath: roleConfig?.destinationPath,
       destinationRegion: roleConfig?.destinationRegion,
     };
     const consoleResponse: Response = await env.SELF.fetch(`${SELF_WORKER_BASE_URL}/api/aws/console`, {

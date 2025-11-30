@@ -47,11 +47,10 @@ class GenerateConsoleUrlRoute extends IActivityAPIRoute<GenerateConsoleUrlReques
                 description: 'AWS IAM Role name - optional, used for federate URL generation',
                 example: 'DeveloperRole',
               },
-              destinationUrl: {
+              destinationPath: {
                 type: 'string' as const,
-                format: 'uri',
-                description: 'Target AWS Console URL to redirect to after authentication',
-                example: 'https://console.aws.amazon.com/ec2/home',
+                description: 'Target AWS Console path to redirect to after authentication',
+                example: 'ec2/home',
               },
               destinationRegion: {
                 type: 'string' as const,
@@ -85,7 +84,7 @@ class GenerateConsoleUrlRoute extends IActivityAPIRoute<GenerateConsoleUrlReques
                 accessKeyId: 'ASIAIOSFODNN7EXAMPLE',
                 secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
                 sessionToken: 'AQoEXAMPLEH4aoAH0gNCAPyJxz4BlCFFxWNE1OPTgk5TthT+FvwqnKwRcOIfrRh3c/LTo6UDdyJwOOvEVPvLXCrrrUtdnniCEXAMPLE',
-                destinationUrl: 'https://console.aws.amazon.com/ec2/home',
+                destinationPath: 'ec2/home',
                 destinationRegion: 'us-east-1',
               },
             },
@@ -109,7 +108,7 @@ class GenerateConsoleUrlRoute extends IActivityAPIRoute<GenerateConsoleUrlReques
                 sessionToken: 'AQoEXAMPLEH4aoAH0gNCAPyJxz4BlCFFxWNE1OPTgk5TthT+FvwqnKwRcOIfrRh3c/LTo6UDdyJwOOvEVPvLXCrrrUtdnniCEXAMPLE',
                 awsAccountId: '987654321098',
                 roleName: 'CrossAccountAdminRole',
-                destinationUrl: 'https://console.aws.amazon.com/iam/home',
+                destinationPath: 'iam/home',
                 destinationRegion: 'us-west-2',
               },
             },
@@ -234,7 +233,10 @@ class GenerateConsoleUrlRoute extends IActivityAPIRoute<GenerateConsoleUrlReques
     if (request.awsAccountId && request.roleName) {
       federateUrl = `${federateUrl}/api/aws/federate?awsAccountId=${request.awsAccountId}&role=${request.roleName}`;
     }
-    let destination: string = request.destinationUrl || 'https://console.aws.amazon.com/';
+    let destination: string = 'https://console.aws.amazon.com/';
+    if (request.destinationPath) {
+      destination = `https://console.aws.amazon.com/${request.destinationPath}`;
+    }
     if (request.destinationRegion) {
       const url: URL = new URL(destination);
       url.searchParams.set('region', request.destinationRegion);
@@ -253,7 +255,7 @@ interface GenerateConsoleUrlRequestInternal {
   sessionToken?: string | undefined;
   awsAccountId?: string | undefined;
   roleName?: string | undefined;
-  destinationUrl?: string | undefined;
+  destinationPath?: string | undefined;
   destinationRegion?: string | undefined;
 }
 
