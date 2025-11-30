@@ -53,6 +53,7 @@ export default function AdminPage() {
     { id: 'credentials', label: 'Credentials' },
     { id: 'access', label: 'User Access' },
     { id: 'accounts', label: 'Account Nicknames' },
+    { id: 'roleconfig', label: 'Role Config' },
     { id: 'crypto', label: 'Encryption' },
   ];
 
@@ -90,6 +91,7 @@ export default function AdminPage() {
       {activeTab === 'credentials' && <CredentialsTab showMessage={showMessage} />}
       {activeTab === 'access' && <AccessTab showMessage={showMessage} />}
       {activeTab === 'accounts' && <AccountsTab showMessage={showMessage} />}
+      {activeTab === 'roleconfig' && <RoleConfigTab showMessage={showMessage} />}
       {activeTab === 'crypto' && <CryptoTab showMessage={showMessage} />}
     </div>
   );
@@ -597,6 +599,148 @@ function CryptoTab({ showMessage }: { showMessage: (type: 'success' | 'error', t
           Rotate Master Key
         </LoadingButton>
       </div>
+    </div>
+  );
+}
+
+function RoleConfigTab({ showMessage }: { showMessage: (type: 'success' | 'error', text: string) => void }) {
+  const [configForm, setConfigForm] = useState({
+    awsAccountId: '',
+    roleName: '',
+    destinationPath: '',
+    destinationRegion: '',
+  });
+
+  const isSetConfigValid = configForm.awsAccountId.trim() !== '' && configForm.roleName.trim() !== '';
+  const isDeleteConfigValid = configForm.awsAccountId.trim() !== '' && configForm.roleName.trim() !== '';
+
+  const handleSetConfig = async () => {
+    if (!isSetConfigValid) return;
+
+    try {
+      const response = await fetch('/api/admin/role/config', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          awsAccountId: configForm.awsAccountId,
+          roleName: configForm.roleName,
+          ...(configForm.destinationPath && { destinationPath: configForm.destinationPath }),
+          ...(configForm.destinationRegion && { destinationRegion: configForm.destinationRegion }),
+        }),
+      });
+
+      const responseText = await response.text();
+      console.log('Set role config response:', response.status, responseText);
+
+      if (response.ok) {
+        showMessage('success', 'Role configuration set successfully');
+        setConfigForm({ awsAccountId: '', roleName: '', destinationPath: '', destinationRegion: '' });
+      } else {
+        let errorMessage = 'Failed to set role configuration';
+        try {
+          const error = JSON.parse(responseText);
+          errorMessage = error.Exception?.Message || error.message || errorMessage;
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${responseText}`;
+        }
+        showMessage('error', errorMessage);
+      }
+    } catch (err) {
+      console.error('Network error:', err);
+      showMessage('error', `Network error: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
+  };
+
+  const handleDeleteConfig = async () => {
+    if (!isDeleteConfigValid) return;
+
+    try {
+      const response = await fetch('/api/admin/role/config', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          awsAccountId: configForm.awsAccountId,
+          roleName: configForm.roleName,
+        }),
+      });
+
+      const responseText = await response.text();
+      console.log('Delete role config response:', response.status, responseText);
+
+      if (response.ok) {
+        showMessage('success', 'Role configuration deleted successfully');
+        setConfigForm({ awsAccountId: '', roleName: '', destinationPath: '', destinationRegion: '' });
+      } else {
+        let errorMessage = 'Failed to delete role configuration';
+        try {
+          const error = JSON.parse(responseText);
+          errorMessage = error.Exception?.Message || error.message || errorMessage;
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${responseText}`;
+        }
+        showMessage('error', errorMessage);
+      }
+    } catch (err) {
+      console.error('Network error:', err);
+      showMessage('error', `Network error: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
+  };
+
+  return (
+    <div className="bg-gray-800 p-6 rounded">
+      <h3 className="text-xl font-semibold mb-4">Manage Role Configurations</h3>
+      <p className="text-gray-300 mb-6">
+        Configure custom destination paths and regions for AWS Console redirection when users assume specific roles.
+      </p>
+      <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+        <input
+          type="text"
+          placeholder="AWS Account ID (12 digits)"
+          value={configForm.awsAccountId}
+          onChange={(e) => setConfigForm({ ...configForm, awsAccountId: e.target.value })}
+          className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+          pattern="[0-9]{12}"
+          required
+        />
+        <input
+          type="text"
+          placeholder="Role Name"
+          value={configForm.roleName}
+          onChange={(e) => setConfigForm({ ...configForm, roleName: e.target.value })}
+          className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+          required
+        />
+        <input
+          type="text"
+          placeholder="Destination Path (Optional, e.g., /ec2/home)"
+          value={configForm.destinationPath}
+          onChange={(e) => setConfigForm({ ...configForm, destinationPath: e.target.value })}
+          className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+        />
+        <input
+          type="text"
+          placeholder="Destination Region (Optional, e.g., us-east-1)"
+          value={configForm.destinationRegion}
+          onChange={(e) => setConfigForm({ ...configForm, destinationRegion: e.target.value })}
+          className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+        />
+        <div className="flex space-x-4">
+          <LoadingButton
+            onClick={handleSetConfig}
+            disabled={!isSetConfigValid}
+            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
+          >
+            Set Configuration
+          </LoadingButton>
+          <LoadingButton
+            onClick={handleDeleteConfig}
+            disabled={!isDeleteConfigValid}
+            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
+          >
+            Delete Configuration
+          </LoadingButton>
+        </div>
+      </form>
     </div>
   );
 }
