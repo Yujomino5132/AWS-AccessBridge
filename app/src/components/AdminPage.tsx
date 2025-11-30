@@ -59,8 +59,15 @@ export default function AdminPage() {
   return (
     <div className="max-w-6xl mx-auto py-8">
       {message && (
-        <div className={`mb-6 p-4 rounded ${message.type === 'success' ? 'bg-green-900 text-green-100' : 'bg-red-900 text-red-100'}`}>
-          {message.text}
+        <div
+          className={`fixed top-0 left-0 right-0 z-50 p-4 ${message.type === 'success' ? 'bg-green-600' : 'bg-red-600'} text-white shadow-lg`}
+        >
+          <div className="max-w-6xl mx-auto flex items-center justify-between">
+            <span>{message.text}</span>
+            <button onClick={() => setMessage(null)} className="ml-4 text-white hover:text-gray-200">
+              ✕
+            </button>
+          </div>
         </div>
       )}
 
