@@ -24,6 +24,22 @@ class RoleConfigsDAO {
     }
     return undefined;
   }
+
+  public async setRoleConfig(
+    awsAccountId: string,
+    roleName: string,
+    destinationPath?: string | undefined,
+    destinationRegion?: string | undefined,
+  ): Promise<void> {
+    await this.database
+      .prepare('INSERT OR REPLACE INTO role_configs (aws_account_id, role_name, destination_path, destination_region) VALUES (?, ?, ?, ?)')
+      .bind(awsAccountId, roleName, destinationPath || null, destinationRegion || null)
+      .run();
+  }
+
+  public async deleteRoleConfig(awsAccountId: string, roleName: string): Promise<void> {
+    await this.database.prepare('DELETE FROM role_configs WHERE aws_account_id = ? AND role_name = ?').bind(awsAccountId, roleName).run();
+  }
 }
 
 export { RoleConfigsDAO };

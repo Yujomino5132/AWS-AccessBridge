@@ -19,6 +19,8 @@ import {
   RemoveCredentialRelationshipRoute,
   HideRoleRoute,
   UnhideRoleRoute,
+  SetRoleConfigRoute,
+  DeleteRoleConfigRoute,
 } from '@/endpoints';
 
 class AccessBridgeWorker extends AbstractWorker {
@@ -59,6 +61,8 @@ class AccessBridgeWorker extends AbstractWorker {
     openapi.delete('/api/admin/access', RevokeAccessRoute);
     openapi.put('/api/admin/account/nickname', SetAccountNicknameRoute);
     openapi.delete('/api/admin/account/nickname', RemoveAccountNicknameRoute);
+    openapi.put('/api/admin/role/config', SetRoleConfigRoute);
+    openapi.delete('/api/admin/role/config', DeleteRoleConfigRoute);
 
     this.app = openapi;
   }

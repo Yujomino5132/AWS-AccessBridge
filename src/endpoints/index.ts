@@ -17,6 +17,8 @@ import { StoreCredentialRelationshipRoute as OriginalStoreCredentialRelationship
 import { RemoveCredentialRelationshipRoute as OriginalRemoveCredentialRelationshipRoute } from './api/admin/credentials/relationship/DELETE';
 import { HideRoleRoute as OriginalHideRoleRoute } from './api/user/assumable/hidden/POST';
 import { UnhideRoleRoute as OriginalUnhideRoleRoute } from './api/user/assumable/hidden/DELETE';
+import { SetRoleConfigRoute as OriginalSetRoleConfigRoute } from './api/admin/role/config/PUT';
+import { DeleteRoleConfigRoute as OriginalDeleteRoleConfigRoute } from './api/admin/role/config/DELETE';
 
 export const GenerateConsoleUrlRoute: any = OriginalGenerateConsoleUrlRoute;
 export const AssumeRoleRoute: any = OriginalAssumeRoleRoute;
@@ -35,3 +37,5 @@ export const StoreCredentialRelationshipRoute: any = OriginalStoreCredentialRela
 export const RemoveCredentialRelationshipRoute: any = OriginalRemoveCredentialRelationshipRoute;
 export const HideRoleRoute: any = OriginalHideRoleRoute;
 export const UnhideRoleRoute: any = OriginalUnhideRoleRoute;
+export const SetRoleConfigRoute: any = OriginalSetRoleConfigRoute;
+export const DeleteRoleConfigRoute: any = OriginalDeleteRoleConfigRoute;
