@@ -2,9 +2,11 @@ import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
 import type { ActivityContext, IEnv, IRequest, IResponse, ExtendedResponse } from '@/endpoints/IActivityAPIRoute';
 import { BadRequestError } from '@/error';
 import type { AssumeRoleResponse } from '@/endpoints/api/aws/assume-role/POST';
-import type { GenerateConsoleUrlResponse } from '@/endpoints/api/aws/console/POST';
+import type { GenerateConsoleUrlRequestInternal, GenerateConsoleUrlResponse } from '@/endpoints/api/aws/console/POST';
 import { INTERNAL_USER_EMAIL_HEADER, INTERNAL_BASE_URL_HEADER, CONTENT_TYPE, APPLICATION_JSON, SELF_WORKER_BASE_URL } from '@/constants';
 import { ErrorDeserializer } from '@/utils';
+import { RoleConfigsDAO } from '@/dao';
+import { RoleConfig } from '@/model';
 
 class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse, FederateEnv> {
   schema = {
@@ -176,6 +178,8 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
     const principalArn: string = `arn:aws:iam::${awsAccountId}:role/${roleName}`;
     const userEmail: string = this.getAuthenticatedUserEmailAddress(cxt);
     const baseUrl: string = this.getBaseUrl(cxt);
+    const roleConfigsDAO: RoleConfigsDAO = new RoleConfigsDAO(env.AccessBridgeDB);
+    const roleConfig: RoleConfig | undefined = await roleConfigsDAO.getRoleConfig(awsAccountId, roleName);
     const assumeRoleResponse: Response = await env.SELF.fetch(`${SELF_WORKER_BASE_URL}/api/aws/assume-role`, {
       method: 'POST',
       headers: {
@@ -189,6 +193,15 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
       throw await ErrorDeserializer.deserializeError(assumeRoleResponse);
     }
     const credentials: AssumeRoleResponse = await assumeRoleResponse.json();
+    const consoleUrlRequest: GenerateConsoleUrlRequestInternal = {
+      accessKeyId: credentials.accessKeyId,
+      secretAccessKey: credentials.secretAccessKey,
+      sessionToken: credentials.sessionToken,
+      awsAccountId: awsAccountId,
+      roleName: roleName,
+      destinationUrl: roleConfig?.destinationUrl,
+      destinationRegion: roleConfig?.destinationRegion,
+    };
     const consoleResponse: Response = await env.SELF.fetch(`${SELF_WORKER_BASE_URL}/api/aws/console`, {
       method: 'POST',
       headers: {
@@ -196,13 +209,7 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
         [INTERNAL_USER_EMAIL_HEADER]: userEmail,
         [INTERNAL_BASE_URL_HEADER]: baseUrl,
       },
-      body: JSON.stringify({
-        accessKeyId: credentials.accessKeyId,
-        secretAccessKey: credentials.secretAccessKey,
-        sessionToken: credentials.sessionToken,
-        awsAccountId: awsAccountId,
-        roleName: roleName,
-      }),
+      body: JSON.stringify(consoleUrlRequest),
     });
     if (!consoleResponse.ok) {
       throw await ErrorDeserializer.deserializeError(consoleResponse);
@@ -223,6 +230,7 @@ type FederateResponse = IResponse;
 
 interface FederateEnv extends IEnv {
   SELF: Fetcher;
+  AccessBridgeDB: D1Database;
 }
 
 export { FederateRoute };

@@ -10,7 +10,8 @@
     "postdeploy": "wrangler deploy",
     "prettier": "prettier --write '!app' .",
     "lint": "eslint --ext .ts,.tsx --fix --ignore-pattern app/ .",
-    "tsc": "tsc --noemit"
+    "tsc": "tsc --noemit",
+    "migrations:apply": "yes | wrangler d1 migrations apply --remote aws-access-bridge-db"
   },
   "devDependencies": {
     "eslint": "^9.39.x",
