@@ -17,10 +17,10 @@
     "eslint-config-prettier": "^10.1.x",
     "eslint-plugin-prettier": "^5.5.x",
     "globals": "^16.5.x",
-    "prettier": "^3.6.x",
+    "prettier": "^3.7.x",
     "typescript": "^5.9.x",
-    "typescript-eslint": "^8.47.x",
-    "wrangler": "^4.50.x"
+    "typescript-eslint": "^8.48.x",
+    "wrangler": "^4.51.x"
   },
   "dependencies": {
     "aws4fetch": "^1.0.x",
