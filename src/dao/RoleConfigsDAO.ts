@@ -9,7 +9,9 @@ class RoleConfigsDAO {
 
   public async getRoleConfig(awsAccountId: string, roleName: string): Promise<RoleConfig | undefined> {
     const result: RoleConfigInternal | null = await this.database
-      .prepare('SELECT aws_account_id, role_name, destination_url, region FROM role_configs WHERE aws_account_id = ? AND role_name = ?')
+      .prepare(
+        'SELECT aws_account_id, role_name, destination_url, destination_region FROM role_configs WHERE aws_account_id = ? AND role_name = ?',
+      )
       .bind(awsAccountId, roleName)
       .first<RoleConfigInternal>();
     if (result) {
