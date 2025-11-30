@@ -1,5 +1,45 @@
 import { useState } from 'react';
 
+interface LoadingButtonProps {
+  onClick: () => Promise<void> | void;
+  disabled?: boolean;
+  className?: string;
+  children: React.ReactNode;
+  type?: 'button' | 'submit';
+}
+
+function LoadingButton({ onClick, disabled = false, className = '', children, type = 'button' }: LoadingButtonProps) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleClick = async () => {
+    if (disabled || isLoading) return;
+
+    setIsLoading(true);
+    try {
+      await onClick();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <button
+      type={type}
+      onClick={handleClick}
+      disabled={disabled || isLoading}
+      className={`${className} ${isLoading ? 'cursor-not-allowed' : ''}`}
+    >
+      {isLoading ? (
+        <div className="flex items-center justify-center">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+        </div>
+      ) : (
+        children
+      )}
+    </button>
+  );
+}
+
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('credentials');
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -65,8 +105,7 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
   const isRelationFormValid = relationForm.principalArn.trim() !== '' && relationForm.assumedBy.trim() !== '';
   const isRemoveRelationFormValid = relationForm.principalArn.trim() !== '';
 
-  const handleAddCredentials = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAddCredentials = async () => {
     if (!isCredFormValid) return;
 
     try {
@@ -104,8 +143,7 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
     }
   };
 
-  const handleAddRelation = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAddRelation = async () => {
     if (!isRelationFormValid) return;
 
     try {
@@ -140,8 +178,7 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
     }
   };
 
-  const handleRemoveRelation = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleRemoveRelation = async () => {
     if (!isRemoveRelationFormValid) return;
 
     try {
@@ -179,7 +216,7 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
     <div className="space-y-8">
       <div className="bg-gray-800 p-6 rounded">
         <h3 className="text-xl font-semibold mb-4">Add AWS Credentials</h3>
-        <form onSubmit={handleAddCredentials} className="space-y-4">
+        <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
           <input
             type="text"
             placeholder="Principal ARN (e.g., arn:aws:iam::123456789012:user/username)"
@@ -211,19 +248,20 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
             onChange={(e) => setCredForm({ ...credForm, sessionToken: e.target.value })}
             className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
           />
-          <button
+          <LoadingButton
             type="submit"
+            onClick={handleAddCredentials}
             disabled={!isCredFormValid}
             className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
           >
             Add Credentials
-          </button>
+          </LoadingButton>
         </form>
       </div>
 
       <div className="bg-gray-800 p-6 rounded">
         <h3 className="text-xl font-semibold mb-4">Manage Credential Relationships</h3>
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
           <input
             type="text"
             placeholder="Principal ARN"
@@ -241,22 +279,20 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
             required
           />
           <div className="flex space-x-4">
-            <button
-              type="button"
+            <LoadingButton
               onClick={handleAddRelation}
               disabled={!isRelationFormValid}
               className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
             >
               Add Relationship
-            </button>
-            <button
-              type="button"
+            </LoadingButton>
+            <LoadingButton
               onClick={handleRemoveRelation}
               disabled={!isRemoveRelationFormValid}
               className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
             >
               Remove Relationship
-            </button>
+            </LoadingButton>
           </div>
         </form>
       </div>
@@ -372,20 +408,20 @@ function AccessTab({ showMessage }: { showMessage: (type: 'success' | 'error', t
           className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
         />
         <div className="flex space-x-4">
-          <button
+          <LoadingButton
             onClick={handleGrantAccess}
             disabled={!isFormValid}
             className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
           >
             Grant Access
-          </button>
-          <button
+          </LoadingButton>
+          <LoadingButton
             onClick={handleRevokeAccess}
             disabled={!isFormValid}
             className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
           >
             Revoke Access
-          </button>
+          </LoadingButton>
         </div>
       </div>
     </div>
@@ -401,8 +437,7 @@ function AccountsTab({ showMessage }: { showMessage: (type: 'success' | 'error',
   const isSetNicknameValid = nicknameForm.awsAccountId.trim() !== '' && nicknameForm.nickname.trim() !== '';
   const isRemoveNicknameValid = nicknameForm.awsAccountId.trim() !== '';
 
-  const handleSetNickname = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSetNickname = async () => {
     if (!isSetNicknameValid) return;
 
     try {
@@ -437,8 +472,7 @@ function AccountsTab({ showMessage }: { showMessage: (type: 'success' | 'error',
     }
   };
 
-  const handleRemoveNickname = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleRemoveNickname = async () => {
     if (!isRemoveNicknameValid) return;
 
     try {
@@ -475,7 +509,7 @@ function AccountsTab({ showMessage }: { showMessage: (type: 'success' | 'error',
   return (
     <div className="bg-gray-800 p-6 rounded">
       <h3 className="text-xl font-semibold mb-4">Manage Account Nicknames</h3>
-      <form className="space-y-4">
+      <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
         <input
           type="text"
           placeholder="AWS Account ID (12 digits)"
@@ -493,22 +527,20 @@ function AccountsTab({ showMessage }: { showMessage: (type: 'success' | 'error',
           className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
         />
         <div className="flex space-x-4">
-          <button
-            type="button"
+          <LoadingButton
             onClick={handleSetNickname}
             disabled={!isSetNicknameValid}
             className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
           >
             Set Nickname
-          </button>
-          <button
-            type="button"
+          </LoadingButton>
+          <LoadingButton
             onClick={handleRemoveNickname}
             disabled={!isRemoveNicknameValid}
             className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
           >
             Remove Nickname
-          </button>
+          </LoadingButton>
         </div>
       </form>
     </div>
@@ -516,10 +548,7 @@ function AccountsTab({ showMessage }: { showMessage: (type: 'success' | 'error',
 }
 
 function CryptoTab({ showMessage }: { showMessage: (type: 'success' | 'error', text: string) => void }) {
-  const [isRotating, setIsRotating] = useState(false);
-
   const handleRotateKey = async () => {
-    setIsRotating(true);
     try {
       const response = await fetch('/api/admin/crypto/rotate-master-key', {
         method: 'POST',
@@ -543,8 +572,6 @@ function CryptoTab({ showMessage }: { showMessage: (type: 'success' | 'error', t
     } catch (err) {
       console.error('Network error:', err);
       showMessage('error', `Network error: ${err instanceof Error ? err.message : 'Unknown error'}`);
-    } finally {
-      setIsRotating(false);
     }
   };
 
@@ -556,13 +583,12 @@ function CryptoTab({ showMessage }: { showMessage: (type: 'success' | 'error', t
           Rotate the master encryption key used for encrypting AWS credentials in the database. This operation will re-encrypt all existing
           credentials with the new key.
         </p>
-        <button
+        <LoadingButton
           onClick={handleRotateKey}
-          disabled={isRotating}
           className="bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-600 px-4 py-2 rounded text-white"
         >
-          {isRotating ? 'Rotating...' : 'Rotate Master Key'}
-        </button>
+          Rotate Master Key
+        </LoadingButton>
       </div>
     </div>
   );
