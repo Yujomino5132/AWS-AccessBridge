@@ -1,4 +1,4 @@
-import { BadRequestError, ForbiddenError, InternalServerError, UnauthorizedError, IServiceError } from '@/error';
+import { BadRequestError, ForbiddenError, InternalServerError, UnauthorizedError, IServiceError, DatabaseError } from '@/error';
 import type { ErrorResponse } from '@/error';
 
 class ErrorDeserializer {
@@ -14,6 +14,8 @@ class ErrorDeserializer {
           return new UnauthorizedError(errorMessage);
         case 'Forbidden':
           return new ForbiddenError(errorMessage);
+        case 'DatabaseError':
+          return new DatabaseError(errorMessage);
         case 'InternalServerError':
         default:
           return new InternalServerError(errorMessage);

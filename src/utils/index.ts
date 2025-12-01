@@ -5,3 +5,4 @@ export { BaseUrlUtil } from './BaseUrlUtil';
 export { EmailUtil } from './EmailUtil';
 export { EmailValidationUtil } from './EmailValidationUtil';
 export { ErrorDeserializer } from './ErrorDeserializer';
+export { TimestampUtil } from './TimestampUtil';
