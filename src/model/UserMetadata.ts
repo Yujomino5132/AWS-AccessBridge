@@ -1,12 +1,12 @@
 interface UserMetadata {
   userEmail: string;
   isSuperAdmin: boolean;
-  federationUsername?: string | undefined;
+  federationUsername: string;
 }
 
 interface UserMetadataInternal {
-  user_email: string;
-  is_superadmin: boolean;
+  user_email?: string | undefined;
+  is_superadmin?: boolean | undefined;
   federation_username?: string | undefined;
 }
 

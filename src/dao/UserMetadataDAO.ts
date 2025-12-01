@@ -17,7 +17,7 @@ class UserMetadataDAO {
 
   public async getOrCreateFederationUsername(userEmail: string): Promise<string> {
     const result: UserMetadataInternal | null = await this.database
-      .prepare('SELECT uuid FROM user_metadata WHERE user_email = ?')
+      .prepare('SELECT federation_username FROM user_metadata WHERE user_email = ?')
       .bind(userEmail)
       .first<UserMetadataInternal>();
     if (result?.federation_username) {
