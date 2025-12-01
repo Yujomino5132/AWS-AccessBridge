@@ -3,10 +3,9 @@ import type { ActivityContext, IEnv, IRequest, IResponse, ExtendedResponse } fro
 import { BadRequestError } from '@/error';
 import type { AssumeRoleResponse } from '@/endpoints/api/aws/assume-role/POST';
 import type { GenerateConsoleUrlRequestInternal, GenerateConsoleUrlResponse } from '@/endpoints/api/aws/console/POST';
-import { ErrorDeserializer } from '@/utils';
+import { ErrorDeserializer, InternalRequestHelper } from '@/utils';
 import { RoleConfigsDAO } from '@/dao';
 import { RoleConfig } from '@/model';
-import { makeInternalRequest } from '@/utils/internal-request';
 
 class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse, FederateEnv> {
   schema = {
@@ -180,14 +179,14 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
     const baseUrl: string = this.getBaseUrl(cxt);
     const roleConfigsDAO: RoleConfigsDAO = new RoleConfigsDAO(env.AccessBridgeDB);
     const roleConfig: RoleConfig | undefined = await roleConfigsDAO.getRoleConfig(awsAccountId, roleName);
-    const assumeRoleResponse: Response = await makeInternalRequest(
+    const hmacSecret: string = await env.INTERNAL_HMAC_SECRET.get();
+    const internalRequestHelper: InternalRequestHelper = new InternalRequestHelper(env.SELF, hmacSecret);
+    const assumeRoleResponse: Response = await internalRequestHelper.makeRequest(
       '/api/aws/assume-role',
       'POST',
       JSON.stringify({ principalArn }),
       baseUrl,
       userEmail,
-      env.INTERNAL_HMAC_SECRET,
-      env.SELF,
     );
     if (!assumeRoleResponse.ok) {
       throw await ErrorDeserializer.deserializeError(assumeRoleResponse);
@@ -202,14 +201,12 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
       destinationPath: roleConfig?.destinationPath,
       destinationRegion: roleConfig?.destinationRegion,
     };
-    const consoleResponse: Response = await makeInternalRequest(
+    const consoleResponse: Response = await internalRequestHelper.makeRequest(
       '/api/aws/console',
       'POST',
       JSON.stringify(consoleUrlRequest),
       baseUrl,
       userEmail,
-      env.INTERNAL_HMAC_SECRET,
-      env.SELF,
     );
     if (!consoleResponse.ok) {
       throw await ErrorDeserializer.deserializeError(consoleResponse);

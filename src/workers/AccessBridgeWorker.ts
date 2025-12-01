@@ -23,7 +23,7 @@ import {
   DeleteRoleConfigRoute,
 } from '@/endpoints';
 import { ExpiredCredentialsCleanupTask } from '@/scheduled';
-import { validateInternalRequest } from '@/utils/hmac-middleware';
+import { MiddlewareHandlers } from '@/middleware';
 
 class AccessBridgeWorker extends AbstractWorker {
   protected readonly app: Hono<{ Bindings: Env }>;
@@ -35,15 +35,8 @@ class AccessBridgeWorker extends AbstractWorker {
       Bindings: Env;
     }> = new Hono<{ Bindings: Env }>();
 
-    // Apply HMAC validation middleware for internal requests
-    app.use('*', async (c, next) => {
-      const signature = c.req.header('X-Internal-Signature');
-      if (signature) {
-        await validateInternalRequest(c, next);
-      } else {
-        await next();
-      }
-    });
+    // Middleware Handlers
+    app.use('*', MiddlewareHandlers.hmacValidation());
 
     const openapi: HonoOpenAPIRouterType<{
       Bindings: Env;

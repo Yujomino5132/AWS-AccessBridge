@@ -6,5 +6,5 @@ export { EmailUtil } from './EmailUtil';
 export { EmailValidationUtil } from './EmailValidationUtil';
 export { ErrorDeserializer } from './ErrorDeserializer';
 export { TimestampUtil } from './TimestampUtil';
-export { makeInternalRequest } from './internal-request';
-export { validateInternalRequest } from './hmac-middleware';
+
+export { InternalRequestHelper } from './helpers/InternalRequestHelper';
