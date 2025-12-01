@@ -153,8 +153,12 @@ npx wrangler secret-store create aws-access-bridge-secrets
 Create the AES encryption key secret:
 
 ```bash
-# Create the secret (you'll be prompted to enter the key value)
+# Create the AES encryption secret (you'll be prompted to enter the key value)
 npx wrangler secret-store put aws-access-bridge-aes-encryption-key --store-id YOUR_STORE_ID
+
+# Create the HMAC secret for internal request validation
+node scripts/setup-hmac-secret.js
+npx wrangler secret-store put aws-access-bridge-internal-hmac-secret --store-id YOUR_STORE_ID
 
 # Call the rotate-master-key endpoint to initialize the encryption key
 curl -X POST https://your-worker-domain.workers.dev/api/admin/rotate-master-key
@@ -539,11 +543,23 @@ npm run lint
 
 - Application is protected by Cloudflare Zero Trust authentication
 - All AWS credentials are encrypted using AES-GCM and stored securely in Cloudflare D1
+- Internal requests are secured with HMAC-SHA256 signatures and timestamp validation (1-second window)
 - User authentication is required for all role assumptions
 - Role access is controlled via database mappings
 - Temporary credentials have limited lifespans
 - All API requests are validated and sanitized
 - Encryption keys are stored in Cloudflare Secrets Store
+
+### HMAC Internal Request Security
+
+Internal requests between worker components are secured using HMAC-SHA256 signatures that include:
+
+- All X-Internal headers (sorted alphabetically)
+- Request timestamp in Unix milliseconds
+- SHA-256 hash of request body
+- Request path and HTTP method
+
+Requests must be made within 1 second of the timestamp to prevent replay attacks.
 
 ## Contributing
 

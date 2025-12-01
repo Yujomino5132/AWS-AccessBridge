@@ -3,10 +3,10 @@ import type { ActivityContext, IEnv, IRequest, IResponse, ExtendedResponse } fro
 import { BadRequestError } from '@/error';
 import type { AssumeRoleResponse } from '@/endpoints/api/aws/assume-role/POST';
 import type { GenerateConsoleUrlRequestInternal, GenerateConsoleUrlResponse } from '@/endpoints/api/aws/console/POST';
-import { INTERNAL_USER_EMAIL_HEADER, INTERNAL_BASE_URL_HEADER, CONTENT_TYPE, APPLICATION_JSON, SELF_WORKER_BASE_URL } from '@/constants';
 import { ErrorDeserializer } from '@/utils';
 import { RoleConfigsDAO } from '@/dao';
 import { RoleConfig } from '@/model';
+import { makeInternalRequest } from '@/utils/internal-request';
 
 class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse, FederateEnv> {
   schema = {
@@ -180,15 +180,15 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
     const baseUrl: string = this.getBaseUrl(cxt);
     const roleConfigsDAO: RoleConfigsDAO = new RoleConfigsDAO(env.AccessBridgeDB);
     const roleConfig: RoleConfig | undefined = await roleConfigsDAO.getRoleConfig(awsAccountId, roleName);
-    const assumeRoleResponse: Response = await env.SELF.fetch(`${SELF_WORKER_BASE_URL}/api/aws/assume-role`, {
-      method: 'POST',
-      headers: {
-        [CONTENT_TYPE]: APPLICATION_JSON,
-        [INTERNAL_USER_EMAIL_HEADER]: userEmail,
-        [INTERNAL_BASE_URL_HEADER]: baseUrl,
-      },
-      body: JSON.stringify({ principalArn }),
-    });
+    const assumeRoleResponse: Response = await makeInternalRequest(
+      '/api/aws/assume-role',
+      'POST',
+      JSON.stringify({ principalArn }),
+      baseUrl,
+      userEmail,
+      env.INTERNAL_HMAC_SECRET,
+      env.SELF,
+    );
     if (!assumeRoleResponse.ok) {
       throw await ErrorDeserializer.deserializeError(assumeRoleResponse);
     }
@@ -202,15 +202,15 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
       destinationPath: roleConfig?.destinationPath,
       destinationRegion: roleConfig?.destinationRegion,
     };
-    const consoleResponse: Response = await env.SELF.fetch(`${SELF_WORKER_BASE_URL}/api/aws/console`, {
-      method: 'POST',
-      headers: {
-        [CONTENT_TYPE]: APPLICATION_JSON,
-        [INTERNAL_USER_EMAIL_HEADER]: userEmail,
-        [INTERNAL_BASE_URL_HEADER]: baseUrl,
-      },
-      body: JSON.stringify(consoleUrlRequest),
-    });
+    const consoleResponse: Response = await makeInternalRequest(
+      '/api/aws/console',
+      'POST',
+      JSON.stringify(consoleUrlRequest),
+      baseUrl,
+      userEmail,
+      env.INTERNAL_HMAC_SECRET,
+      env.SELF,
+    );
     if (!consoleResponse.ok) {
       throw await ErrorDeserializer.deserializeError(consoleResponse);
     }
@@ -231,6 +231,7 @@ type FederateResponse = IResponse;
 interface FederateEnv extends IEnv {
   SELF: Fetcher;
   AccessBridgeDB: D1Database;
+  INTERNAL_HMAC_SECRET: SecretsStoreSecret;
 }
 
 export { FederateRoute };
