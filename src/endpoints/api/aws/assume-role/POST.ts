@@ -279,13 +279,13 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
     credentialsCacheDAO: CredentialsCacheDAO,
     credentialChain: CredentialChain,
   ): Promise<{ startIndex: number; credentials: AccessKeysWithExpiration }> {
-    let startIndex: number = 1; // Skip target role (never cached)
+    let startIndex: number = credentialChain.principalArns.length - 2;
     let credentials: AccessKeysWithExpiration = {
       accessKeyId: credentialChain.accessKeyId,
       secretAccessKey: credentialChain.secretAccessKey,
     };
     // Check cache from first intermediate role towards base IAM user to find closest cached credential
-    for (let i: number = startIndex; i < credentialChain.principalArns.length; ++i) {
+    for (let i: number = 1; i < credentialChain.principalArns.length; ++i) {
       const cachedCredential: CredentialCache | undefined = await credentialsCacheDAO.getCachedCredential(credentialChain.principalArns[i]);
       if (cachedCredential) {
         startIndex = i - 1; // Start assuming from the role before the cached one (closer to target)
