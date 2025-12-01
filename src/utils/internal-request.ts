@@ -26,12 +26,6 @@ export async function makeInternalRequest(
     ...additionalHeaders,
   };
 
-  console.log('makeInternalRequest Debug - headers for signature:', JSON.stringify(headers));
-  console.log('makeInternalRequest Debug - timestamp:', timestamp);
-  console.log('makeInternalRequest Debug - bodyHash:', bodyHash);
-  console.log('makeInternalRequest Debug - path:', path);
-  console.log('makeInternalRequest Debug - method:', method);
-
   const signature = await generateHMACSignature(hmacSecret, headers, timestamp, bodyHash, path, method);
   headers['x-internal-signature'] = signature;
 
