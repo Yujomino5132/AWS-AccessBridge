@@ -225,8 +225,8 @@ class GenerateConsoleUrlRoute extends IActivityAPIRoute<GenerateConsoleUrlReques
 
   protected async handleRequest(
     request: GenerateConsoleUrlRequest,
-    _env: IEnv,
-    cxt: ActivityContext<IEnv>,
+    _env: GenerateConsoleUrlEnv,
+    cxt: ActivityContext<GenerateConsoleUrlEnv>,
   ): Promise<GenerateConsoleUrlResponse> {
     const signinToken: string = await AwsConsoleUtil.getSigninToken(request.accessKeyId, request.secretAccessKey, request.sessionToken);
     let federateUrl: string = this.getBaseUrl(cxt);
@@ -264,7 +264,9 @@ interface GenerateConsoleUrlResponseInternal {
 }
 
 interface GenerateConsoleUrlRequest extends IRequest, GenerateConsoleUrlRequestInternal {}
+
 interface GenerateConsoleUrlResponse extends IResponse, GenerateConsoleUrlResponseInternal {}
+
 type GenerateConsoleUrlEnv = IEnv;
 
 export { GenerateConsoleUrlRoute };

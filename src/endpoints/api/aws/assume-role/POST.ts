@@ -1,6 +1,6 @@
-import { AssumableRolesDAO, CredentialsDAO } from '@/dao';
+import { AssumableRolesDAO, CredentialsDAO, UserMetadataDAO } from '@/dao';
 import { AccessKeysWithExpiration, CredentialChain } from '@/model';
-import { ArnUtil, AssumeRoleUtil, EmailUtil } from '@/utils';
+import { ArnUtil, AssumeRoleUtil } from '@/utils';
 import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
 import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
 import { BadRequestError } from '@/error';
@@ -248,7 +248,8 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
     const accountId: string = ArnUtil.getAccountIdFromArn(request.principalArn);
     const roleName: string = ArnUtil.getRoleNameFromArn(request.principalArn);
 
-    await new AssumableRolesDAO(env.AccessBridgeDB).verifyUserHasAccessToRole(userEmail, accountId, roleName);
+    const assumableRolesDAO: AssumableRolesDAO = new AssumableRolesDAO(env.AccessBridgeDB);
+    await assumableRolesDAO.verifyUserHasAccessToRole(userEmail, accountId, roleName);
 
     const masterKey: string = await env.AES_ENCRYPTION_KEY_SECRET.get();
     const credentialsDAO: CredentialsDAO = new CredentialsDAO(env.AccessBridgeDB, masterKey);
@@ -259,7 +260,8 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
       secretAccessKey: credentialChain.secretAccessKey,
     };
 
-    const userId: string = EmailUtil.extractUsername(userEmail);
+    const userMetadataDAO: UserMetadataDAO = new UserMetadataDAO(env.AccessBridgeDB);
+    const userId: string = await userMetadataDAO.getOrCreateFederationUsername(userEmail);
     for (let i = credentialChain.principalArns.length - 2; i >= 0; --i) {
       newCredentials = await AssumeRoleUtil.assumeRole(credentialChain.principalArns[i], newCredentials, `AccessBridge-${userId}`);
     }
@@ -275,8 +277,8 @@ interface AssumeRoleRequest extends IRequest {
 interface AssumeRoleResponse extends IResponse {
   accessKeyId: string;
   secretAccessKey: string;
-  sessionToken?: string;
-  expiration?: string;
+  sessionToken?: string | undefined;
+  expiration?: string | undefined;
 }
 
 interface AssumeRoleEnv extends IEnv {
