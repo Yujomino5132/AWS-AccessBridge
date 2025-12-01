@@ -21,6 +21,9 @@ class AssumeRoleUtil {
       Action: 'AssumeRole',
       RoleArn: roleArn,
       RoleSessionName: sessionName,
+      // The actual maximum duration depends on the target role's configured MaxSessionDuration value.
+      // Note: This limit applies only when an IAM user or long-term credentials assume a role. Role-to-role chaining remains restricted to a maximum of 1 hour regardless of this setting.
+      DurationSeconds: '43200',
       Version: '2011-06-15',
     });
 
@@ -34,7 +37,6 @@ class AssumeRoleUtil {
       throw new UnauthorizedError('Failed to get response from STS AssumeRole.');
     }
 
-    // Extract credentials using regex (simplified)
     const accessKeyIdMatch = xmlText.match(/<AccessKeyId>([^<]+)<\/AccessKeyId>/);
     const secretAccessKeyMatch = xmlText.match(/<SecretAccessKey>([^<]+)<\/SecretAccessKey>/);
     const sessionTokenMatch = xmlText.match(/<SessionToken>([^<]+)<\/SessionToken>/);
