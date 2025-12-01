@@ -315,10 +315,11 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
     credentials: AccessKeysWithExpiration,
     userId: string,
   ): Promise<AccessKeysWithExpiration> {
-    let newCredentials = credentials;
+    let newCredentials: AccessKeysWithExpiration = credentials;
     for (let i = startIndex; i >= 0; i--) {
-      const roleArn = credentialChain.principalArns[i];
-      newCredentials = await AssumeRoleUtil.assumeRole(roleArn, newCredentials, `AccessBridge-${userId}`);
+      const roleArn: string = credentialChain.principalArns[i];
+      const sessionName: string = i > 0 ? 'AccessBridge-Intermediate' : `AccessBridge-${userId}`;
+      newCredentials = await AssumeRoleUtil.assumeRole(roleArn, newCredentials, sessionName);
       // Cache intermediate credentials (not target role, not base IAM user)
       if (i > 0 && newCredentials.expiration) {
         await credentialsCacheDAO.storeCachedCredential({
