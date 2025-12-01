@@ -8,6 +8,7 @@
     "predeploy": "npm install && npm run cf-typegen && npm run prettier && npm run lint && npm run tsc",
     "deploy": "npm run buildApp && wrangler deploy --dry-run",
     "postdeploy": "wrangler deploy",
+    "deploy:fast": "wrangler deploy",
     "prettier": "prettier --write '!app' .",
     "lint": "eslint --ext .ts,.tsx --fix --ignore-pattern app/ .",
     "tsc": "tsc --noemit",
