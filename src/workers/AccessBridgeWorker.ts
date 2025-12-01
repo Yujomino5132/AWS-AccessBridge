@@ -22,6 +22,7 @@ import {
   SetRoleConfigRoute,
   DeleteRoleConfigRoute,
 } from '@/endpoints';
+import { ExpiredCredentialsCleanupTask } from '@/scheduled';
 
 class AccessBridgeWorker extends AbstractWorker {
   protected readonly app: Hono<{ Bindings: Env }>;
@@ -71,8 +72,8 @@ class AccessBridgeWorker extends AbstractWorker {
     return this.app.fetch(request, env, ctx);
   }
 
-  protected async handleScheduled(_event: ScheduledController, _env: Env, _ctx: ExecutionContext): Promise<void> {
-    // No scheduled tasks for AccessBridge
+  protected async handleScheduled(event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+    await new ExpiredCredentialsCleanupTask().handle(event, env, ctx);
   }
 }
 

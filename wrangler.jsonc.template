@@ -42,4 +42,7 @@
     "POLICY_AUD": "you-cloudflare-zero-trust-application-aud",
     "TEAM_DOMAIN": "https://your-cloudflare-zero-trust-team-domain.cloudflareaccess.com"
   },
+  "triggers": {
+    "crons": ["*/10 * * * *"], 
+  },
 }
