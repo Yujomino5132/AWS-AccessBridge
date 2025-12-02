@@ -37,6 +37,11 @@
       "store_id": "00000000000000000000000000000000",
       "secret_name": "aws-access-bridge-aes-encryption-key",
     },
+    {
+      "binding": "INTERNAL_HMAC_SECRET",
+      "store_id": "00000000000000000000000000000000",
+      "secret_name": "aws-access-bridge-internal-hmac-secret",
+    },
   ],
   "vars": {
     "POLICY_AUD": "you-cloudflare-zero-trust-application-aud",
