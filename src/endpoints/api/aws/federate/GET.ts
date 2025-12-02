@@ -8,6 +8,7 @@ import { RoleConfigsDAO } from '@/dao';
 import { RoleConfig } from '@/model';
 
 class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse, FederateEnv> {
+
   schema = {
     tags: ['AWS'],
     summary: 'Federate AWS Access',

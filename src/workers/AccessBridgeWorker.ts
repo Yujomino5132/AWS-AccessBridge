@@ -21,6 +21,7 @@ import {
   UnhideRoleRoute,
   SetRoleConfigRoute,
   DeleteRoleConfigRoute,
+  FederateWrapperRoute,
 } from '@/endpoints';
 import { ExpiredCredentialsCleanupTask } from '@/scheduled';
 import { MiddlewareHandlers } from '@/middleware';
@@ -43,6 +44,9 @@ class AccessBridgeWorker extends AbstractWorker {
     }> = fromHono(app, {
       docs_url: '/docs',
     });
+
+    // Root Routes
+    openapi.get('/federate', FederateWrapperRoute);
 
     // AWS Routes
     openapi.post('/api/aws/console', GenerateConsoleUrlRoute);

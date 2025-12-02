@@ -129,7 +129,7 @@ export default function AccountList({ showHidden }: AccountListProps) {
     try {
       const backendUrl = import.meta.env.VITE_OPTIONAL_BACKEND_URL || '';
       const baseUrl = backendUrl ? backendUrl : '';
-      const federateUrl = `${baseUrl}/api/aws/federate?awsAccountId=${accountId}&role=${encodeURIComponent(role)}`;
+      const federateUrl = `${baseUrl}/federate?awsAccountId=${accountId}&role=${encodeURIComponent(role)}`;
       window.open(federateUrl, '_blank');
     } catch (error) {
       console.error(error);
