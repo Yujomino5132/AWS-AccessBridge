@@ -1,3 +1,4 @@
+import { DatabaseError } from '@/error';
 import type { RoleConfig, RoleConfigInternal } from '@/model';
 
 class RoleConfigsDAO {
@@ -31,14 +32,23 @@ class RoleConfigsDAO {
     destinationPath?: string | undefined,
     destinationRegion?: string | undefined,
   ): Promise<void> {
-    await this.database
+    const result: D1Result = await this.database
       .prepare('INSERT OR REPLACE INTO role_configs (aws_account_id, role_name, destination_path, destination_region) VALUES (?, ?, ?, ?)')
       .bind(awsAccountId, roleName, destinationPath || null, destinationRegion || null)
       .run();
+    if (!result.success) {
+      throw new DatabaseError(`Failed to set role config: ${result.error}`);
+    }
   }
 
   public async deleteRoleConfig(awsAccountId: string, roleName: string): Promise<void> {
-    await this.database.prepare('DELETE FROM role_configs WHERE aws_account_id = ? AND role_name = ?').bind(awsAccountId, roleName).run();
+    const result: D1Result = await this.database
+      .prepare('DELETE FROM role_configs WHERE aws_account_id = ? AND role_name = ?')
+      .bind(awsAccountId, roleName)
+      .run();
+    if (!result.success) {
+      throw new DatabaseError(`Failed to delete role config: ${result.error}`);
+    }
   }
 }
 

@@ -1,3 +1,4 @@
+import { DatabaseError } from '@/error';
 import type { UserMetadataInternal } from '@/model';
 
 class UserMetadataDAO {
@@ -24,10 +25,13 @@ class UserMetadataDAO {
       return result.federation_username;
     }
     const federationUsername: string = crypto.randomUUID().replace(/-/g, '').toUpperCase();
-    await this.database
+    const updateResult: D1Result = await this.database
       .prepare('UPDATE user_metadata SET federation_username = ? WHERE user_email = ?')
       .bind(federationUsername, userEmail)
       .run();
+    if (!updateResult.success) {
+      throw new DatabaseError(`Failed to update federation username: ${updateResult.error}`);
+    }
     return federationUsername;
   }
 }

@@ -1,4 +1,4 @@
-import { UnauthorizedError } from '@/error';
+import { DatabaseError, UnauthorizedError } from '@/error';
 import type { AssumableAccountsMap } from '@/model';
 
 class AssumableRolesDAO {
@@ -110,13 +110,16 @@ class AssumableRolesDAO {
    * @param roleName The name of the role to grant access to.
    */
   public async grantUserAccessToRole(userEmail: string, awsAccountId: string, roleName: string): Promise<void> {
-    await this.database
+    const result: D1Result = await this.database
       .prepare(
         `INSERT OR IGNORE INTO assumable_roles (user_email, aws_account_id, role_name)
          VALUES (?, ?, ?)`,
       )
       .bind(userEmail, awsAccountId, roleName)
       .run();
+    if (!result.success) {
+      throw new DatabaseError(`Failed to grant user access to role: ${result.error}`);
+    }
   }
 
   /**
@@ -126,13 +129,16 @@ class AssumableRolesDAO {
    * @param roleName The name of the role to revoke access from.
    */
   public async revokeUserAccessToRole(userEmail: string, awsAccountId: string, roleName: string): Promise<void> {
-    await this.database
+    const result: D1Result = await this.database
       .prepare(
         `DELETE FROM assumable_roles 
          WHERE user_email = ? AND aws_account_id = ? AND role_name = ?`,
       )
       .bind(userEmail, awsAccountId, roleName)
       .run();
+    if (!result.success) {
+      throw new DatabaseError(`Failed to revoke user access to role: ${result.error}`);
+    }
   }
 
   /**
@@ -142,7 +148,7 @@ class AssumableRolesDAO {
    * @param roleName The name of the role to hide.
    */
   public async hideRole(userEmail: string, awsAccountId: string, roleName: string): Promise<void> {
-    await this.database
+    const result: D1Result = await this.database
       .prepare(
         `UPDATE assumable_roles 
          SET hidden = TRUE 
@@ -150,6 +156,9 @@ class AssumableRolesDAO {
       )
       .bind(userEmail, awsAccountId, roleName)
       .run();
+    if (!result.success) {
+      throw new DatabaseError(`Failed to hide role: ${result.error}`);
+    }
   }
 
   /**
@@ -159,7 +168,7 @@ class AssumableRolesDAO {
    * @param roleName The name of the role to unhide.
    */
   public async unhideRole(userEmail: string, awsAccountId: string, roleName: string): Promise<void> {
-    await this.database
+    const result: D1Result = await this.database
       .prepare(
         `UPDATE assumable_roles 
          SET hidden = FALSE 
@@ -167,6 +176,9 @@ class AssumableRolesDAO {
       )
       .bind(userEmail, awsAccountId, roleName)
       .run();
+    if (!result.success) {
+      throw new DatabaseError(`Failed to unhide role: ${result.error}`);
+    }
   }
 }
 

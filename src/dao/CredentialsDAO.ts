@@ -1,4 +1,4 @@
-import { ForbiddenError, InternalServerError, UnauthorizedError } from '@/error';
+import { DatabaseError, ForbiddenError, InternalServerError, UnauthorizedError } from '@/error';
 import { Credential, CredentialChain, CredentialInternal } from '@/model';
 import { decryptDataOptional, encryptData } from '@/crypto/aes-gcm';
 
@@ -89,8 +89,7 @@ class CredentialsDAO {
     const encryptedSessionToken: { encrypted: string; iv: string } | null = sessionToken
       ? await encryptData(sessionToken, this.masterKey, encryptedAccessKeyId.iv)
       : null;
-
-    await this.database
+    const result: D1Result = await this.database
       .prepare(
         `INSERT OR REPLACE INTO credentials (principal_arn, encrypted_access_key_id, encrypted_secret_access_key, encrypted_session_token, salt)
          VALUES (?, ?, ?, ?, ?)`,
@@ -103,20 +102,29 @@ class CredentialsDAO {
         encryptedAccessKeyId.iv,
       )
       .run();
+    if (!result.success) {
+      throw new DatabaseError(`Failed to store credential: ${result.error}`);
+    }
   }
 
   public async storeCredentialRelationship(principalArn: string, assumedBy: string): Promise<void> {
-    await this.database
+    const result: D1Result = await this.database
       .prepare(
         `INSERT OR REPLACE INTO credentials (principal_arn, assumed_by)
          VALUES (?, ?)`,
       )
       .bind(principalArn, assumedBy)
       .run();
+    if (!result.success) {
+      throw new DatabaseError(`Failed to store credential relationship: ${result.error}`);
+    }
   }
 
   public async removeCredential(principalArn: string): Promise<void> {
-    await this.database.prepare(`DELETE FROM credentials WHERE principal_arn = ?`).bind(principalArn).run();
+    const result: D1Result = await this.database.prepare(`DELETE FROM credentials WHERE principal_arn = ?`).bind(principalArn).run();
+    if (!result.success) {
+      throw new DatabaseError(`Failed to remove credential: ${result.error}`);
+    }
   }
 }
 
