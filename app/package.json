@@ -14,7 +14,7 @@
     "lint": "eslint --ext .ts,.tsx --fix ."
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.16.x",
+    "@cloudflare/vite-plugin": "^1.17.x",
     "@tailwindcss/vite": "^4.1.x",
     "@types/node": "^24.10.x",
     "@types/react": "^19.2.x",
@@ -30,7 +30,7 @@
     "typescript": "^5.9.x",
     "typescript-eslint": "^8.48.x",
     "vite": "^7.2.x",
-    "wrangler": "^4.52.x"
+    "wrangler": "^4.53.x"
   },
   "dependencies": {}
 }
