@@ -20,7 +20,6 @@ class CredentialsCacheDAO {
   public async getCachedCredential(principalArn: string): Promise<CredentialCache | undefined> {
     if (this.masterKey) {
       const currentTime: number = TimestampUtil.getCurrentUnixTimestampInSeconds();
-      const minExpirationTime: number = TimestampUtil.addMinutes(currentTime, CredentialsCacheDAO.CREDENTIAL_EXPIRY_BUFFER_MINUTES);
       const result: CredentialCacheInternal | null = await this.database
         .prepare(
           `SELECT principal_arn, encrypted_access_key_id, encrypted_secret_access_key, encrypted_session_token, salt, expires_at
@@ -28,7 +27,7 @@ class CredentialsCacheDAO {
          WHERE principal_arn = ? AND expires_at > ?
          LIMIT 1`,
         )
-        .bind(principalArn, minExpirationTime)
+        .bind(principalArn, currentTime)
         .first<CredentialCacheInternal>();
       if (result) {
         return {
@@ -50,13 +49,17 @@ class CredentialsCacheDAO {
       const { encrypted: encryptedAccessKeyId, iv } = await encryptData(credential.accessKeyId, this.masterKey);
       const { encrypted: encryptedSecretAccessKey } = await encryptData(credential.secretAccessKey, this.masterKey, iv);
       const { encrypted: encryptedSessionToken } = await encryptData(credential.sessionToken, this.masterKey, iv);
+      const adjustedExpiresAt: number = TimestampUtil.subtractMinutes(
+        credential.expiresAt,
+        CredentialsCacheDAO.CREDENTIAL_EXPIRY_BUFFER_MINUTES,
+      );
       const result: D1Result = await this.database
         .prepare(
           `INSERT OR REPLACE INTO credentials_cache 
          (principal_arn, encrypted_access_key_id, encrypted_secret_access_key, encrypted_session_token, salt, expires_at)
          VALUES (?, ?, ?, ?, ?, ?)`,
         )
-        .bind(credential.principalArn, encryptedAccessKeyId, encryptedSecretAccessKey, encryptedSessionToken, iv, credential.expiresAt)
+        .bind(credential.principalArn, encryptedAccessKeyId, encryptedSecretAccessKey, encryptedSessionToken, iv, adjustedExpiresAt)
         .run();
       if (!result.success) {
         throw new DatabaseError(`Failed to store cached credential: ${result.error}`);

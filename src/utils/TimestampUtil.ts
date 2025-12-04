@@ -7,6 +7,10 @@ class TimestampUtil {
     return timestamp + minutes * 60;
   }
 
+  public static subtractMinutes(timestamp: number, minutes: number): number {
+    return timestamp - minutes * 60;
+  }
+
   public static convertIsoToUnixTimestampInSeconds(isoString: string): number {
     return Math.floor(new Date(isoString).getTime() / 1000);
   }
