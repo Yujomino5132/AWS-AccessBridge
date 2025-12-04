@@ -35,6 +35,9 @@ jobs:
         env:
           WRANGLER_JSONC: ${{ vars.WRANGLER_JSONC }}
 
+      - name: Initialize Cloudflare Secrets Store
+        run: npx tsx scripts/init-secrets.ts
+
       - name: Apply Database Migration
         run: yes | npx wrangler d1 migrations apply --remote aws-access-bridge-db
         env:
