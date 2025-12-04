@@ -5,7 +5,6 @@ import {
   FavoriteAccountRoute,
   UnfavoriteAccountRoute,
   StoreCredentialRoute,
-  RotateMasterKeyRoute,
   GenerateConsoleUrlRoute,
   AssumeRoleRoute,
   FederateRoute,
@@ -62,7 +61,6 @@ class AccessBridgeWorker extends AbstractWorker {
     openapi.delete('/api/user/assumable/hidden', UnhideRoleRoute);
 
     // Admin Routes
-    openapi.post('/api/admin/crypto/rotate-master-key', RotateMasterKeyRoute);
     openapi.post('/api/admin/credentials', StoreCredentialRoute);
     openapi.post('/api/admin/credentials/relationship', StoreCredentialRelationshipRoute);
     openapi.delete('/api/admin/credentials/relationship', RemoveCredentialRelationshipRoute);
