@@ -33,7 +33,7 @@ function parseWranglerConfig(): WranglerConfig {
 
 function checkSecret(storeId: string, secretName: string): boolean {
   try {
-    const output = exec(`npx wrangler secrets-store secret list ${storeId}`);
+    const output = exec(`npx wrangler secrets-store secret list ${storeId} --remote`);
     return output.includes(secretName);
   } catch {
     return false;
