@@ -5,7 +5,7 @@ import { TimestampUtil } from '@/utils/TimestampUtil';
 import { InternalServerError } from '@/error';
 
 class CredentialsCacheDAO {
-  protected static readonly CREDENTIAL_EXPIRY_BUFFER_MINUTES: number = 10;
+  protected static readonly CREDENTIAL_EXPIRY_BUFFER_MINUTES: number = 15;
   protected static readonly ERROR_MESSAGE_MASTER_KEY_MISSING: string =
     'The operation cannot be completed because the master key is missing.';
 
