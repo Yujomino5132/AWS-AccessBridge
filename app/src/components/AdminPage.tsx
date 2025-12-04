@@ -54,7 +54,6 @@ export default function AdminPage() {
     { id: 'access', label: 'User Access' },
     { id: 'accounts', label: 'Account Nicknames' },
     { id: 'roleconfig', label: 'Role Config' },
-    { id: 'crypto', label: 'Encryption' },
   ];
 
   return (
@@ -92,7 +91,6 @@ export default function AdminPage() {
       {activeTab === 'access' && <AccessTab showMessage={showMessage} />}
       {activeTab === 'accounts' && <AccountsTab showMessage={showMessage} />}
       {activeTab === 'roleconfig' && <RoleConfigTab showMessage={showMessage} />}
-      {activeTab === 'crypto' && <CryptoTab showMessage={showMessage} />}
     </div>
   );
 }
@@ -552,53 +550,6 @@ function AccountsTab({ showMessage }: { showMessage: (type: 'success' | 'error',
           </LoadingButton>
         </div>
       </form>
-    </div>
-  );
-}
-
-function CryptoTab({ showMessage }: { showMessage: (type: 'success' | 'error', text: string) => void }) {
-  const handleRotateKey = async () => {
-    try {
-      const response = await fetch('/api/admin/crypto/rotate-master-key', {
-        method: 'POST',
-      });
-
-      const responseText = await response.text();
-      console.log('Rotate key response:', response.status, responseText);
-
-      if (response.ok) {
-        showMessage('success', 'Encryption key rotated successfully');
-      } else {
-        let errorMessage = 'Failed to rotate encryption key';
-        try {
-          const error = JSON.parse(responseText);
-          errorMessage = error.Exception?.Message || error.message || errorMessage;
-        } catch {
-          errorMessage = `HTTP ${response.status}: ${responseText}`;
-        }
-        showMessage('error', errorMessage);
-      }
-    } catch (err) {
-      console.error('Network error:', err);
-      showMessage('error', `Network error: ${err instanceof Error ? err.message : 'Unknown error'}`);
-    }
-  };
-
-  return (
-    <div className="bg-gray-800 p-6 rounded">
-      <h3 className="text-xl font-semibold mb-4">Encryption Key Management</h3>
-      <div className="space-y-4">
-        <p className="text-gray-300">
-          Rotate the master encryption key used for encrypting AWS credentials in the database. This operation will re-encrypt all existing
-          credentials with the new key.
-        </p>
-        <LoadingButton
-          onClick={handleRotateKey}
-          className="bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-600 px-4 py-2 rounded text-white"
-        >
-          Rotate Master Key
-        </LoadingButton>
-      </div>
     </div>
   );
 }
