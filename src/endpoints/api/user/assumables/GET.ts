@@ -20,6 +20,29 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
           default: false,
         },
       },
+      {
+        name: 'limit',
+        in: 'query' as const,
+        description: 'Maximum number of roles to return. Defaults to 50, range 1-200.',
+        required: false,
+        schema: {
+          type: 'integer' as const,
+          minimum: 1,
+          maximum: 200,
+          default: 50,
+        },
+      },
+      {
+        name: 'offset',
+        in: 'query' as const,
+        description: 'Number of roles to skip for pagination. Defaults to 0.',
+        required: false,
+        schema: {
+          type: 'integer' as const,
+          minimum: 0,
+          default: 0,
+        },
+      },
     ],
     responses: {
       '200': {
@@ -71,6 +94,12 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
                 value: {
                   '123456789012': { roles: ['ReadOnlyRole', 'DeveloperRole', 'HiddenRole'], nickname: 'Production', favorite: true },
                   '987654321098': { roles: ['AdminRole', 'AnotherHiddenRole'], favorite: false },
+                },
+              },
+              'with-pagination': {
+                summary: 'Paginated results (limit=2&offset=0)',
+                value: {
+                  '123456789012': { roles: ['ReadOnlyRole', 'DeveloperRole'], nickname: 'Production', favorite: true },
                 },
               },
               'single-account': {
@@ -154,11 +183,13 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
   ): Promise<ListAssumablesResponse> {
     const userEmail: string = this.getAuthenticatedUserEmailAddress(cxt);
     const assumableRolesDAO: AssumableRolesDAO = new AssumableRolesDAO(env.AccessBridgeDB);
-
     const url: URL = new URL(request.raw.url);
     const showHidden: boolean = url.searchParams.get('showHidden') === 'true';
-
-    return assumableRolesDAO.getAllRolesByUserEmail(userEmail, showHidden);
+    const limitParam: string | null = url.searchParams.get('limit');
+    const offsetParam: string | null = url.searchParams.get('offset');
+    const limit: number = limitParam ? Math.max(1, Math.min(200, parseInt(limitParam, 10))) : 50;
+    const offset: number = offsetParam ? Math.max(0, parseInt(offsetParam, 10)) : 0;
+    return assumableRolesDAO.getAllRolesByUserEmail(userEmail, showHidden, limit, offset);
   }
 }
 

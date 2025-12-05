@@ -15,7 +15,7 @@ class AssumableRolesDAO {
    * @returns A list of role names the user is authorized to assume in the account.
    */
   public async getRolesByUserAndAccount(userEmail: string, awsAccountId: string): Promise<Array<string>> {
-    const results = await this.database
+    const results: D1Result<GetRolesByUserAndAccountInternal> = await this.database
       .prepare(
         `SELECT role_name
          FROM assumable_roles
@@ -23,7 +23,7 @@ class AssumableRolesDAO {
            AND aws_account_id = ?`,
       )
       .bind(userEmail, awsAccountId)
-      .all<{ role_name: string }>();
+      .all<GetRolesByUserAndAccountInternal>();
 
     if (!results || !results.results) {
       return [];
@@ -36,12 +36,18 @@ class AssumableRolesDAO {
    * Retrieves all assumable roles for the specified user across all accessible AWS accounts.
    * @param userEmail The email address of the user.
    * @param showHidden Whether to include hidden roles in the results. Defaults to false.
+   * @param limit Maximum number of roles to return. Defaults to 50.
+   * @param offset Number of roles to skip. Defaults to 0.
    * @returns A map of AWS account IDs to objects containing roles and account nickname.
    */
-  public async getAllRolesByUserEmail(userEmail: string, showHidden: boolean = false): Promise<AssumableAccountsMap> {
-    const hiddenFilter = showHidden ? '' : 'AND (ar.hidden IS NULL OR ar.hidden = FALSE)';
-
-    const results = await this.database
+  public async getAllRolesByUserEmail(
+    userEmail: string,
+    showHidden: boolean = false,
+    limit: number = 50,
+    offset: number = 0,
+  ): Promise<AssumableAccountsMap> {
+    const hiddenFilter: string = showHidden ? '' : 'AND (ar.hidden IS NULL OR ar.hidden = FALSE)';
+    const results: D1Result<GetAllRolesByUserEmailInternal> = await this.database
       .prepare(
         `SELECT ar.aws_account_id, ar.role_name, aa.aws_account_nickname, 
                 CASE WHEN ufa.aws_account_id IS NOT NULL THEN 1 ELSE 0 END as is_favorite
@@ -51,10 +57,11 @@ class AssumableRolesDAO {
          WHERE ar.user_email = ? ${hiddenFilter}
          ORDER BY is_favorite DESC, 
                   CASE WHEN aa.aws_account_nickname IS NOT NULL THEN 0 ELSE 1 END,
-                  COALESCE(aa.aws_account_nickname, ar.aws_account_id)`,
+                  COALESCE(aa.aws_account_nickname, ar.aws_account_id)
+         LIMIT ? OFFSET ?`,
       )
-      .bind(userEmail, userEmail)
-      .all<{ aws_account_id: string; role_name: string; aws_account_nickname: string | null; is_favorite: number }>();
+      .bind(userEmail, userEmail, limit, offset)
+      .all<GetAllRolesByUserEmailInternal>();
 
     if (!results || !results.results) {
       return {};
@@ -180,6 +187,17 @@ class AssumableRolesDAO {
       throw new DatabaseError(`Failed to unhide role: ${result.error}`);
     }
   }
+}
+
+interface GetRolesByUserAndAccountInternal {
+  role_name: string;
+}
+
+interface GetAllRolesByUserEmailInternal {
+  aws_account_id: string;
+  role_name: string;
+  aws_account_nickname: string | null;
+  is_favorite: number;
 }
 
 export { AssumableRolesDAO };
