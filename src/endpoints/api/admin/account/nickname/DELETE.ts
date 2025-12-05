@@ -192,9 +192,7 @@ interface RemoveAccountNicknameResponse extends IResponse {
   accountId: string;
 }
 
-interface RemoveAccountNicknameEnv extends IAdminEnv {
-  AccessBridgeDB: D1Database;
-}
+type RemoveAccountNicknameEnv = IAdminEnv;
 
 export { RemoveAccountNicknameRoute };
 export type { RemoveAccountNicknameRequest, RemoveAccountNicknameResponse };

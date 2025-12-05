@@ -262,9 +262,7 @@ interface RevokeAccessResponse extends IResponse {
   message: string;
 }
 
-interface RevokeAccessEnv extends IAdminEnv {
-  AccessBridgeDB: D1Database;
-}
+type RevokeAccessEnv = IAdminEnv;
 
 export { RevokeAccessRoute };
 export type { RevokeAccessRequest, RevokeAccessResponse };

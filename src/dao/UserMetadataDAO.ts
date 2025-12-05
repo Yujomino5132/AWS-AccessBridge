@@ -2,9 +2,9 @@ import { DatabaseError } from '@/error';
 import type { UserMetadataInternal } from '@/model';
 
 class UserMetadataDAO {
-  protected readonly database: D1Database;
+  protected readonly database: D1Database | D1DatabaseSession;
 
-  constructor(database: D1Database) {
+  constructor(database: D1Database | D1DatabaseSession) {
     this.database = database;
   }
 

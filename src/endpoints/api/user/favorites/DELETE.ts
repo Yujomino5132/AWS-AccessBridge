@@ -65,9 +65,7 @@ interface UnfavoriteAccountResponse extends IResponse {
   success: boolean;
 }
 
-interface UnfavoriteAccountEnv extends IEnv {
-  AccessBridgeDB: D1Database;
-}
+type UnfavoriteAccountEnv = IEnv;
 
 export { UnfavoriteAccountRoute };
 export type { UnfavoriteAccountRequest, UnfavoriteAccountResponse };

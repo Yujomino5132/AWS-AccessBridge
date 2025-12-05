@@ -132,9 +132,7 @@ interface GetCurrentUserResponse extends IResponse {
   isSuperAdmin: boolean;
 }
 
-interface GetCurrentUserEnv extends IEnv {
-  AccessBridgeDB: D1Database;
-}
+type GetCurrentUserEnv = IEnv;
 
 export { GetCurrentUserRoute };
 export type { GetCurrentUserRequest, GetCurrentUserResponse };

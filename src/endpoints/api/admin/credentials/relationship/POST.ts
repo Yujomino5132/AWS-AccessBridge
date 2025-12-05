@@ -246,7 +246,6 @@ interface StoreCredentialRelationshipResponse extends IResponse {
 }
 
 interface StoreCredentialRelationshipEnv extends IAdminEnv {
-  AccessBridgeDB: D1Database;
   AES_ENCRYPTION_KEY_SECRET: SecretsStoreSecret;
 }
 

@@ -184,9 +184,7 @@ interface UnhideRoleResponse extends IResponse {
   success: boolean;
 }
 
-interface UnhideRoleEnv extends IEnv {
-  AccessBridgeDB: D1Database;
-}
+type UnhideRoleEnv = IEnv;
 
 export { UnhideRoleRoute };
 export type { UnhideRoleRequest, UnhideRoleResponse };

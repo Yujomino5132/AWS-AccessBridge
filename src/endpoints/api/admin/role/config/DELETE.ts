@@ -248,9 +248,7 @@ interface DeleteRoleConfigResponse extends IResponse {
   message: string;
 }
 
-interface DeleteRoleConfigEnv extends IAdminEnv {
-  AccessBridgeDB: D1Database;
-}
+type DeleteRoleConfigEnv = IAdminEnv;
 
 export { DeleteRoleConfigRoute };
 export type { DeleteRoleConfigRequest, DeleteRoleConfigResponse };

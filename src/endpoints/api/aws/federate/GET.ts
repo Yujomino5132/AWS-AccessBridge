@@ -227,7 +227,6 @@ type FederateResponse = IResponse;
 
 interface FederateEnv extends IEnv {
   SELF: Fetcher;
-  AccessBridgeDB: D1Database;
   INTERNAL_HMAC_SECRET: SecretsStoreSecret;
 }
 

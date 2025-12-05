@@ -225,7 +225,6 @@ interface RemoveCredentialRelationshipResponse extends IResponse {
 }
 
 interface RemoveCredentialRelationshipEnv extends IAdminEnv {
-  AccessBridgeDB: D1Database;
   AES_ENCRYPTION_KEY_SECRET: SecretsStoreSecret;
 }
 

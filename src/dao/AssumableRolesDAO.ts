@@ -2,9 +2,9 @@ import { DatabaseError, UnauthorizedError } from '@/error';
 import type { AssumableAccountsMap } from '@/model';
 
 class AssumableRolesDAO {
-  protected readonly database: D1Database;
+  protected readonly database: D1Database | D1DatabaseSession;
 
-  constructor(database: D1Database) {
+  constructor(database: D1Database | D1DatabaseSession) {
     this.database = database;
   }
 

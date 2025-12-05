@@ -9,10 +9,10 @@ class CredentialsCacheDAO {
   protected static readonly ERROR_MESSAGE_MASTER_KEY_MISSING: string =
     'The operation cannot be completed because the master key is missing.';
 
-  protected readonly database: D1Database;
+  protected readonly database: D1Database | D1DatabaseSession;
   protected readonly masterKey?: string | undefined;
 
-  constructor(database: D1Database, masterKey?: string | undefined) {
+  constructor(database: D1Database | D1DatabaseSession, masterKey?: string | undefined) {
     this.database = database;
     this.masterKey = masterKey;
   }

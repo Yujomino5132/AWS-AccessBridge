@@ -31,9 +31,7 @@ abstract class IAdminActivityAPIRoute<
   ): Promise<TResponse | ExtendedResponse<TResponse>>;
 }
 
-interface IAdminEnv extends IEnv {
-  AccessBridgeDB: D1Database;
-}
+type IAdminEnv = IEnv;
 
 export { IAdminActivityAPIRoute };
 export type { IAdminEnv, ActivityContext, IRequest, IResponse, ExtendedResponse };

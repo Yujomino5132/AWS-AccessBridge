@@ -166,9 +166,7 @@ type ListAssumablesRequest = IRequest;
 
 interface ListAssumablesResponse extends IResponse, AssumableAccountsMap {}
 
-interface ListAssumablesEnv extends IEnv {
-  AccessBridgeDB: D1Database;
-}
+type ListAssumablesEnv = IEnv;
 
 export { ListAssumablesRoute };
 export type { ListAssumablesRequest, ListAssumablesResponse };

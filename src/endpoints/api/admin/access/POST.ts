@@ -253,9 +253,7 @@ interface GrantAccessResponse extends IResponse {
   message: string;
 }
 
-interface GrantAccessEnv extends IAdminEnv {
-  AccessBridgeDB: D1Database;
-}
+type GrantAccessEnv = IAdminEnv;
 
 export { GrantAccessRoute };
 export type { GrantAccessRequest, GrantAccessResponse };

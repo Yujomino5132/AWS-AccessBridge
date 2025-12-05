@@ -3,6 +3,7 @@ import { Context } from 'hono';
 import type { StatusCode } from 'hono/utils/http-status';
 import { EmailValidationUtil, BaseUrlUtil } from '@/utils';
 import { DefaultInternalServerError, InternalServerError, IServiceError } from '@/error';
+import { D1_SESSION_CONSTRAINT_FIRST_UNCONSTRAINED } from '@/constants';
 
 abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IResponse, TEnv extends IEnv> extends OpenAPIRoute {
   async handle(c: ActivityContext<TEnv>) {
@@ -16,7 +17,8 @@ abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IR
         body = {};
       }
       const request: TRequest = { ...(body as TRequest), raw: c.req };
-      const response: TResponse | ExtendedResponse<TResponse> = await this.handleRequest(request, c.env as TEnv, c);
+      const env: TEnv = { ...(c.env as TEnv), AccessBridgeDB: c.env.AccessBridgeDB.withSession(D1_SESSION_CONSTRAINT_FIRST_UNCONSTRAINED) };
+      const response: TResponse | ExtendedResponse<TResponse> = await this.handleRequest(request, env, c);
       if (response && typeof response === 'object' && ('body' in response || 'statusCode' in response || 'headers' in response)) {
         const extendedResponse: ExtendedResponse<TResponse> = response as ExtendedResponse<TResponse>;
         const statusCode: StatusCode = extendedResponse.statusCode || 200;
@@ -83,6 +85,7 @@ interface IEnv {
   Variables: {
     AuthenticatedUserEmailAddress: string;
   };
+  AccessBridgeDB: D1DatabaseSession;
 }
 
 type ActivityContext<TEnv extends IEnv> = Context<{ Bindings: Env } & TEnv>;

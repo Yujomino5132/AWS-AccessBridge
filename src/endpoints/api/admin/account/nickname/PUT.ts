@@ -219,9 +219,7 @@ interface SetAccountNicknameResponse extends IResponse {
   nickname: string;
 }
 
-interface SetAccountNicknameEnv extends IAdminEnv {
-  AccessBridgeDB: D1Database;
-}
+type SetAccountNicknameEnv = IAdminEnv;
 
 export { SetAccountNicknameRoute };
 export type { SetAccountNicknameRequest, SetAccountNicknameResponse };

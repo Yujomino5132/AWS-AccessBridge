@@ -279,9 +279,7 @@ interface SetRoleConfigResponse extends IResponse {
   message: string;
 }
 
-interface SetRoleConfigEnv extends IAdminEnv {
-  AccessBridgeDB: D1Database;
-}
+type SetRoleConfigEnv = IAdminEnv;
 
 export { SetRoleConfigRoute };
 export type { SetRoleConfigRequest, SetRoleConfigResponse };

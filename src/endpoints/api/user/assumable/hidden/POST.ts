@@ -180,9 +180,7 @@ interface HideRoleResponse extends IResponse {
   success: boolean;
 }
 
-interface HideRoleEnv extends IEnv {
-  AccessBridgeDB: D1Database;
-}
+type HideRoleEnv = IEnv;
 
 export { HideRoleRoute };
 export type { HideRoleRequest, HideRoleResponse };

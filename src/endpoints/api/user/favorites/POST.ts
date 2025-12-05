@@ -67,9 +67,7 @@ interface FavoriteAccountResponse extends IResponse {
   success: boolean;
 }
 
-interface FavoriteAccountEnv extends IEnv {
-  AccessBridgeDB: D1Database;
-}
+type FavoriteAccountEnv = IEnv;
 
 export { FavoriteAccountRoute };
 export type { FavoriteAccountRequest, FavoriteAccountResponse };

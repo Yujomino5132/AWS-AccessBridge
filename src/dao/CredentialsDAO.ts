@@ -5,10 +5,10 @@ import { decryptDataOptional, encryptData } from '@/crypto/aes-gcm';
 class CredentialsDAO {
   protected static readonly ASSUME_ROLE_CHAIN_LIMIT: number = 3;
 
-  protected readonly database: D1Database;
+  protected readonly database: D1Database | D1DatabaseSession;
   protected readonly masterKey: string;
 
-  constructor(database: D1Database, masterKey: string) {
+  constructor(database: D1Database | D1DatabaseSession, masterKey: string) {
     this.database = database;
     this.masterKey = masterKey;
   }

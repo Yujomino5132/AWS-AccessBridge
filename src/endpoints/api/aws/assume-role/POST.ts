@@ -351,7 +351,6 @@ interface AssumeRoleResponse extends IResponse {
 }
 
 interface AssumeRoleEnv extends IEnv {
-  AccessBridgeDB: D1Database;
   AES_ENCRYPTION_KEY_SECRET: SecretsStoreSecret;
 }
 
