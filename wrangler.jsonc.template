@@ -13,7 +13,7 @@
   },
   "routes": [],
   "placement": {
-    "mode": "smart",
+    "mode": "off",
   },
   "assets": {
     "directory": "./app/dist/",
