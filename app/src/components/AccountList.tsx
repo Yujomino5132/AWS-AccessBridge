@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AccessKeyModal from './AccessKeyModal';
 
 type RoleMap = Record<string, { roles: string[]; nickname?: string; favorite: boolean }>;
@@ -21,50 +21,65 @@ export default function AccountList({ showHidden }: AccountListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalAccounts, setTotalAccounts] = useState(0);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [showHidden]);
-
-  useEffect(() => {
+  const fetchAccounts = useCallback(async () => {
     setIsLoading(true);
     const backendUrl = import.meta.env.VITE_OPTIONAL_BACKEND_URL || '';
     const baseUrl = backendUrl ? backendUrl : '';
-    const offset = (currentPage - 1) * pageSize;
-    const params = new URLSearchParams();
-    if (showHidden) params.set('showHidden', 'true');
-    params.set('limit', pageSize.toString());
-    params.set('offset', offset.toString());
-    const url = `${baseUrl}/api/user/assumables?${params.toString()}`;
 
-    fetch(url)
-      .then(async (res) => {
-        if (res.status === 401) {
-          window.location.reload();
-          return;
-        }
-        if (!res.ok) {
-          const errorData = await res.json().catch(() => null);
-          const errorMsg = errorData?.Exception?.Message || `Failed to load accounts: ${res.status} ${res.statusText}`;
-          throw new Error(errorMsg);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        if (data) {
+    let url: string;
+    if (searchTerm.trim()) {
+      const params = new URLSearchParams();
+      params.set('q', searchTerm.trim());
+      if (showHidden) params.set('showHidden', 'true');
+      url = `${baseUrl}/api/user/assumables/search?${params.toString()}`;
+    } else {
+      const offset = (currentPage - 1) * pageSize;
+      const params = new URLSearchParams();
+      if (showHidden) params.set('showHidden', 'true');
+      params.set('limit', pageSize.toString());
+      params.set('offset', offset.toString());
+      url = `${baseUrl}/api/user/assumables?${params.toString()}`;
+    }
+
+    try {
+      const res = await fetch(url);
+      if (res.status === 401) {
+        window.location.reload();
+        return;
+      }
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null);
+        const errorMsg = errorData?.Exception?.Message || `Failed to load accounts: ${res.status} ${res.statusText}`;
+        throw new Error(errorMsg);
+      }
+
+      const data = await res.json();
+      if (data) {
+        if (searchTerm.trim()) {
+          setRolesData(data);
+          setTotalAccounts(Object.keys(data).length);
+        } else {
           const { totalAccounts, ...accounts } = data;
           setRolesData(accounts);
           setTotalAccounts(totalAccounts);
-          setExpanded(Object.fromEntries(Object.keys(accounts).map((id) => [id, false])));
-          setError(null);
         }
-      })
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Failed to load AWS accounts');
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [showHidden, currentPage, pageSize]);
+        setExpanded(Object.fromEntries(Object.keys(searchTerm.trim() ? data : data).map((id) => [id, false])));
+        setError(null);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load AWS accounts');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [showHidden, currentPage, pageSize, searchTerm]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [showHidden, searchTerm]);
+
+  useEffect(() => {
+    fetchAccounts();
+  }, [fetchAccounts]);
 
   const toggleExpand = (id: string) => {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -154,12 +169,7 @@ export default function AccountList({ showHidden }: AccountListProps) {
     }
   };
 
-  const filteredAccounts = Object.entries(rolesData).filter(([accountId, accountData]) => {
-    const term = searchTerm.toLowerCase();
-    return accountId.includes(term) || (accountData.nickname?.toLowerCase().includes(term) ?? false);
-  });
-
-  const totalPages = Math.ceil(totalAccounts / pageSize);
+  const totalPages = searchTerm.trim() ? 1 : Math.ceil(totalAccounts / pageSize);
 
   return (
     <div>
@@ -173,77 +183,79 @@ export default function AccountList({ showHidden }: AccountListProps) {
             className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-400 focus:outline-none"
           />
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <label className="text-sm text-gray-300">Accounts per page:</label>
-                <select
-                  value={pageSize}
-                  onChange={(e) => {
-                    setPageSize(Number(e.target.value));
-                    setCurrentPage(1);
-                  }}
-                  className="px-2 py-1 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-400 focus:outline-none"
-                >
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                </select>
+          {!searchTerm.trim() && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <label className="text-sm text-gray-300">Accounts per page:</label>
+                  <select
+                    value={pageSize}
+                    onChange={(e) => {
+                      setPageSize(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                    className="px-2 py-1 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-400 focus:outline-none"
+                  >
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                  </select>
+                </div>
+                <div className="text-sm text-gray-400">
+                  Showing {Math.min((currentPage - 1) * pageSize + 1, totalAccounts)}-{Math.min(currentPage * pageSize, totalAccounts)} of{' '}
+                  {totalAccounts} accounts
+                </div>
               </div>
-              <div className="text-sm text-gray-400">
-                Showing {Math.min((currentPage - 1) * pageSize + 1, totalAccounts)}-{Math.min(currentPage * pageSize, totalAccounts)} of{' '}
-                {totalAccounts} accounts
-              </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center space-x-1">
+                  <button
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className="px-2 py-1 text-sm bg-gray-700 text-white rounded border border-gray-600 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`px-3 py-1 text-sm rounded border ${
+                          currentPage === pageNum
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'bg-gray-700 text-white border-gray-600 hover:bg-gray-600'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-2 py-1 text-sm bg-gray-700 text-white rounded border border-gray-600 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
-
-            {totalPages > 1 && (
-              <div className="flex items-center space-x-1">
-                <button
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className="px-2 py-1 text-sm bg-gray-700 text-white rounded border border-gray-600 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Previous
-                </button>
-
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum;
-                  if (totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (currentPage <= 3) {
-                    pageNum = i + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    pageNum = currentPage - 2 + i;
-                  }
-
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
-                      className={`px-3 py-1 text-sm rounded border ${
-                        currentPage === pageNum
-                          ? 'bg-blue-600 text-white border-blue-600'
-                          : 'bg-gray-700 text-white border-gray-600 hover:bg-gray-600'
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-
-                <button
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                  className="px-2 py-1 text-sm bg-gray-700 text-white rounded border border-gray-600 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Next
-                </button>
-              </div>
-            )}
-          </div>
+          )}
         </div>
       )}
       {isLoading && (
@@ -281,7 +293,7 @@ export default function AccountList({ showHidden }: AccountListProps) {
         </div>
       )}
       {!isLoading &&
-        filteredAccounts.map(([accountId, accountData]) => (
+        Object.entries(rolesData).map(([accountId, accountData]) => (
           <div key={accountId} className="bg-gray-800 rounded p-4 my-2 text-white shadow">
             <div className="flex items-center justify-between">
               <div className="flex items-center cursor-pointer" onClick={() => toggleExpand(accountId)}>
