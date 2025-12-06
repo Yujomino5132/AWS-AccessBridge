@@ -83,9 +83,16 @@ export default function App() {
           <AdminPage />
         ) : (
           <>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold">AWS Accounts</h2>
-              <div className="relative filter-dropdown">
+            <div className="flex items-center mb-4">
+              <h2 className="text-2xl font-bold flex-shrink-0">AWS Accounts</h2>
+              <input
+                type="text"
+                placeholder="Search by account id or nickname"
+                value={searchTerm}
+                onChange={(e) => handleSearchTermChange(e.target.value)}
+                className="flex-1 mx-6 px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-400 focus:outline-none"
+              />
+              <div className="relative filter-dropdown flex-shrink-0">
                 <button
                   onClick={() => setFilterOpen(!filterOpen)}
                   className="flex items-center text-gray-300 hover:text-white transition-colors"
@@ -118,13 +125,6 @@ export default function App() {
               </div>
             </div>
             <div className="mb-4 space-y-4">
-              <input
-                type="text"
-                placeholder="Search by account id or nickname"
-                value={searchTerm}
-                onChange={(e) => handleSearchTermChange(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-400 focus:outline-none"
-              />
               {!searchTerm.trim() && (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
