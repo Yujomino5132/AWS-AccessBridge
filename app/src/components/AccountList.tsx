@@ -7,9 +7,11 @@ interface AccountListProps {
   showHidden: boolean;
   searchTerm: string;
   pageSize: number;
+  currentPage: number;
+  setTotalAccounts: (count: number) => void;
 }
 
-export default function AccountList({ showHidden, searchTerm, pageSize }: AccountListProps) {
+export default function AccountList({ showHidden, searchTerm, pageSize, currentPage, setTotalAccounts }: AccountListProps) {
   const [rolesData, setRolesData] = useState<RoleMap>({});
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -18,8 +20,6 @@ export default function AccountList({ showHidden, searchTerm, pageSize }: Accoun
   const [loadingKeys, setLoadingKeys] = useState<string | null>(null);
   const [loadingConsole, setLoadingConsole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalAccounts, setTotalAccounts] = useState(0);
 
   const fetchAccounts = useCallback(async () => {
     setIsLoading(true);
@@ -71,11 +71,7 @@ export default function AccountList({ showHidden, searchTerm, pageSize }: Accoun
     } finally {
       setIsLoading(false);
     }
-  }, [showHidden, currentPage, pageSize, searchTerm]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [showHidden, searchTerm]);
+  }, [showHidden, currentPage, pageSize, searchTerm, setTotalAccounts]);
 
   useEffect(() => {
     fetchAccounts();
@@ -169,62 +165,8 @@ export default function AccountList({ showHidden, searchTerm, pageSize }: Accoun
     }
   };
 
-  const totalPages = searchTerm.trim() ? 1 : Math.ceil(totalAccounts / pageSize);
-
   return (
     <div>
-      {!isLoading && !searchTerm.trim() && totalAccounts > 0 && totalPages > 1 && (
-        <div className="mb-4 flex items-center justify-between">
-          <div className="text-sm text-gray-400">
-            Showing {Math.min((currentPage - 1) * pageSize + 1, totalAccounts)}-{Math.min(currentPage * pageSize, totalAccounts)} of{' '}
-            {totalAccounts} accounts
-          </div>
-          <div className="flex items-center space-x-1">
-            <button
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className="px-2 py-1 text-sm bg-gray-700 text-white rounded border border-gray-600 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Previous
-            </button>
-
-            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              let pageNum;
-              if (totalPages <= 5) {
-                pageNum = i + 1;
-              } else if (currentPage <= 3) {
-                pageNum = i + 1;
-              } else if (currentPage >= totalPages - 2) {
-                pageNum = totalPages - 4 + i;
-              } else {
-                pageNum = currentPage - 2 + i;
-              }
-
-              return (
-                <button
-                  key={pageNum}
-                  onClick={() => setCurrentPage(pageNum)}
-                  className={`px-3 py-1 text-sm rounded border ${
-                    currentPage === pageNum
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'bg-gray-700 text-white border-gray-600 hover:bg-gray-600'
-                  }`}
-                >
-                  {pageNum}
-                </button>
-              );
-            })}
-
-            <button
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
-              className="px-2 py-1 text-sm bg-gray-700 text-white rounded border border-gray-600 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
       {isLoading && (
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto mb-4"></div>
@@ -245,7 +187,7 @@ export default function AccountList({ showHidden, searchTerm, pageSize }: Accoun
           </div>
         </div>
       )}
-      {!error && totalAccounts === 0 && !isLoading && (
+      {!error && Object.keys(rolesData).length === 0 && !isLoading && (
         <div className="bg-yellow-800 border border-yellow-600 text-yellow-200 px-4 py-3 rounded mb-4">
           <div className="flex items-center">
             <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
