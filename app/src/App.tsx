@@ -11,7 +11,10 @@ export default function App() {
   const [showHidden, setShowHidden] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(() => {
+    const saved = localStorage.getItem('aws-access-bridge-page-size');
+    return saved ? parseInt(saved, 10) : 10;
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const [totalAccounts, setTotalAccounts] = useState(0);
 
@@ -28,6 +31,10 @@ export default function App() {
     setSearchTerm(term);
     setCurrentPage(1);
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('aws-access-bridge-page-size', pageSize.toString());
+  }, [pageSize]);
 
   useEffect(() => {
     const checkAuth = async () => {
