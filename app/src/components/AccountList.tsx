@@ -17,12 +17,25 @@ export default function AccountList({ showHidden }: AccountListProps) {
   const [loadingConsole, setLoadingConsole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalAccounts, setTotalAccounts] = useState(0);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [showHidden]);
 
   useEffect(() => {
     setIsLoading(true);
     const backendUrl = import.meta.env.VITE_OPTIONAL_BACKEND_URL || '';
     const baseUrl = backendUrl ? backendUrl : '';
-    const url = `${baseUrl}/api/user/assumables${showHidden ? '?showHidden=true' : ''}`;
+    const offset = (currentPage - 1) * pageSize;
+    const params = new URLSearchParams();
+    if (showHidden) params.set('showHidden', 'true');
+    params.set('limit', pageSize.toString());
+    params.set('offset', offset.toString());
+    const url = `${baseUrl}/api/user/assumables?${params.toString()}`;
+
     fetch(url)
       .then(async (res) => {
         if (res.status === 401) {
@@ -38,8 +51,10 @@ export default function AccountList({ showHidden }: AccountListProps) {
       })
       .then((data) => {
         if (data) {
-          setRolesData(data);
-          setExpanded(Object.fromEntries(Object.keys(data).map((id) => [id, false])));
+          const { totalAccounts, ...accounts } = data;
+          setRolesData(accounts);
+          setTotalAccounts(totalAccounts);
+          setExpanded(Object.fromEntries(Object.keys(accounts).map((id) => [id, false])));
           setError(null);
         }
       })
@@ -49,7 +64,7 @@ export default function AccountList({ showHidden }: AccountListProps) {
       .finally(() => {
         setIsLoading(false);
       });
-  }, [showHidden]);
+  }, [showHidden, currentPage, pageSize]);
 
   const toggleExpand = (id: string) => {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -144,10 +159,12 @@ export default function AccountList({ showHidden }: AccountListProps) {
     return accountId.includes(term) || (accountData.nickname?.toLowerCase().includes(term) ?? false);
   });
 
+  const totalPages = Math.ceil(totalAccounts / pageSize);
+
   return (
     <div>
-      {!isLoading && Object.keys(rolesData).length > 0 && (
-        <div className="mb-4">
+      {!isLoading && totalAccounts > 0 && (
+        <div className="mb-4 space-y-4">
           <input
             type="text"
             placeholder="Search by account id or nickname"
@@ -155,6 +172,78 @@ export default function AccountList({ showHidden }: AccountListProps) {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-400 focus:outline-none"
           />
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <label className="text-sm text-gray-300">Accounts per page:</label>
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="px-2 py-1 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-400 focus:outline-none"
+                >
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+              </div>
+              <div className="text-sm text-gray-400">
+                Showing {Math.min((currentPage - 1) * pageSize + 1, totalAccounts)}-{Math.min(currentPage * pageSize, totalAccounts)} of{' '}
+                {totalAccounts} accounts
+              </div>
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex items-center space-x-1">
+                <button
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="px-2 py-1 text-sm bg-gray-700 text-white rounded border border-gray-600 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`px-3 py-1 text-sm rounded border ${
+                        currentPage === pageNum
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'bg-gray-700 text-white border-gray-600 hover:bg-gray-600'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+
+                <button
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-2 py-1 text-sm bg-gray-700 text-white rounded border border-gray-600 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
       {isLoading && (
@@ -177,7 +266,7 @@ export default function AccountList({ showHidden }: AccountListProps) {
           </div>
         </div>
       )}
-      {!error && Object.keys(rolesData).length === 0 && !isLoading && (
+      {!error && totalAccounts === 0 && !isLoading && (
         <div className="bg-yellow-800 border border-yellow-600 text-yellow-200 px-4 py-3 rounded mb-4">
           <div className="flex items-center">
             <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
