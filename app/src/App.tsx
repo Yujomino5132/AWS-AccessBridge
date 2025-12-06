@@ -10,6 +10,8 @@ export default function App() {
   const [currentView, setCurrentView] = useState<'accounts' | 'admin'>('accounts');
   const [showHidden, setShowHidden] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -94,7 +96,33 @@ export default function App() {
                 )}
               </div>
             </div>
-            <AccountList showHidden={showHidden} />
+            <div className="mb-4 space-y-4">
+              <input
+                type="text"
+                placeholder="Search by account id or nickname"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-400 focus:outline-none"
+              />
+              {!searchTerm.trim() && (
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <label className="text-sm text-gray-300">Accounts per page:</label>
+                    <select
+                      value={pageSize}
+                      onChange={(e) => setPageSize(Number(e.target.value))}
+                      className="px-2 py-1 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-400 focus:outline-none"
+                    >
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+            <AccountList showHidden={showHidden} searchTerm={searchTerm} pageSize={pageSize} />
           </>
         )}
       </div>
