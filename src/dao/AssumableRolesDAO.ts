@@ -203,6 +203,47 @@ class AssumableRolesDAO {
       throw new DatabaseError(`Failed to unhide role: ${result.error}`);
     }
   }
+
+  /**
+   * Searches accounts by AWS account ID or nickname that the user has access to.
+   * @param userEmail The email address of the user.
+   * @param query The search query to match against account ID or nickname.
+   * @param showHidden Whether to include hidden roles. Defaults to false.
+   * @returns A map of matching AWS account IDs to objects containing roles and account nickname.
+   */
+  public async searchAccountsByQuery(userEmail: string, query: string, showHidden: boolean = false): Promise<AssumableAccountsMap> {
+    const hiddenFilter: string = showHidden ? '' : 'AND (ar.hidden IS NULL OR ar.hidden = FALSE)';
+    const results: D1Result<GetAllRolesByUserEmailInternal> = await this.database
+      .prepare(
+        `SELECT ar.aws_account_id, ar.role_name, aa.aws_account_nickname, 
+                CASE WHEN ufa.aws_account_id IS NOT NULL THEN 1 ELSE 0 END as is_favorite
+         FROM assumable_roles ar
+         LEFT JOIN aws_accounts aa ON ar.aws_account_id = aa.aws_account_id
+         LEFT JOIN user_favorite_accounts ufa ON ar.aws_account_id = ufa.aws_account_id AND ufa.user_email = ?
+         WHERE ar.user_email = ? ${hiddenFilter}
+           AND (ar.aws_account_id LIKE ? OR aa.aws_account_nickname LIKE ?)
+         ORDER BY is_favorite DESC, 
+                  CASE WHEN aa.aws_account_nickname IS NOT NULL THEN 0 ELSE 1 END,
+                  COALESCE(aa.aws_account_nickname, ar.aws_account_id)`,
+      )
+      .bind(userEmail, userEmail, `%${query}%`, `%${query}%`)
+      .all<GetAllRolesByUserEmailInternal>();
+    if (results && results.results) {
+      const roleMap: AssumableAccountsMap = {};
+      for (const row of results.results) {
+        if (!roleMap[row.aws_account_id]) {
+          roleMap[row.aws_account_id] = {
+            roles: [],
+            nickname: row.aws_account_nickname || undefined,
+            favorite: row.is_favorite === 1,
+          };
+        }
+        roleMap[row.aws_account_id].roles.push(row.role_name);
+      }
+      return roleMap;
+    }
+    return {};
+  }
 }
 
 interface GetRolesByUserAndAccountInternal {

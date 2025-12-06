@@ -215,7 +215,7 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
 
 type ListAssumablesRequest = IRequest;
 
-interface ListAssumablesResponse extends IResponse, AssumableAccountsResponse {}
+type ListAssumablesResponse = IResponse & AssumableAccountsResponse;
 
 type ListAssumablesEnv = IEnv;
 

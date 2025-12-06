@@ -9,6 +9,7 @@ import {
   AssumeRoleRoute,
   FederateRoute,
   ListAssumablesRoute,
+  SearchAccountsRoute,
   GetCurrentUserRoute,
   GrantAccessRoute,
   RevokeAccessRoute,
@@ -54,6 +55,7 @@ class AccessBridgeWorker extends AbstractWorker {
 
     // User Routes
     openapi.get('/api/user/assumables', ListAssumablesRoute);
+    openapi.get('/api/user/assumables/search', SearchAccountsRoute);
     openapi.get('/api/user/me', GetCurrentUserRoute);
     openapi.post('/api/user/favorites', FavoriteAccountRoute);
     openapi.delete('/api/user/favorites', UnfavoriteAccountRoute);
