@@ -1,7 +1,7 @@
 import { AssumableRolesDAO } from '@/dao';
 import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
 import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
-import type { AssumableAccountsMap } from '@/model';
+import type { AssumableAccountsMap, AssumableAccountsResponse } from '@/model';
 
 class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListAssumablesResponse, ListAssumablesEnv> {
   schema = {
@@ -51,6 +51,13 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
           'application/json': {
             schema: {
               type: 'object' as const,
+              properties: {
+                totalAccounts: {
+                  type: 'integer' as const,
+                  description: 'Total number of AWS accounts the user has access to',
+                  minimum: 0,
+                },
+              },
               additionalProperties: {
                 type: 'object' as const,
                 properties: {
@@ -74,8 +81,10 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
                 },
                 required: ['roles'],
               },
-              description: 'Map of AWS Account IDs to objects containing role arrays and optional nicknames',
+              required: ['totalAccounts'],
+              description: 'Map of AWS Account IDs to objects containing role arrays and optional nicknames, plus total account count',
               example: {
+                totalAccounts: 3,
                 '123456789012': { roles: ['ReadOnlyRole', 'DeveloperRole', 'AdminRole'], nickname: 'Production', favorite: true },
                 '987654321098': { roles: ['CrossAccountRole'], favorite: false },
                 '555666777888': { roles: ['AuditorRole', 'ReadOnlyRole'], nickname: 'Development', favorite: true },
@@ -85,6 +94,7 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
               'visible-roles-only': {
                 summary: 'User with visible roles only (default behavior)',
                 value: {
+                  totalAccounts: 2,
                   '123456789012': { roles: ['ReadOnlyRole', 'DeveloperRole'], nickname: 'Production', favorite: true },
                   '987654321098': { roles: ['AdminRole'], favorite: false },
                 },
@@ -92,6 +102,7 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
               'with-hidden-roles': {
                 summary: 'User with hidden roles included (showHidden=true)',
                 value: {
+                  totalAccounts: 2,
                   '123456789012': { roles: ['ReadOnlyRole', 'DeveloperRole', 'HiddenRole'], nickname: 'Production', favorite: true },
                   '987654321098': { roles: ['AdminRole', 'AnotherHiddenRole'], favorite: false },
                 },
@@ -99,18 +110,22 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
               'with-pagination': {
                 summary: 'Paginated results (limit=2&offset=0)',
                 value: {
+                  totalAccounts: 3,
                   '123456789012': { roles: ['ReadOnlyRole', 'DeveloperRole'], nickname: 'Production', favorite: true },
                 },
               },
               'single-account': {
                 summary: 'User with roles in one account',
                 value: {
+                  totalAccounts: 1,
                   '123456789012': { roles: ['ReadOnlyRole', 'DeveloperRole', 'AdminRole'], nickname: 'Production', favorite: true },
                 },
               },
               'no-roles': {
                 summary: 'User with no assumable roles',
-                value: {},
+                value: {
+                  totalAccounts: 0,
+                },
               },
             },
           },
@@ -189,13 +204,18 @@ class ListAssumablesRoute extends IActivityAPIRoute<ListAssumablesRequest, ListA
     const offsetParam: string | null = url.searchParams.get('offset');
     const limit: number = limitParam ? Math.max(1, Math.min(200, parseInt(limitParam, 10))) : 50;
     const offset: number = offsetParam ? Math.max(0, parseInt(offsetParam, 10)) : 0;
-    return assumableRolesDAO.getAllRolesByUserEmail(userEmail, showHidden, limit, offset);
+    const totalAccounts: number = await assumableRolesDAO.getTotalAccountsCount(userEmail, showHidden);
+    const assumableAccountsMap: AssumableAccountsMap = await assumableRolesDAO.getAllRolesByUserEmail(userEmail, showHidden, limit, offset);
+    return {
+      ...assumableAccountsMap,
+      totalAccounts: totalAccounts,
+    };
   }
 }
 
 type ListAssumablesRequest = IRequest;
 
-interface ListAssumablesResponse extends IResponse, AssumableAccountsMap {}
+interface ListAssumablesResponse extends IResponse, AssumableAccountsResponse {}
 
 type ListAssumablesEnv = IEnv;
 

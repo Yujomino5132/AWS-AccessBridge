@@ -6,4 +6,9 @@ interface AssumableAccount {
 
 type AssumableAccountsMap = Record<string, AssumableAccount>;
 
-export type { AssumableAccount, AssumableAccountsMap };
+interface AssumableAccountsResponse {
+  [accountId: string]: AssumableAccount | number;
+  totalAccounts: number;
+}
+
+export type { AssumableAccount, AssumableAccountsMap, AssumableAccountsResponse };

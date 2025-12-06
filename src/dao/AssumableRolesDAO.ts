@@ -33,6 +33,25 @@ class AssumableRolesDAO {
   }
 
   /**
+   * Gets the total count of unique accounts accessible by the user.
+   * @param userEmail The email address of the user.
+   * @param showHidden Whether to include hidden roles in the count.
+   * @returns The total number of unique accounts.
+   */
+  public async getTotalAccountsCount(userEmail: string, showHidden: boolean): Promise<number> {
+    const hiddenFilter: string = showHidden ? '' : 'AND (ar.hidden IS NULL OR ar.hidden = FALSE)';
+    const countResult: D1Result<GetTotalAccountsCountInternal> = await this.database
+      .prepare(
+        `SELECT COUNT(DISTINCT ar.aws_account_id) as total_accounts
+         FROM assumable_roles ar
+         WHERE ar.user_email = ? ${hiddenFilter}`,
+      )
+      .bind(userEmail)
+      .all<GetTotalAccountsCountInternal>();
+    return countResult?.results?.[0]?.total_accounts || 0;
+  }
+
+  /**
    * Retrieves all assumable roles for the specified user across all accessible AWS accounts.
    * @param userEmail The email address of the user.
    * @param showHidden Whether to include hidden roles in the results. Defaults to false.
@@ -62,24 +81,21 @@ class AssumableRolesDAO {
       )
       .bind(userEmail, userEmail, limit, offset)
       .all<GetAllRolesByUserEmailInternal>();
-
-    if (!results || !results.results) {
-      return {};
-    }
-
-    const roleMap: AssumableAccountsMap = {};
-    for (const row of results.results) {
-      if (!roleMap[row.aws_account_id]) {
-        roleMap[row.aws_account_id] = {
-          roles: [],
-          nickname: row.aws_account_nickname || undefined,
-          favorite: row.is_favorite === 1,
-        };
+    if (results && results.results) {
+      const roleMap: AssumableAccountsMap = {};
+      for (const row of results.results) {
+        if (!roleMap[row.aws_account_id]) {
+          roleMap[row.aws_account_id] = {
+            roles: [],
+            nickname: row.aws_account_nickname || undefined,
+            favorite: row.is_favorite === 1,
+          };
+        }
+        roleMap[row.aws_account_id].roles.push(row.role_name);
       }
-      roleMap[row.aws_account_id].roles.push(row.role_name);
+      return roleMap;
     }
-
-    return roleMap;
+    return {};
   }
 
   /**
@@ -198,6 +214,10 @@ interface GetAllRolesByUserEmailInternal {
   role_name: string;
   aws_account_nickname: string | null;
   is_favorite: number;
+}
+
+interface GetTotalAccountsCountInternal {
+  total_accounts: number;
 }
 
 export { AssumableRolesDAO };
