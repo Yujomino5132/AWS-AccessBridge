@@ -1,11 +1,14 @@
-interface UserAccessToken {
+interface UserAccessTokenMetadata {
   tokenId: string;
   userEmail: string;
-  accessToken: string;
   name: string;
   createdAt: number;
   expiresAt: number;
   lastUsedAt?: number | undefined;
+}
+
+interface UserAccessToken extends UserAccessTokenMetadata {
+  accessToken: string;
 }
 
 interface UserAccessTokenInternal {
@@ -18,4 +21,4 @@ interface UserAccessTokenInternal {
   last_used_at?: number | undefined;
 }
 
-export type { UserAccessToken, UserAccessTokenInternal };
+export type { UserAccessToken, UserAccessTokenMetadata, UserAccessTokenInternal };
