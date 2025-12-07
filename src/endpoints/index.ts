@@ -20,6 +20,9 @@ import { UnhideRoleRoute as OriginalUnhideRoleRoute } from './api/user/assumable
 import { SetRoleConfigRoute as OriginalSetRoleConfigRoute } from './api/admin/role/config/PUT';
 import { DeleteRoleConfigRoute as OriginalDeleteRoleConfigRoute } from './api/admin/role/config/DELETE';
 import { FederateWrapperRoute as OriginalFederateWrapperRoute } from './federate/GET';
+import { CreateTokenRoute as OriginalCreateTokenRoute } from './api/user/token/POST';
+import { DeleteTokenRoute as OriginalDeleteTokenRoute } from './api/user/token/DELETE';
+import { ListTokensRoute as OriginalListTokensRoute } from './api/user/tokens/GET';
 
 export const GenerateConsoleUrlRoute: any = OriginalGenerateConsoleUrlRoute;
 export const AssumeRoleRoute: any = OriginalAssumeRoleRoute;
@@ -41,3 +44,6 @@ export const UnhideRoleRoute: any = OriginalUnhideRoleRoute;
 export const SetRoleConfigRoute: any = OriginalSetRoleConfigRoute;
 export const DeleteRoleConfigRoute: any = OriginalDeleteRoleConfigRoute;
 export const FederateWrapperRoute: any = OriginalFederateWrapperRoute;
+export const CreateTokenRoute: any = OriginalCreateTokenRoute;
+export const DeleteTokenRoute: any = OriginalDeleteTokenRoute;
+export const ListTokensRoute: any = OriginalListTokensRoute;

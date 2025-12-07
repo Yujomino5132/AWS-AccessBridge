@@ -7,8 +7,16 @@ class TimestampUtil {
     return timestamp + minutes * 60;
   }
 
+  public static addDays(timestamp: number, days: number): number {
+    return timestamp + days * 60 * 60 * 24;
+  }
+
   public static subtractMinutes(timestamp: number, minutes: number): number {
     return timestamp - minutes * 60;
+  }
+
+  public static subtractDays(timestamp: number, days: number): number {
+    return timestamp - days * 60 * 60 * 24;
   }
 
   public static convertIsoToUnixTimestampInSeconds(isoString: string): number {

@@ -45,7 +45,9 @@
   ],
   "vars": {
     "POLICY_AUD": "you-cloudflare-zero-trust-application-aud",
-    "TEAM_DOMAIN": "https://your-cloudflare-zero-trust-team-domain.cloudflareaccess.com"
+    "TEAM_DOMAIN": "https://your-cloudflare-zero-trust-team-domain.cloudflareaccess.com",
+    "MAX_TOKENS_PER_USER": 5,
+    "MAX_TOKEN_EXPIRY_DAYS": 90,
   },
   "triggers": {
     "crons": ["*/10 * * * *"], 

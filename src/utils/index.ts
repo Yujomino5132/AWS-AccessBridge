@@ -7,5 +7,6 @@ export { EmailValidationUtil } from './EmailValidationUtil';
 export { TokenAuthUtil } from './TokenAuthUtil';
 export { ErrorDeserializer } from './ErrorDeserializer';
 export { TimestampUtil } from './TimestampUtil';
+export { UUIDUtil } from './UUIDUtil';
 
 export { InternalRequestHelper } from './helpers/InternalRequestHelper';

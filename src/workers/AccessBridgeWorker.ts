@@ -22,6 +22,9 @@ import {
   SetRoleConfigRoute,
   DeleteRoleConfigRoute,
   FederateWrapperRoute,
+  CreateTokenRoute,
+  ListTokensRoute,
+  DeleteTokenRoute,
 } from '@/endpoints';
 import { ExpiredCredentialsCleanupTask } from '@/scheduled';
 import { MiddlewareHandlers } from '@/middleware';
@@ -61,6 +64,9 @@ class AccessBridgeWorker extends AbstractWorker {
     openapi.delete('/api/user/favorites', UnfavoriteAccountRoute);
     openapi.post('/api/user/assumable/hidden', HideRoleRoute);
     openapi.delete('/api/user/assumable/hidden', UnhideRoleRoute);
+    openapi.post('/api/user/token', CreateTokenRoute);
+    openapi.delete('/api/user/token', DeleteTokenRoute);
+    openapi.get('/api/user/tokens', ListTokensRoute);
 
     // Admin Routes
     openapi.post('/api/admin/credentials', StoreCredentialRoute);
