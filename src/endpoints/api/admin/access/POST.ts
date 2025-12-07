@@ -224,21 +224,21 @@ class GrantAccessRoute extends IAdminActivityAPIRoute<GrantAccessRequest, GrantA
     env: GrantAccessEnv,
     cxt: ActivityContext<GrantAccessEnv>,
   ): Promise<GrantAccessResponse> {
-    if (!request.awsAccountId || !request.roleName) {
-      throw new BadRequestError('Missing required fields.');
+    if (request.awsAccountId && request.roleName) {
+      if (/^[0-9]{12}$/.test(request.awsAccountId)) {
+        const userEmail: string = request.userEmail || this.getAuthenticatedUserEmailAddress(cxt);
+        const assumableRolesDAO: AssumableRolesDAO = new AssumableRolesDAO(env.AccessBridgeDB);
+        const accountsDAO: AwsAccountsDAO = new AwsAccountsDAO(env.AccessBridgeDB);
+        await accountsDAO.ensureAccountExists(request.awsAccountId);
+        await assumableRolesDAO.grantUserAccessToRole(userEmail, request.awsAccountId, request.roleName);
+        return {
+          success: true,
+          message: 'Access granted successfully',
+        };
+      }
+      throw new BadRequestError('AWS Account ID must be exactly 12 digits.');
     }
-
-    const userEmail: string = request.userEmail || this.getAuthenticatedUserEmailAddress(cxt);
-    const assumableRolesDAO: AssumableRolesDAO = new AssumableRolesDAO(env.AccessBridgeDB);
-    const accountsDAO: AwsAccountsDAO = new AwsAccountsDAO(env.AccessBridgeDB);
-
-    await accountsDAO.ensureAccountExists(request.awsAccountId);
-    await assumableRolesDAO.grantUserAccessToRole(userEmail, request.awsAccountId, request.roleName);
-
-    return {
-      success: true,
-      message: 'Access granted successfully',
-    };
+    throw new BadRequestError('Missing required fields.');
   }
 }
 
