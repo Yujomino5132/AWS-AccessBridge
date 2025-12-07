@@ -31,7 +31,7 @@ class UserAccessTokenDAO {
       .prepare(
         `SELECT token_id, user_email, access_token, name, created_at, expires_at, last_used_at FROM user_access_tokens WHERE token_id = ? ${activeFilter} LIMIT 1`,
       )
-      .bind(bindings)
+      .bind(...bindings)
       .first<UserAccessTokenInternal>();
     if (result) {
       return {
@@ -54,7 +54,7 @@ class UserAccessTokenDAO {
       .prepare(
         `SELECT token_id, user_email, access_token, name, created_at, expires_at, last_used_at FROM user_access_tokens WHERE access_token = ? ${activeFilter} LIMIT 1`,
       )
-      .bind(bindings)
+      .bind(...bindings)
       .first<UserAccessTokenInternal>();
     if (result) {
       return {
