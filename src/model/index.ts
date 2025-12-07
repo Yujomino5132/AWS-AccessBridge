@@ -7,3 +7,4 @@ export type { CredentialCache, CredentialCacheInternal } from './CredentialCache
 export type { CredentialChain } from './CredentialChain';
 export type { RoleConfig, RoleConfigInternal } from './RoleConfig';
 export type { UserMetadata, UserMetadataInternal } from './UserMetadata';
+export type { UserAccessToken, UserAccessTokenInternal } from './UserAccessToken';
