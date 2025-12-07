@@ -4,6 +4,7 @@ export { AwsConsoleUtil } from './AwsConsoleUtil';
 export { BaseUrlUtil } from './BaseUrlUtil';
 export { EmailUtil } from './EmailUtil';
 export { EmailValidationUtil } from './EmailValidationUtil';
+export { TokenAuthUtil } from './TokenAuthUtil';
 export { ErrorDeserializer } from './ErrorDeserializer';
 export { TimestampUtil } from './TimestampUtil';
 

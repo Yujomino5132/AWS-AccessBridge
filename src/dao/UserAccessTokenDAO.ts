@@ -23,24 +23,50 @@ class UserAccessTokenDAO {
     }
   }
 
-  public async getById(tokenId: string): Promise<UserAccessTokenInternal | undefined> {
+  public async getById(tokenId: string, activeOnly: boolean): Promise<UserAccessTokenMetadata | undefined> {
+    const currentTime: number = TimestampUtil.getCurrentUnixTimestampInSeconds();
+    const activeFilter: string = activeOnly ? 'AND expires_at > ?' : '';
+    const bindings: unknown[] = activeOnly ? [tokenId, currentTime] : [tokenId];
     const result: UserAccessTokenInternal | null = await this.database
       .prepare(
-        'SELECT token_id, user_email, access_token, name, created_at, expires_at, last_used_at FROM user_access_tokens WHERE token_id = ? LIMIT 1',
+        `SELECT token_id, user_email, access_token, name, created_at, expires_at, last_used_at FROM user_access_tokens WHERE token_id = ? ${activeFilter} LIMIT 1`,
       )
-      .bind(tokenId)
+      .bind(bindings)
       .first<UserAccessTokenInternal>();
-    return result ?? undefined;
+    if (result) {
+      return {
+        tokenId: result.token_id,
+        userEmail: result.user_email,
+        name: result.name,
+        createdAt: result.created_at,
+        expiresAt: result.expires_at,
+        lastUsedAt: result.last_used_at,
+      };
+    }
+    return undefined;
   }
 
-  public async getByToken(token: string): Promise<UserAccessTokenInternal | undefined> {
+  public async getByToken(token: string, activeOnly: boolean): Promise<UserAccessTokenMetadata | undefined> {
+    const currentTime: number = TimestampUtil.getCurrentUnixTimestampInSeconds();
+    const activeFilter: string = activeOnly ? 'AND expires_at > ?' : '';
+    const bindings: unknown[] = activeOnly ? [token, currentTime] : [token];
     const result: UserAccessTokenInternal | null = await this.database
       .prepare(
-        'SELECT token_id, user_email, access_token, name, created_at, expires_at, last_used_at FROM user_access_tokens WHERE access_token = ? LIMIT 1',
+        `SELECT token_id, user_email, access_token, name, created_at, expires_at, last_used_at FROM user_access_tokens WHERE access_token = ? ${activeFilter} LIMIT 1`,
       )
-      .bind(token)
+      .bind(bindings)
       .first<UserAccessTokenInternal>();
-    return result ?? undefined;
+    if (result) {
+      return {
+        tokenId: result.token_id,
+        userEmail: result.user_email,
+        name: result.name,
+        createdAt: result.created_at,
+        expiresAt: result.expires_at,
+        lastUsedAt: result.last_used_at,
+      };
+    }
+    return undefined;
   }
 
   public async getByUserEmail(userEmail: string): Promise<UserAccessTokenMetadata[]> {

@@ -1,14 +1,14 @@
 import { OpenAPIRoute } from 'chanfana';
 import { Context } from 'hono';
 import type { StatusCode } from 'hono/utils/http-status';
-import { EmailValidationUtil, BaseUrlUtil } from '@/utils';
+import { EmailValidationUtil, TokenAuthUtil, BaseUrlUtil } from '@/utils';
 import { DefaultInternalServerError, InternalServerError, IServiceError } from '@/error';
 import { D1_SESSION_CONSTRAINT_FIRST_UNCONSTRAINED } from '@/constants';
 
 abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IResponse, TEnv extends IEnv> extends OpenAPIRoute {
   async handle(c: ActivityContext<TEnv>) {
     try {
-      const userEmail: string = await EmailValidationUtil.getAuthenticatedUserEmail(c.req.raw, c.env.TEAM_DOMAIN, c.env.POLICY_AUD);
+      const userEmail: string = await this.authenticateUserIdentity(c);
       c.set('AuthenticatedUserEmailAddress', userEmail);
       let body: unknown = {};
       try {
@@ -63,6 +63,15 @@ abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IR
 
   protected getBaseUrl(c: ActivityContext<TEnv>): string {
     return BaseUrlUtil.getBaseUrl(c.req.raw);
+  }
+
+  private async authenticateUserIdentity(c: ActivityContext<TEnv>): Promise<string> {
+    const authHeader: string | undefined = c.req.header('Authorization');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token: string = authHeader.substring(7);
+      return await TokenAuthUtil.authenticateWithPAT(token, c.env.AccessBridgeDB);
+    }
+    return await EmailValidationUtil.getAuthenticatedUserEmail(c.req.raw, c.env.TEAM_DOMAIN, c.env.POLICY_AUD);
   }
 }
 
