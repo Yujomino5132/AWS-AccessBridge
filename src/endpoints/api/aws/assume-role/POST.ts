@@ -1,4 +1,4 @@
-import { AssumableRolesDAO, CredentialsDAO, CredentialsCacheDAO, UserMetadataDAO } from '@/dao';
+import { AssumableRolesDAO, CredentialsCacheDAO, UserMetadataDAO, EnhancedCredentialsDAO } from '@/dao';
 import { AccessKeysWithExpiration, CredentialCache, CredentialChain } from '@/model';
 import { ArnUtil, AssumeRoleUtil, TimestampUtil } from '@/utils';
 import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
@@ -254,9 +254,14 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
 
     const masterKey: string = await env.AES_ENCRYPTION_KEY_SECRET.get();
     const principalTrustChainLimit: number = parseInt(env.PRINCIPAL_TRUST_CHAIN_LIMIT || DEFAULT_PRINCIPAL_TRUST_CHAIN_LIMIT);
-    const credentialsDAO: CredentialsDAO = new CredentialsDAO(env.AccessBridgeDB, masterKey, principalTrustChainLimit);
     const credentialsCacheDAO: CredentialsCacheDAO = new CredentialsCacheDAO(env.AccessBridgeDB, masterKey);
-    const credentialChain: CredentialChain = await credentialsDAO.getCredentialChainByPrincipalArn(request.principalArn);
+    const credentialsDAO: EnhancedCredentialsDAO = new EnhancedCredentialsDAO(
+      env.AccessBridgeDB,
+      masterKey,
+      principalTrustChainLimit,
+      credentialsCacheDAO,
+    );
+    const credentialChain: CredentialChain = await credentialsDAO.getCredentialChainToFirstCachedPrincipal(request.principalArn);
 
     const userMetadataDAO: UserMetadataDAO = new UserMetadataDAO(env.AccessBridgeDB);
     const userId: string = await userMetadataDAO.getOrCreateFederationUsername(userEmail);
