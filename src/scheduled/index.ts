@@ -1,2 +1,2 @@
+export { CredentialCacheRefreshTask } from './CredentialCacheRefreshTask';
 export { ExpiredCredentialsCleanupTask } from './ExpiredCredentialsCleanupTask';
-export { IScheduledTask } from './IScheduledTask';

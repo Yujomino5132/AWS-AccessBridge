@@ -1,0 +1,2 @@
+export const CREDENTIAL_EXPIRY_BUFFER_MINUTES: number = 15;
+export const NUMBER_OF_CREDENTIALS_TO_REFRESH: number = 10;

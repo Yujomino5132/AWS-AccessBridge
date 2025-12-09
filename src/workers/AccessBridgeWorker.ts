@@ -26,7 +26,7 @@ import {
   ListTokensRoute,
   DeleteTokenRoute,
 } from '@/endpoints';
-import { ExpiredCredentialsCleanupTask } from '@/scheduled';
+import { CredentialCacheRefreshTask, ExpiredCredentialsCleanupTask } from '@/scheduled';
 import { MiddlewareHandlers } from '@/middleware';
 
 class AccessBridgeWorker extends AbstractWorker {
@@ -88,6 +88,7 @@ class AccessBridgeWorker extends AbstractWorker {
 
   protected async handleScheduled(event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
     await new ExpiredCredentialsCleanupTask().handle(event, env, ctx);
+    await new CredentialCacheRefreshTask().handle(event, env, ctx);
   }
 }
 

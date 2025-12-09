@@ -3,9 +3,9 @@ import { decryptData, encryptData } from '@/crypto/aes-gcm';
 import { DatabaseError } from '@/error/DatabaseError';
 import { TimestampUtil } from '@/utils/TimestampUtil';
 import { InternalServerError } from '@/error';
+import { CREDENTIAL_EXPIRY_BUFFER_MINUTES } from '@/constants';
 
 class CredentialsCacheDAO {
-  protected static readonly CREDENTIAL_EXPIRY_BUFFER_MINUTES: number = 15;
   protected static readonly ERROR_MESSAGE_MASTER_KEY_MISSING: string =
     'The operation cannot be completed because the master key is missing.';
 
@@ -49,10 +49,7 @@ class CredentialsCacheDAO {
       const { encrypted: encryptedAccessKeyId, iv } = await encryptData(credential.accessKeyId, this.masterKey);
       const { encrypted: encryptedSecretAccessKey } = await encryptData(credential.secretAccessKey, this.masterKey, iv);
       const { encrypted: encryptedSessionToken } = await encryptData(credential.sessionToken, this.masterKey, iv);
-      const adjustedExpiresAt: number = TimestampUtil.subtractMinutes(
-        credential.expiresAt,
-        CredentialsCacheDAO.CREDENTIAL_EXPIRY_BUFFER_MINUTES,
-      );
+      const adjustedExpiresAt: number = TimestampUtil.subtractMinutes(credential.expiresAt, CREDENTIAL_EXPIRY_BUFFER_MINUTES);
       const result: D1Result = await this.database
         .prepare(
           `INSERT OR REPLACE INTO credentials_cache 

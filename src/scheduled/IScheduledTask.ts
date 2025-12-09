@@ -1,9 +1,9 @@
 abstract class IScheduledTask<TEnv extends IEnv> {
   constructor() {}
 
-  public async handle(event: ScheduledController, env: TEnv, ctx: ExecutionContext): Promise<void> {
+  public async handle(event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
     // TODO: error handling
-    return this.handleScheduledTask(event, env, ctx);
+    return this.handleScheduledTask(event, env as unknown as TEnv, ctx);
   }
 
   protected abstract handleScheduledTask(event: ScheduledController, env: TEnv, ctx: ExecutionContext): Promise<void>;

@@ -192,7 +192,7 @@ interface StoreCredentialRequest extends IRequest {
   principalArn: string;
   accessKeyId: string;
   secretAccessKey: string;
-  sessionToken?: string;
+  sessionToken?: string | undefined;
 }
 
 interface StoreCredentialResponse extends IResponse {
