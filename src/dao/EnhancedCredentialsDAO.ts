@@ -42,7 +42,7 @@ class EnhancedCredentialsDAO extends CredentialsDAO {
       if (credential.assumedBy) {
         assumedBy = credential.assumedBy;
       }
-    } while (credential.assumedBy && credential.assumedBy.length > 0 && ++depth < this.principalTrustChainLimit);
+    } while (credential.assumedBy && credential.assumedBy.length > 0 && ++depth <= this.principalTrustChainLimit);
     if (credential.accessKeyId && credential.secretAccessKey) {
       if (trustChain.length > 1) {
         return {
