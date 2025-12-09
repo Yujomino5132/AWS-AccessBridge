@@ -34,7 +34,7 @@ class CredentialCacheConfigDAO {
   ): Promise<void> {
     const result: D1Result = await this.database
       .prepare('UPDATE credential_cache_config SET last_cached_at = ? WHERE principal_arn = ?')
-      .bind(principalArn, timestamp)
+      .bind(timestamp, principalArn)
       .run();
     if (!result.success) {
       throw new DatabaseError(`Failed to update cache config: ${result.error}`);
