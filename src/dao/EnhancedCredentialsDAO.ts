@@ -26,15 +26,17 @@ class EnhancedCredentialsDAO extends CredentialsDAO {
     let assumedBy: string = principalArn;
     let credential: Credential;
     do {
-      const cachedCredential: CredentialCache | undefined = await this.credentialsCacheDAO.getCachedCredential(assumedBy);
       trustChain.push(assumedBy);
-      if (cachedCredential) {
-        return {
-          principalArns: trustChain,
-          accessKeyId: cachedCredential.accessKeyId,
-          secretAccessKey: cachedCredential.secretAccessKey,
-          sessionToken: cachedCredential.sessionToken,
-        };
+      if (assumedBy !== principalArn) {
+        const cachedCredential: CredentialCache | undefined = await this.credentialsCacheDAO.getCachedCredential(assumedBy);
+        if (cachedCredential) {
+          return {
+            principalArns: trustChain,
+            accessKeyId: cachedCredential.accessKeyId,
+            secretAccessKey: cachedCredential.secretAccessKey,
+            sessionToken: cachedCredential.sessionToken,
+          };
+        }
       }
       credential = await this.getCredentialByPrincipalArn(assumedBy);
       if (credential.assumedBy) {
