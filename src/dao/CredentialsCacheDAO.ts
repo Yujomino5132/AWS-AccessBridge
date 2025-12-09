@@ -49,14 +49,13 @@ class CredentialsCacheDAO {
       const { encrypted: encryptedAccessKeyId, iv } = await encryptData(credential.accessKeyId, this.masterKey);
       const { encrypted: encryptedSecretAccessKey } = await encryptData(credential.secretAccessKey, this.masterKey, iv);
       const { encrypted: encryptedSessionToken } = await encryptData(credential.sessionToken, this.masterKey, iv);
-      const adjustedExpiresAt: number = TimestampUtil.subtractMinutes(credential.expiresAt, CREDENTIAL_EXPIRY_BUFFER_MINUTES);
       const result: D1Result = await this.database
         .prepare(
           `INSERT OR REPLACE INTO credentials_cache 
          (principal_arn, encrypted_access_key_id, encrypted_secret_access_key, encrypted_session_token, salt, expires_at)
          VALUES (?, ?, ?, ?, ?, ?)`,
         )
-        .bind(credential.principalArn, encryptedAccessKeyId, encryptedSecretAccessKey, encryptedSessionToken, iv, adjustedExpiresAt)
+        .bind(credential.principalArn, encryptedAccessKeyId, encryptedSecretAccessKey, encryptedSessionToken, iv, credential.expiresAt)
         .run();
       if (!result.success) {
         throw new DatabaseError(`Failed to store cached credential: ${result.error}`);
@@ -67,9 +66,13 @@ class CredentialsCacheDAO {
   }
 
   public async cleanupExpiredCredentials(): Promise<void> {
+    const adjustedExpiresAt: number = TimestampUtil.subtractMinutes(
+      TimestampUtil.getCurrentUnixTimestampInSeconds(),
+      CREDENTIAL_EXPIRY_BUFFER_MINUTES,
+    );
     const result: D1Result = await this.database
       .prepare(`DELETE FROM credentials_cache WHERE expires_at <= ?`)
-      .bind(TimestampUtil.getCurrentUnixTimestampInSeconds())
+      .bind(adjustedExpiresAt)
       .run();
     if (!result.success) {
       throw new DatabaseError(`Failed to cleanup expired credentials: ${result.error}`);
