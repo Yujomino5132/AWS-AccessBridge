@@ -102,8 +102,8 @@ interface CreateTokenResponse extends IResponse {
 }
 
 interface CreateTokenEnv extends IEnv {
-  MAX_TOKENS_PER_USER?: string;
-  MAX_TOKEN_EXPIRY_DAYS?: string;
+  MAX_TOKENS_PER_USER?: string | undefined;
+  MAX_TOKEN_EXPIRY_DAYS?: string | undefined;
 }
 
 export { CreateTokenRoute };

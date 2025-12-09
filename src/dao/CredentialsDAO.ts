@@ -3,14 +3,14 @@ import { Credential, CredentialChain, CredentialInternal } from '@/model';
 import { decryptDataOptional, encryptData } from '@/crypto/aes-gcm';
 
 class CredentialsDAO {
-  protected static readonly ASSUME_ROLE_CHAIN_LIMIT: number = 3;
-
   protected readonly database: D1Database | D1DatabaseSession;
   protected readonly masterKey: string;
+  protected readonly principalTrustChainLimit: number;
 
-  constructor(database: D1Database | D1DatabaseSession, masterKey: string) {
+  constructor(database: D1Database | D1DatabaseSession, masterKey: string, principalTrustChainLimit: number) {
     this.database = database;
     this.masterKey = masterKey;
+    this.principalTrustChainLimit = principalTrustChainLimit;
   }
 
   public async getCredentialByPrincipalArn(principalArn: string): Promise<Credential> {
@@ -49,11 +49,11 @@ class CredentialsDAO {
         assumedBy = credential.assumedBy;
       }
       trustChain.push(credential);
-    } while (credential.assumedBy && credential.assumedBy.length > 0 && ++depth <= CredentialsDAO.ASSUME_ROLE_CHAIN_LIMIT);
+    } while (credential.assumedBy && credential.assumedBy.length > 0 && ++depth <= this.principalTrustChainLimit);
 
     if (!credential.accessKeyId || !credential.secretAccessKey) {
-      if (depth >= CredentialsDAO.ASSUME_ROLE_CHAIN_LIMIT) {
-        console.error('Principal chain exceeds the maximum allowed depth: ', CredentialsDAO.ASSUME_ROLE_CHAIN_LIMIT);
+      if (depth >= this.principalTrustChainLimit) {
+        console.error('Principal chain exceeds the maximum allowed depth: ', this.principalTrustChainLimit);
       }
       throw new InternalServerError('Principal chain is not valid. Contact system administrator.');
     }

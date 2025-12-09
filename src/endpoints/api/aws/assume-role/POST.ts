@@ -4,6 +4,7 @@ import { ArnUtil, AssumeRoleUtil, TimestampUtil } from '@/utils';
 import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
 import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
 import { BadRequestError } from '@/error';
+import { DEFAULT_PRINCIPAL_TRUST_CHAIN_LIMIT } from '@/constants';
 
 class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleResponse, AssumeRoleEnv> {
   schema = {
@@ -252,7 +253,8 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
     await assumableRolesDAO.verifyUserHasAccessToRole(userEmail, accountId, roleName);
 
     const masterKey: string = await env.AES_ENCRYPTION_KEY_SECRET.get();
-    const credentialsDAO: CredentialsDAO = new CredentialsDAO(env.AccessBridgeDB, masterKey);
+    const principalTrustChainLimit: number = parseInt(env.PRINCIPAL_TRUST_CHAIN_LIMIT || DEFAULT_PRINCIPAL_TRUST_CHAIN_LIMIT);
+    const credentialsDAO: CredentialsDAO = new CredentialsDAO(env.AccessBridgeDB, masterKey, principalTrustChainLimit);
     const credentialsCacheDAO: CredentialsCacheDAO = new CredentialsCacheDAO(env.AccessBridgeDB, masterKey);
     const credentialChain: CredentialChain = await credentialsDAO.getCredentialChainByPrincipalArn(request.principalArn);
 
@@ -351,6 +353,7 @@ interface AssumeRoleResponse extends IResponse {
 }
 
 interface AssumeRoleEnv extends IEnv {
+  PRINCIPAL_TRUST_CHAIN_LIMIT?: string | undefined;
   AES_ENCRYPTION_KEY_SECRET: SecretsStoreSecret;
 }
 

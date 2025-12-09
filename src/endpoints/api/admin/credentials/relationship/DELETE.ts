@@ -2,6 +2,7 @@ import { CredentialsDAO } from '@/dao';
 import { BadRequestError } from '@/error';
 import { IAdminActivityAPIRoute } from '@/endpoints/IAdminActivityAPIRoute';
 import type { ActivityContext, IAdminEnv, IRequest, IResponse } from '@/endpoints/IAdminActivityAPIRoute';
+import { DEFAULT_PRINCIPAL_TRUST_CHAIN_LIMIT } from '@/constants';
 
 class RemoveCredentialRelationshipRoute extends IAdminActivityAPIRoute<
   RemoveCredentialRelationshipRequest,
@@ -204,7 +205,8 @@ class RemoveCredentialRelationshipRoute extends IAdminActivityAPIRoute<
     }
 
     const masterKey: string = await env.AES_ENCRYPTION_KEY_SECRET.get();
-    const credentialsDAO: CredentialsDAO = new CredentialsDAO(env.AccessBridgeDB, masterKey);
+    const principalTrustChainLimit: number = parseInt(env.PRINCIPAL_TRUST_CHAIN_LIMIT || DEFAULT_PRINCIPAL_TRUST_CHAIN_LIMIT);
+    const credentialsDAO: CredentialsDAO = new CredentialsDAO(env.AccessBridgeDB, masterKey, principalTrustChainLimit);
 
     await credentialsDAO.removeCredential(request.principalArn);
 
@@ -225,6 +227,7 @@ interface RemoveCredentialRelationshipResponse extends IResponse {
 }
 
 interface RemoveCredentialRelationshipEnv extends IAdminEnv {
+  PRINCIPAL_TRUST_CHAIN_LIMIT?: string | undefined;
   AES_ENCRYPTION_KEY_SECRET: SecretsStoreSecret;
 }
 

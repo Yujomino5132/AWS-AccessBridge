@@ -2,6 +2,7 @@ import { CredentialsDAO } from '@/dao';
 import { BadRequestError } from '@/error';
 import { IAdminActivityAPIRoute } from '@/endpoints/IAdminActivityAPIRoute';
 import type { ActivityContext, IAdminEnv, IRequest, IResponse } from '@/endpoints/IAdminActivityAPIRoute';
+import { DEFAULT_PRINCIPAL_TRUST_CHAIN_LIMIT } from '@/constants';
 
 class StoreCredentialRoute extends IAdminActivityAPIRoute<StoreCredentialRequest, StoreCredentialResponse, StoreCredentialEnv> {
   schema = {
@@ -175,7 +176,8 @@ class StoreCredentialRoute extends IAdminActivityAPIRoute<StoreCredentialRequest
     }
 
     const masterKey: string = await env.AES_ENCRYPTION_KEY_SECRET.get();
-    const credentialsDAO: CredentialsDAO = new CredentialsDAO(env.AccessBridgeDB, masterKey);
+    const principalTrustChainLimit: number = parseInt(env.PRINCIPAL_TRUST_CHAIN_LIMIT || DEFAULT_PRINCIPAL_TRUST_CHAIN_LIMIT);
+    const credentialsDAO: CredentialsDAO = new CredentialsDAO(env.AccessBridgeDB, masterKey, principalTrustChainLimit);
 
     await credentialsDAO.storeCredential(request.principalArn, request.accessKeyId, request.secretAccessKey, request.sessionToken);
 
@@ -199,6 +201,7 @@ interface StoreCredentialResponse extends IResponse {
 }
 
 interface StoreCredentialEnv extends IAdminEnv {
+  PRINCIPAL_TRUST_CHAIN_LIMIT?: string | undefined;
   AES_ENCRYPTION_KEY_SECRET: SecretsStoreSecret;
 }
 
