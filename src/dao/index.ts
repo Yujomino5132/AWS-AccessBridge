@@ -1,5 +1,6 @@
 export { AssumableRolesDAO } from './AssumableRolesDAO';
 export { AwsAccountsDAO } from './AwsAccountsDAO';
+export { CredentialCacheConfigDAO } from './CredentialCacheConfigDAO';
 export { CredentialsCacheDAO } from './CredentialsCacheDAO';
 export { CredentialsDAO } from './CredentialsDAO';
 export { EnhancedCredentialsDAO } from './EnhancedCredentialsDAO';

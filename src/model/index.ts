@@ -4,6 +4,7 @@ export type { AssumableRole, AssumableRoleInternal } from './AssumableRoles';
 export type { AssumableAccount, AssumableAccountsMap, AssumableAccountsResponse } from './AssumableAccount';
 export type { Credential, CredentialInternal } from './Credential';
 export type { CredentialCache, CredentialCacheInternal } from './CredentialCache';
+export type { CredentialCacheConfig, CredentialCacheConfigInternal } from './CredentialCacheConfig';
 export type { CredentialChain } from './CredentialChain';
 export type { RoleConfig, RoleConfigInternal } from './RoleConfig';
 export type { UserMetadata, UserMetadataInternal } from './UserMetadata';
