@@ -3,11 +3,7 @@ import { AssumeRoleUtil, TimestampUtil } from '@/utils';
 import { CredentialChain, CredentialCache, AccessKeys, AccessKeysWithExpiration } from '@/model';
 import { IScheduledTask } from './IScheduledTask';
 import type { IEnv } from './IScheduledTask';
-import {
-  CREDENTIAL_REFRESH_CUT_OFF_OFFSET_MINUTES,
-  DEFAULT_PRINCIPAL_TRUST_CHAIN_LIMIT,
-  NUMBER_OF_CREDENTIALS_TO_REFRESH,
-} from '@/constants';
+import { CREDENTIAL_REFRESH_INTERVAL_MINUTES, DEFAULT_PRINCIPAL_TRUST_CHAIN_LIMIT, NUMBER_OF_CREDENTIALS_TO_REFRESH } from '@/constants';
 
 class CredentialCacheRefreshTask extends IScheduledTask<CredentialCacheRefreshTaskEnv> {
   protected async handleScheduledTask(
@@ -15,9 +11,9 @@ class CredentialCacheRefreshTask extends IScheduledTask<CredentialCacheRefreshTa
     env: CredentialCacheRefreshTaskEnv,
     _ctx: ExecutionContext,
   ): Promise<void> {
-    const cutoffTime: number = TimestampUtil.addMinutes(
+    const cutoffTime: number = TimestampUtil.subtractMinutes(
       TimestampUtil.getCurrentUnixTimestampInSeconds(),
-      CREDENTIAL_REFRESH_CUT_OFF_OFFSET_MINUTES,
+      CREDENTIAL_REFRESH_INTERVAL_MINUTES,
     );
     const credentialCacheConfigDAO: CredentialCacheConfigDAO = new CredentialCacheConfigDAO(env.AccessBridgeDB);
     const masterKey: string = await env.AES_ENCRYPTION_KEY_SECRET.get();
