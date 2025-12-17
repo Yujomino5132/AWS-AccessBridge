@@ -15,7 +15,10 @@ export default function App() {
     const saved = localStorage.getItem('aws-access-bridge-page-size');
     return saved ? parseInt(saved, 10) : 10;
   });
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(() => {
+    const saved = sessionStorage.getItem('aws-access-bridge-current-page');
+    return saved ? parseInt(saved, 10) : 1;
+  });
   const [totalAccounts, setTotalAccounts] = useState(0);
 
   const handleSetTotalAccounts = useCallback((count: number) => {
@@ -35,6 +38,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('aws-access-bridge-page-size', pageSize.toString());
   }, [pageSize]);
+
+  useEffect(() => {
+    sessionStorage.setItem('aws-access-bridge-current-page', currentPage.toString());
+  }, [currentPage]);
 
   useEffect(() => {
     const checkAuth = async () => {
