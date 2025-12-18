@@ -3,7 +3,7 @@ import type { ActivityContext, IEnv, IRequest, IResponse, ExtendedResponse } fro
 import { BadRequestError } from '@/error';
 import type { AssumeRoleResponse } from '@/endpoints/api/aws/assume-role/POST';
 import type { GenerateConsoleUrlRequestInternal, GenerateConsoleUrlResponse } from '@/endpoints/api/aws/console/POST';
-import { ErrorDeserializer, InternalRequestHelper } from '@/utils';
+import { ErrorDeserializationUtil, InternalRequestHelper } from '@/utils';
 import { RoleConfigsDAO } from '@/dao';
 import { RoleConfig } from '@/model';
 
@@ -189,7 +189,7 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
       userEmail,
     );
     if (!assumeRoleResponse.ok) {
-      throw await ErrorDeserializer.deserializeError(assumeRoleResponse);
+      throw await ErrorDeserializationUtil.deserializeError(assumeRoleResponse);
     }
     const credentials: AssumeRoleResponse = await assumeRoleResponse.json();
     const consoleUrlRequest: GenerateConsoleUrlRequestInternal = {
@@ -209,7 +209,7 @@ class FederateRoute extends IActivityAPIRoute<FederateRequest, FederateResponse,
       userEmail,
     );
     if (!consoleResponse.ok) {
-      throw await ErrorDeserializer.deserializeError(consoleResponse);
+      throw await ErrorDeserializationUtil.deserializeError(consoleResponse);
     }
     const consoleData: GenerateConsoleUrlResponse = await consoleResponse.json();
     return {

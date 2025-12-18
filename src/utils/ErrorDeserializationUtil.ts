@@ -1,7 +1,7 @@
 import { BadRequestError, ForbiddenError, InternalServerError, UnauthorizedError, IServiceError, DatabaseError } from '@/error';
 import type { ErrorResponse } from '@/error';
 
-class ErrorDeserializer {
+class ErrorDeserializationUtil {
   public static async deserializeError(response: Response): Promise<IServiceError> {
     try {
       const errorData: ErrorResponse = (await response.json()) as ErrorResponse;
@@ -26,4 +26,4 @@ class ErrorDeserializer {
   }
 }
 
-export { ErrorDeserializer };
+export { ErrorDeserializationUtil };

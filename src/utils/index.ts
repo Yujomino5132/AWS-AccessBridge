@@ -5,7 +5,7 @@ export { BaseUrlUtil } from './BaseUrlUtil';
 export { EmailUtil } from './EmailUtil';
 export { EmailValidationUtil } from './EmailValidationUtil';
 export { TokenAuthUtil } from './TokenAuthUtil';
-export { ErrorDeserializer } from './ErrorDeserializer';
+export { ErrorDeserializationUtil } from './ErrorDeserializationUtil';
 export { ErrorTranslationUtil } from './ErrorTranslationUtil';
 export { TimestampUtil } from './TimestampUtil';
 export { UUIDUtil } from './UUIDUtil';
