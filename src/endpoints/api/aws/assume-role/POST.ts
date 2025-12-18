@@ -4,7 +4,7 @@ import { ArnUtil, AssumeRoleUtil, TimestampUtil } from '@/utils';
 import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
 import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
 import { BadRequestError } from '@/error';
-import { DEFAULT_PRINCIPAL_TRUST_CHAIN_LIMIT } from '@/constants';
+import { DEFAULT_PRINCIPAL_TRUST_CHAIN_LIMIT, INTERMEDIATE_ROLE_SESSION_NAME, ROLE_SESSION_NAME_PREFIX } from '@/constants';
 
 class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleResponse, AssumeRoleEnv> {
   schema = {
@@ -330,7 +330,7 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
     let newCredentials: AccessKeysWithExpiration = credentials;
     for (let i = startIndex; i >= 0; --i) {
       const roleArn: string = credentialChain.principalArns[i];
-      const sessionName: string = i > 0 ? 'AccessBridge-Intermediate' : `AccessBridge-${userId}`;
+      const sessionName: string = i > 0 ? INTERMEDIATE_ROLE_SESSION_NAME : `${ROLE_SESSION_NAME_PREFIX}${userId}`;
       newCredentials = await AssumeRoleUtil.assumeRole(roleArn, newCredentials, sessionName);
       // Cache intermediate credentials (not target role, not base IAM user)
       if (i > 0 && newCredentials.expiration) {

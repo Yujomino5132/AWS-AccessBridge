@@ -3,7 +3,12 @@ import { AssumeRoleUtil, TimestampUtil } from '@/utils';
 import { CredentialChain, CredentialCache, AccessKeys, AccessKeysWithExpiration } from '@/model';
 import { IScheduledTask } from './IScheduledTask';
 import type { IEnv } from './IScheduledTask';
-import { CREDENTIAL_REFRESH_INTERVAL_MINUTES, DEFAULT_PRINCIPAL_TRUST_CHAIN_LIMIT, NUMBER_OF_CREDENTIALS_TO_REFRESH } from '@/constants';
+import {
+  CREDENTIAL_CACHE_REFRESH_ROLE_SESSION_NAME,
+  CREDENTIAL_REFRESH_INTERVAL_MINUTES,
+  DEFAULT_PRINCIPAL_TRUST_CHAIN_LIMIT,
+  NUMBER_OF_CREDENTIALS_TO_REFRESH,
+} from '@/constants';
 
 class CredentialCacheRefreshTask extends IScheduledTask<CredentialCacheRefreshTaskEnv> {
   protected async handleScheduledTask(
@@ -36,7 +41,7 @@ class CredentialCacheRefreshTask extends IScheduledTask<CredentialCacheRefreshTa
         const assumedCredentials: AccessKeysWithExpiration = await AssumeRoleUtil.assumeRole(
           roleArn,
           credential,
-          'AccessBridge-CredentialCacheRefresh',
+          CREDENTIAL_CACHE_REFRESH_ROLE_SESSION_NAME,
         );
         if (assumedCredentials.sessionToken && assumedCredentials.expiration) {
           const credentialCache: CredentialCache = {
