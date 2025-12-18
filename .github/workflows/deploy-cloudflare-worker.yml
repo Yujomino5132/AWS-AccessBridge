@@ -32,6 +32,16 @@ jobs:
         env:
           WRANGLER_JSONC: ${{ vars.WRANGLER_JSONC }}
 
+      - name: Check Wrangler Configuration Version
+        run: |
+          CURRENT_VERSION=$(grep '"\$version"' wrangler.jsonc | sed 's/.*: *\([0-9]*\).*/\1/' 2>/dev/null || echo "0")
+          CURRENT_VERSION=${CURRENT_VERSION:-0}
+          TEMPLATE_VERSION=$(grep '"\$version"' wrangler.jsonc.template | sed 's/.*: *\([0-9]*\).*/\1/')
+          if [ "$CURRENT_VERSION" -lt "$TEMPLATE_VERSION" ]; then
+            echo "ERROR: wrangler.jsonc version ($CURRENT_VERSION) is below template version ($TEMPLATE_VERSION)"
+            exit 1
+          fi
+
       - name: Initialize Cloudflare Secrets Store
         run: npx tsx scripts/init-secrets.ts
         env:

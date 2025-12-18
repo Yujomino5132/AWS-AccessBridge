@@ -1,4 +1,5 @@
 {
+  "$version": 1766016489,
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "aws-access-bridge",
   "main": "src/index.ts",
