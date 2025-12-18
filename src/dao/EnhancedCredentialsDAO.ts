@@ -10,13 +10,14 @@ class EnhancedCredentialsDAO extends CredentialsDAO {
     database: D1Database | D1DatabaseSession,
     masterKey: string,
     principalTrustChainLimit: number,
+    credentialsCacheKV: KVNamespace,
     credentialsCacheDAO?: CredentialsCacheDAO | undefined,
   ) {
     super(database, masterKey, principalTrustChainLimit);
     if (credentialsCacheDAO) {
       this.credentialsCacheDAO = credentialsCacheDAO;
     } else {
-      this.credentialsCacheDAO = new CredentialsCacheDAO(database, masterKey);
+      this.credentialsCacheDAO = new CredentialsCacheDAO(credentialsCacheKV, masterKey);
     }
   }
 

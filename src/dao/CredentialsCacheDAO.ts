@@ -1,83 +1,57 @@
-import { CredentialCache, CredentialCacheInternal } from '@/model/CredentialCache';
+import { CredentialCache } from '@/model/CredentialCache';
 import { decryptData, encryptData } from '@/crypto/aes-gcm';
-import { DatabaseError } from '@/error/DatabaseError';
 import { TimestampUtil } from '@/utils/TimestampUtil';
-import { InternalServerError } from '@/error';
-import { CREDENTIAL_EXPIRY_BUFFER_MINUTES } from '@/constants';
 
 class CredentialsCacheDAO {
-  protected static readonly ERROR_MESSAGE_MASTER_KEY_MISSING: string =
-    'The operation cannot be completed because the master key is missing.';
+  protected readonly kv: KVNamespace;
+  protected readonly masterKey: string;
 
-  protected readonly database: D1Database | D1DatabaseSession;
-  protected readonly masterKey?: string | undefined;
-
-  constructor(database: D1Database | D1DatabaseSession, masterKey?: string | undefined) {
-    this.database = database;
+  constructor(kv: KVNamespace, masterKey: string) {
+    this.kv = kv;
     this.masterKey = masterKey;
   }
 
   public async getCachedCredential(principalArn: string): Promise<CredentialCache | undefined> {
-    if (this.masterKey) {
+    const cached: CachedCredentialData | null = await this.kv.get<CachedCredentialData>(`cred:${principalArn}`, 'json');
+    if (cached) {
       const currentTime: number = TimestampUtil.getCurrentUnixTimestampInSeconds();
-      const result: CredentialCacheInternal | null = await this.database
-        .prepare(
-          `SELECT principal_arn, encrypted_access_key_id, encrypted_secret_access_key, encrypted_session_token, salt, expires_at
-         FROM credentials_cache
-         WHERE principal_arn = ? AND expires_at > ?
-         LIMIT 1`,
-        )
-        .bind(principalArn, currentTime)
-        .first<CredentialCacheInternal>();
-      if (result) {
+      if (cached.expiresAt > currentTime) {
         return {
-          principalArn: result.principal_arn,
-          accessKeyId: await decryptData(result.encrypted_access_key_id, result.salt, this.masterKey),
-          secretAccessKey: await decryptData(result.encrypted_secret_access_key, result.salt, this.masterKey),
-          sessionToken: await decryptData(result.encrypted_session_token, result.salt, this.masterKey),
-          expiresAt: result.expires_at,
+          principalArn,
+          accessKeyId: await decryptData(cached.encryptedAccessKeyId, cached.salt, this.masterKey),
+          secretAccessKey: await decryptData(cached.encryptedSecretAccessKey, cached.salt, this.masterKey),
+          sessionToken: await decryptData(cached.encryptedSessionToken, cached.salt, this.masterKey),
+          expiresAt: cached.expiresAt,
         };
       }
-      return undefined;
-    } else {
-      throw new InternalServerError(CredentialsCacheDAO.ERROR_MESSAGE_MASTER_KEY_MISSING);
+      await this.kv.delete(`cred:${principalArn}`);
     }
+    return undefined;
   }
 
   public async storeCachedCredential(credential: CredentialCache): Promise<void> {
-    if (this.masterKey) {
-      const { encrypted: encryptedAccessKeyId, iv } = await encryptData(credential.accessKeyId, this.masterKey);
-      const { encrypted: encryptedSecretAccessKey } = await encryptData(credential.secretAccessKey, this.masterKey, iv);
-      const { encrypted: encryptedSessionToken } = await encryptData(credential.sessionToken, this.masterKey, iv);
-      const result: D1Result = await this.database
-        .prepare(
-          `INSERT OR REPLACE INTO credentials_cache 
-         (principal_arn, encrypted_access_key_id, encrypted_secret_access_key, encrypted_session_token, salt, expires_at)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        )
-        .bind(credential.principalArn, encryptedAccessKeyId, encryptedSecretAccessKey, encryptedSessionToken, iv, credential.expiresAt)
-        .run();
-      if (!result.success) {
-        throw new DatabaseError(`Failed to store cached credential: ${result.error}`);
-      }
-    } else {
-      throw new InternalServerError(CredentialsCacheDAO.ERROR_MESSAGE_MASTER_KEY_MISSING);
-    }
-  }
+    const { encrypted: encryptedAccessKeyId, iv } = await encryptData(credential.accessKeyId, this.masterKey);
+    const { encrypted: encryptedSecretAccessKey } = await encryptData(credential.secretAccessKey, this.masterKey, iv);
+    const { encrypted: encryptedSessionToken } = await encryptData(credential.sessionToken, this.masterKey, iv);
 
-  public async cleanupExpiredCredentials(): Promise<void> {
-    const adjustedExpiresAt: number = TimestampUtil.subtractMinutes(
-      TimestampUtil.getCurrentUnixTimestampInSeconds(),
-      CREDENTIAL_EXPIRY_BUFFER_MINUTES,
-    );
-    const result: D1Result = await this.database
-      .prepare(`DELETE FROM credentials_cache WHERE expires_at <= ?`)
-      .bind(adjustedExpiresAt)
-      .run();
-    if (!result.success) {
-      throw new DatabaseError(`Failed to cleanup expired credentials: ${result.error}`);
-    }
+    const data: CachedCredentialData = {
+      encryptedAccessKeyId,
+      encryptedSecretAccessKey,
+      encryptedSessionToken,
+      salt: iv,
+      expiresAt: credential.expiresAt,
+    };
+    const ttl: number = Math.max(credential.expiresAt - TimestampUtil.getCurrentUnixTimestampInSeconds(), 0);
+    await this.kv.put(`cred:${credential.principalArn}`, JSON.stringify(data), { expirationTtl: ttl });
   }
+}
+
+interface CachedCredentialData {
+  encryptedAccessKeyId: string;
+  encryptedSecretAccessKey: string;
+  encryptedSessionToken: string;
+  salt: string;
+  expiresAt: number;
 }
 
 export { CredentialsCacheDAO };

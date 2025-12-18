@@ -19,7 +19,7 @@ class CredentialCacheRefreshTask extends IScheduledTask<CredentialCacheRefreshTa
     const masterKey: string = await env.AES_ENCRYPTION_KEY_SECRET.get();
     const principalTrustChainLimit: number = parseInt(env.PRINCIPAL_TRUST_CHAIN_LIMIT || DEFAULT_PRINCIPAL_TRUST_CHAIN_LIMIT);
     const credentialsDAO: CredentialsDAO = new CredentialsDAO(env.AccessBridgeDB, masterKey, principalTrustChainLimit);
-    const credentialsCacheDAO: CredentialsCacheDAO = new CredentialsCacheDAO(env.AccessBridgeDB, masterKey);
+    const credentialsCacheDAO: CredentialsCacheDAO = new CredentialsCacheDAO(env.CREDENTIALS_CACHE_KV, masterKey);
     const principalArns: string[] = await credentialCacheConfigDAO.getPrincipalArnsNeedingUpdate(
       NUMBER_OF_CREDENTIALS_TO_REFRESH,
       cutoffTime,
@@ -60,6 +60,7 @@ class CredentialCacheRefreshTask extends IScheduledTask<CredentialCacheRefreshTa
 interface CredentialCacheRefreshTaskEnv extends IEnv {
   PRINCIPAL_TRUST_CHAIN_LIMIT?: string | undefined;
   AccessBridgeDB: D1Database;
+  CREDENTIALS_CACHE_KV: KVNamespace;
   AES_ENCRYPTION_KEY_SECRET: SecretsStoreSecret;
 }
 

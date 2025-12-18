@@ -1,6 +1,6 @@
 {
-  "$version": 1766016489,
-  "$minimumVersion": 1766016489,
+  "$version": 1766028753,
+  "$minimumVersion": 1766028753,
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "aws-access-bridge",
   "main": "src/index.ts",
@@ -31,6 +31,12 @@
       "binding": "AccessBridgeDB",
       "database_name": "aws-access-bridge-db",
       "database_id": "00000000-0000-0000-0000-000000000000",
+    },
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "CREDENTIALS_CACHE_KV",
+      "id": "00000000000000000000000000000000",
     },
   ],
   "secrets_store_secrets": [
