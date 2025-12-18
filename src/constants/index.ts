@@ -1,6 +1,10 @@
 export * from './ConfigurationDefaults';
 export * from './Configurations';
-export * from './D1SessionConstraint';
-export * from './headers';
-export * from './hostnames';
+export * from './Headers';
+export * from './Hostnames';
 export * from './RoleSessionNames';
+
+export * from './d1/SessionConstraint';
+
+export * from './kv/Namespaces';
+export * from './kv/ValueType';

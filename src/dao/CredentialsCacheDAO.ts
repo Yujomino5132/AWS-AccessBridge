@@ -1,18 +1,19 @@
 import { CredentialCache } from '@/model/CredentialCache';
 import { decryptData, encryptData } from '@/crypto/aes-gcm';
 import { TimestampUtil } from '@/utils/TimestampUtil';
+import { KV_NAMESPACE_CREDENTIAL_CACHE } from '@/constants';
+import { IKeyValueDAO } from './IKeyValueDAO';
 
-class CredentialsCacheDAO {
-  protected readonly kv: KVNamespace;
+class CredentialsCacheDAO extends IKeyValueDAO {
   protected readonly masterKey: string;
 
   constructor(kv: KVNamespace, masterKey: string) {
-    this.kv = kv;
+    super(kv, KV_NAMESPACE_CREDENTIAL_CACHE);
     this.masterKey = masterKey;
   }
 
   public async getCachedCredential(principalArn: string): Promise<CredentialCache | undefined> {
-    const cached: CachedCredentialData | null = await this.kv.get<CachedCredentialData>(`cred:${principalArn}`, 'json');
+    const cached: CachedCredentialData | null = await this.get<CachedCredentialData>(principalArn);
     if (cached) {
       const currentTime: number = TimestampUtil.getCurrentUnixTimestampInSeconds();
       if (cached.expiresAt > currentTime) {
@@ -24,7 +25,7 @@ class CredentialsCacheDAO {
           expiresAt: cached.expiresAt,
         };
       }
-      await this.kv.delete(`cred:${principalArn}`);
+      await this.delete(principalArn);
     }
     return undefined;
   }
@@ -42,7 +43,7 @@ class CredentialsCacheDAO {
       expiresAt: credential.expiresAt,
     };
     const ttl: number = Math.max(credential.expiresAt - TimestampUtil.getCurrentUnixTimestampInSeconds(), 0);
-    await this.kv.put(`cred:${credential.principalArn}`, JSON.stringify(data), { expirationTtl: ttl });
+    await this.put(credential.principalArn, data, { expirationTtl: ttl });
   }
 }
 
