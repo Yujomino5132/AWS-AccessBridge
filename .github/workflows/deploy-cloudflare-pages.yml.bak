@@ -8,8 +8,7 @@ on:
 
 jobs:
   deploy:
-    if: false ## Cloudflare Pages are not supported
-    # if: ${{ github.repository != 'Rexezuge-CloudflareWorkers/AWS-AccessBridge' }}
+    if: ${{ github.repository != 'Rexezuge-CloudflareWorkers/AWS-AccessBridge' }}
     name: Deploy to Cloudflare
     runs-on: ubuntu-latest
 
