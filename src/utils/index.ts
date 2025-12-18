@@ -6,6 +6,7 @@ export { EmailUtil } from './EmailUtil';
 export { EmailValidationUtil } from './EmailValidationUtil';
 export { TokenAuthUtil } from './TokenAuthUtil';
 export { ErrorDeserializer } from './ErrorDeserializer';
+export { ErrorTranslationUtil } from './ErrorTranslationUtil';
 export { TimestampUtil } from './TimestampUtil';
 export { UUIDUtil } from './UUIDUtil';
 

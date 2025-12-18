@@ -1,4 +1,8 @@
 class TimestampUtil {
+  public static getCurrentUnixTimestampInMilliseconds(): number {
+    return Date.now();
+  }
+
   public static getCurrentUnixTimestampInSeconds(): number {
     return Math.floor(Date.now() / 1000);
   }

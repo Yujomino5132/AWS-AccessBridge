@@ -6,6 +6,8 @@ export * from './RoleSessionNames';
 
 export * from './d1/SessionConstraint';
 
+export * from './error/HMACHandler';
+
 export * from './kv/Namespaces';
 export * from './kv/TimeToLive';
 export * from './kv/ValueType';

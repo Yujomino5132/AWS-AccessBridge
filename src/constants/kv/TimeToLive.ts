@@ -1,1 +1,1 @@
-export const KV_MINIMUM_TIVE_TO_LIVE_IN_SECONDS: number = 60;
+export const KV_MINIMUM_TIVE_TO_LIVE_SECONDS: number = 60;
