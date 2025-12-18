@@ -36,9 +36,9 @@ jobs:
         run: |
           CURRENT_VERSION=$(grep '"\$version"' wrangler.jsonc | sed 's/.*: *\([0-9]*\).*/\1/' 2>/dev/null || echo "0")
           CURRENT_VERSION=${CURRENT_VERSION:-0}
-          TEMPLATE_VERSION=$(grep '"\$version"' wrangler.jsonc.template | sed 's/.*: *\([0-9]*\).*/\1/')
-          if [ "$CURRENT_VERSION" -lt "$TEMPLATE_VERSION" ]; then
-            echo "ERROR: wrangler.jsonc version ($CURRENT_VERSION) is below template version ($TEMPLATE_VERSION)"
+          MINIMUM_TEMPLATE_VERSION=$(grep '"\$minimumVersion"' wrangler.jsonc.template | sed 's/.*: *\([0-9]*\).*/\1/')
+          if [ "$CURRENT_VERSION" -lt "$MINIMUM_TEMPLATE_VERSION" ]; then
+            echo "Error: wrangler.jsonc version ($CURRENT_VERSION) is below minimum template version ($MINIMUM_TEMPLATE_VERSION)"
             exit 1
           fi
 
