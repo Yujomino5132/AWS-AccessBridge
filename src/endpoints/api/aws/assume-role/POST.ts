@@ -254,12 +254,12 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
 
     const masterKey: string = await env.AES_ENCRYPTION_KEY_SECRET.get();
     const principalTrustChainLimit: number = parseInt(env.PRINCIPAL_TRUST_CHAIN_LIMIT || DEFAULT_PRINCIPAL_TRUST_CHAIN_LIMIT);
-    const credentialsCacheDAO: CredentialsCacheDAO = new CredentialsCacheDAO(env.CREDENTIALS_CACHE_KV, masterKey);
+    const credentialsCacheDAO: CredentialsCacheDAO = new CredentialsCacheDAO(env.AccessBridgeKV, masterKey);
     const credentialsDAO: EnhancedCredentialsDAO = new EnhancedCredentialsDAO(
       env.AccessBridgeDB,
       masterKey,
       principalTrustChainLimit,
-      env.CREDENTIALS_CACHE_KV,
+      env.AccessBridgeKV,
       credentialsCacheDAO,
     );
     const credentialChain: CredentialChain = await credentialsDAO.getCredentialChainToFirstCachedPrincipal(request.principalArn);
@@ -360,7 +360,7 @@ interface AssumeRoleResponse extends IResponse {
 
 interface AssumeRoleEnv extends IEnv {
   PRINCIPAL_TRUST_CHAIN_LIMIT?: string | undefined;
-  CREDENTIALS_CACHE_KV: KVNamespace;
+  AccessBridgeKV: KVNamespace;
   AES_ENCRYPTION_KEY_SECRET: SecretsStoreSecret;
 }
 
