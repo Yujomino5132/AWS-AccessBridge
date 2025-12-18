@@ -1,7 +1,7 @@
 import { CredentialCache } from '@/model/CredentialCache';
 import { decryptData, encryptData } from '@/crypto/aes-gcm';
 import { TimestampUtil } from '@/utils/TimestampUtil';
-import { KV_NAMESPACE_CREDENTIAL_CACHE } from '@/constants';
+import { KV_MINIMUM_TIVE_TO_LIVE_IN_SECONDS, KV_NAMESPACE_CREDENTIAL_CACHE } from '@/constants';
 import { IKeyValueDAO } from './IKeyValueDAO';
 
 class CredentialsCacheDAO extends IKeyValueDAO {
@@ -42,7 +42,10 @@ class CredentialsCacheDAO extends IKeyValueDAO {
       salt: iv,
       expiresAt: credential.expiresAt,
     };
-    const ttl: number = Math.max(credential.expiresAt - TimestampUtil.getCurrentUnixTimestampInSeconds(), 0);
+    const ttl: number = Math.max(
+      credential.expiresAt - TimestampUtil.getCurrentUnixTimestampInSeconds(),
+      KV_MINIMUM_TIVE_TO_LIVE_IN_SECONDS,
+    );
     await this.put(credential.principalArn, data, { expirationTtl: ttl });
   }
 }
