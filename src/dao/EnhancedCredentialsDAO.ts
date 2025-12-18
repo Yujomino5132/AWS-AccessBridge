@@ -10,15 +10,10 @@ class EnhancedCredentialsDAO extends CredentialsDAO {
     database: D1Database | D1DatabaseSession,
     masterKey: string,
     principalTrustChainLimit: number,
-    credentialsCacheKV: KVNamespace,
-    credentialsCacheDAO?: CredentialsCacheDAO | undefined,
+    credentialsCacheDAO: CredentialsCacheDAO,
   ) {
     super(database, masterKey, principalTrustChainLimit);
-    if (credentialsCacheDAO) {
-      this.credentialsCacheDAO = credentialsCacheDAO;
-    } else {
-      this.credentialsCacheDAO = new CredentialsCacheDAO(credentialsCacheKV, masterKey);
-    }
+    this.credentialsCacheDAO = credentialsCacheDAO;
   }
 
   public async getCredentialChainToFirstCachedPrincipal(principalArn: string): Promise<CredentialChain> {

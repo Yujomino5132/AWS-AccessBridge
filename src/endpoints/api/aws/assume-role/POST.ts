@@ -259,7 +259,6 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
       env.AccessBridgeDB,
       masterKey,
       principalTrustChainLimit,
-      env.AccessBridgeKV,
       credentialsCacheDAO,
     );
     const credentialChain: CredentialChain = await credentialsDAO.getCredentialChainToFirstCachedPrincipal(request.principalArn);

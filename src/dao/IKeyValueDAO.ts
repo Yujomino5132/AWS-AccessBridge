@@ -13,7 +13,7 @@ abstract class IKeyValueDAO {
     return this.kv.get<ExpectedValue>(this.toNamespacedKey(key), KV_VALUE_TYPE_JSON);
   }
 
-  protected async put(key: string, value: unknown, options?: KVNamespacePutOptions): Promise<void> {
+  protected async put(key: string, value: unknown, options?: KVNamespacePutOptions | undefined): Promise<void> {
     return this.kv.put(this.toNamespacedKey(key), JSON.stringify(value), options);
   }
 
