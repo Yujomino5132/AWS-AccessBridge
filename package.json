@@ -22,13 +22,13 @@
     "jsonc-parser": "^3.3.x",
     "prettier": "^3.7.x",
     "typescript": "^5.9.x",
-    "typescript-eslint": "^8.48.x",
-    "wrangler": "^4.53.x"
+    "typescript-eslint": "^8.50.x",
+    "wrangler": "^4.55.x"
   },
   "dependencies": {
     "aws4fetch": "^1.0.x",
     "chanfana": "^2.8.x",
-    "hono": "^4.10.x",
+    "hono": "^4.11.x",
     "jose": "^6.1.x"
   }
 }

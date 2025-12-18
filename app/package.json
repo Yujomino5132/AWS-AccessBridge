@@ -14,9 +14,9 @@
     "lint": "eslint --ext .ts,.tsx --fix ."
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.17.x",
+    "@cloudflare/vite-plugin": "^1.18.x",
     "@tailwindcss/vite": "^4.1.x",
-    "@types/node": "^24.10.x",
+    "@types/node": "^25.0.x",
     "@types/react": "^19.2.x",
     "@types/react-dom": "^19.2.x",
     "@vitejs/plugin-react": "^5.1.x",
@@ -28,9 +28,9 @@
     "react-dom": "^19.2.x",
     "terser": "^5.44.x",
     "typescript": "^5.9.x",
-    "typescript-eslint": "^8.48.x",
-    "vite": "^7.2.x",
-    "wrangler": "^4.53.x"
+    "typescript-eslint": "^8.50.x",
+    "vite": "^7.3.x",
+    "wrangler": "^4.55.x"
   },
   "dependencies": {}
 }
