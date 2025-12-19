@@ -7,6 +7,7 @@ import Unauthorized from './components/Unauthorized';
 export default function App() {
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
   const [currentView, setCurrentView] = useState<'accounts' | 'admin'>('accounts');
   const [showHidden, setShowHidden] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -53,6 +54,7 @@ export default function App() {
           const userData = await response.json();
           setIsAuthorized(true);
           setIsSuperAdmin(userData.isSuperAdmin || false);
+          setUserEmail(userData.email || '');
         } else {
           setIsAuthorized(false);
         }
@@ -91,7 +93,7 @@ export default function App() {
 
   return (
     <div className="bg-gray-900 min-h-screen text-white">
-      <Navbar isSuperAdmin={isSuperAdmin} currentView={currentView} setCurrentView={setCurrentView} />
+      <Navbar isSuperAdmin={isSuperAdmin} currentView={currentView} setCurrentView={setCurrentView} userEmail={userEmail} />
       <div className="max-w-6xl mx-auto py-8">
         {currentView === 'admin' ? (
           <AdminPage />
