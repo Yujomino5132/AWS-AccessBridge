@@ -1,5 +1,5 @@
 {
-  // "$version": 1766030299,
+  // "$version": 1766288169,
   // "$minimumVersion": 1766030299,
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "aws-access-bridge",
@@ -10,8 +10,17 @@
   "workers_dev": true,
   "minify": true,
   "observability": {
-    "enabled": true,
-    "head_sampling_rate": 1,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "invocation_logs": true,
+      "persist": true,
+    },
+    "traces": {
+      "enabled": false,
+      "persist": true,
+      "head_sampling_rate": 1,
+    },
   },
   "routes": [],
   "placement": {
