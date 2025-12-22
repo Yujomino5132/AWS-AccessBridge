@@ -23,7 +23,7 @@
     "prettier": "^3.7.x",
     "typescript": "^5.9.x",
     "typescript-eslint": "^8.50.x",
-    "wrangler": "^4.55.x"
+    "wrangler": "^4.56.x"
   },
   "dependencies": {
     "aws4fetch": "^1.0.x",
