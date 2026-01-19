@@ -34,7 +34,7 @@ abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IR
       }
       return c.json(response);
     } catch (error: unknown) {
-      if (error instanceof IServiceError) {
+      if (error instanceof IServiceError && !(error instanceof InternalServerError)) {
         console.warn(`Responding with ${error.getErrorType()}Error: `, error.stack);
         return c.json({ Exception: { Type: error.getErrorType(), Message: error.getErrorMessage() } }, error.getErrorCode());
       }
