@@ -26,7 +26,7 @@ class AssumeRoleUtil {
       Version: '2011-06-15',
     });
 
-    const url = `https://sts.${region}.amazonaws.com/?${queryParams.toString()}`;
+    const url: string = `https://sts.${region}.amazonaws.com/?${queryParams.toString()}`;
 
     const response: Response = await stsClient.fetch(url, { method: 'POST' });
     const xmlText: string = await response.text();

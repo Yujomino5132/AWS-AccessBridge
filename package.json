@@ -18,12 +18,12 @@
     "eslint": "^9.39.x",
     "eslint-config-prettier": "^10.1.x",
     "eslint-plugin-prettier": "^5.5.x",
-    "globals": "^17.0.x",
+    "globals": "^17.2.x",
     "jsonc-parser": "^3.3.x",
-    "prettier": "^3.7.x",
+    "prettier": "^3.8.x",
     "typescript": "^5.9.x",
-    "typescript-eslint": "^8.52.x",
-    "wrangler": "^4.56.x"
+    "typescript-eslint": "^8.54.x",
+    "wrangler": "^4.61.x"
   },
   "dependencies": {
     "aws4fetch": "^1.0.x",
