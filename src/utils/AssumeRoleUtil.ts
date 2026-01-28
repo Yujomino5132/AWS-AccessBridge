@@ -1,6 +1,7 @@
 import { AwsClient } from 'aws4fetch';
 import { AccessKeys, AccessKeysWithExpiration } from '@/model';
 import { InternalServerError, UnauthorizedError } from '@/error';
+import { ASSUME_ROLE_UTIL_ERROR_STS_CALL, ASSUME_ROLE_UTIL_ERROR_STS_RESPONSE_PARSE } from '@/constants';
 
 class AssumeRoleUtil {
   public static async assumeRole(
@@ -31,17 +32,17 @@ class AssumeRoleUtil {
     const xmlText: string = await response.text();
 
     if (!response.ok) {
-      console.error(`AssumeRole failed: ${response.status} ${response.statusText}\n${xmlText}`);
-      throw new UnauthorizedError('Failed to get response from STS AssumeRole.');
+      console.error(`STS AssumeRole failed: ${response.status} ${response.statusText}\n${xmlText}`);
+      throw new UnauthorizedError(ASSUME_ROLE_UTIL_ERROR_STS_CALL);
     }
 
-    const accessKeyIdMatch = xmlText.match(/<AccessKeyId>([^<]+)<\/AccessKeyId>/);
-    const secretAccessKeyMatch = xmlText.match(/<SecretAccessKey>([^<]+)<\/SecretAccessKey>/);
-    const sessionTokenMatch = xmlText.match(/<SessionToken>([^<]+)<\/SessionToken>/);
-    const expirationMatch = xmlText.match(/<Expiration>([^<]+)<\/Expiration>/);
+    const accessKeyIdMatch: RegExpMatchArray | null = xmlText.match(/<AccessKeyId>([^<]+)<\/AccessKeyId>/);
+    const secretAccessKeyMatch: RegExpMatchArray | null = xmlText.match(/<SecretAccessKey>([^<]+)<\/SecretAccessKey>/);
+    const sessionTokenMatch: RegExpMatchArray | null = xmlText.match(/<SessionToken>([^<]+)<\/SessionToken>/);
+    const expirationMatch: RegExpMatchArray | null = xmlText.match(/<Expiration>([^<]+)<\/Expiration>/);
 
     if (!accessKeyIdMatch || !secretAccessKeyMatch || !sessionTokenMatch || !expirationMatch) {
-      throw new InternalServerError('Unable to parse temporary credentials from STS AssumeRole response.');
+      throw new InternalServerError(ASSUME_ROLE_UTIL_ERROR_STS_RESPONSE_PARSE);
     }
 
     return {

@@ -6,6 +6,7 @@ export * from './RoleSessionNames';
 
 export * from './d1/SessionConstraint';
 
+export * from './error/AssumeRoleUtil';
 export * from './error/HMACHandler';
 
 export * from './kv/Namespaces';
