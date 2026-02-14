@@ -116,7 +116,11 @@ class GetCurrentUserRoute extends IActivityAPIRoute<GetCurrentUserRequest, GetCu
   ): Promise<GetCurrentUserResponse> {
     const userEmail: string = this.getAuthenticatedUserEmailAddress(cxt);
     const userMetadataDAO: UserMetadataDAO = new UserMetadataDAO(env.AccessBridgeDB);
-    const isSuperAdmin: boolean = await userMetadataDAO.isSuperAdmin(userEmail);
+
+    const [_, isSuperAdmin]: [void, boolean] = await Promise.all([
+      userMetadataDAO.ensureUserEmailExists(userEmail),
+      userMetadataDAO.isSuperAdmin(userEmail),
+    ]);
 
     return {
       email: userEmail,

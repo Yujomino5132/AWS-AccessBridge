@@ -8,6 +8,16 @@ class UserMetadataDAO {
     this.database = database;
   }
 
+  public async ensureUserEmailExists(userEmail: string): Promise<void> {
+    const result: D1Result = await this.database
+      .prepare('INSERT OR IGNORE INTO user_metadata (user_email) VALUES (?)')
+      .bind(userEmail)
+      .run();
+    if (!result.success) {
+      throw new DatabaseError(`Failed to ensure user email exists: ${result.error}`);
+    }
+  }
+
   public async isSuperAdmin(userEmail: string): Promise<boolean> {
     const result: UserMetadataInternal | null = await this.database
       .prepare('SELECT is_superadmin FROM user_metadata WHERE user_email = ?')
