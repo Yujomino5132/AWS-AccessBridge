@@ -1,0 +1,103 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { RoleConfigsDAO } from '@/dao/RoleConfigsDAO';
+import { DatabaseError } from '@/error';
+
+describe('RoleConfigsDAO', () => {
+  let mockDb: D1Database;
+  let mockStmt: D1PreparedStatement;
+
+  beforeEach(() => {
+    mockStmt = {
+      bind: vi.fn().mockReturnThis(),
+      run: vi.fn().mockResolvedValue({ success: true }),
+      first: vi.fn().mockResolvedValue(null),
+      all: vi.fn(),
+      raw: vi.fn(),
+    } as unknown as D1PreparedStatement;
+
+    mockDb = {
+      prepare: vi.fn().mockReturnValue(mockStmt),
+      exec: vi.fn(),
+      batch: vi.fn(),
+      dump: vi.fn(),
+    } as unknown as D1Database;
+  });
+
+  describe('getRoleConfig', () => {
+    it('returns role config when found', async () => {
+      vi.mocked(mockStmt.first).mockResolvedValue({
+        aws_account_id: '123456789012',
+        role_name: 'Admin',
+        destination_path: '/s3',
+        destination_region: 'us-west-2',
+      });
+      const dao = new RoleConfigsDAO(mockDb);
+      const result = await dao.getRoleConfig('123456789012', 'Admin');
+      expect(result).toEqual({
+        awsAccountId: '123456789012',
+        roleName: 'Admin',
+        destinationPath: '/s3',
+        destinationRegion: 'us-west-2',
+      });
+    });
+
+    it('returns undefined when not found', async () => {
+      const dao = new RoleConfigsDAO(mockDb);
+      const result = await dao.getRoleConfig('123456789012', 'NonExistent');
+      expect(result).toBeUndefined();
+    });
+
+    it('handles null optional fields', async () => {
+      vi.mocked(mockStmt.first).mockResolvedValue({
+        aws_account_id: '123456789012',
+        role_name: 'Admin',
+        destination_path: null,
+        destination_region: null,
+      });
+      const dao = new RoleConfigsDAO(mockDb);
+      const result = await dao.getRoleConfig('123456789012', 'Admin');
+      expect(result).toEqual({
+        awsAccountId: '123456789012',
+        roleName: 'Admin',
+        destinationPath: null,
+        destinationRegion: null,
+      });
+    });
+  });
+
+  describe('setRoleConfig', () => {
+    it('upserts role config with all fields', async () => {
+      const dao = new RoleConfigsDAO(mockDb);
+      await dao.setRoleConfig('123456789012', 'Admin', '/s3', 'us-west-2');
+      expect(mockDb.prepare).toHaveBeenCalledWith(expect.stringContaining('INSERT OR REPLACE'));
+      expect(mockStmt.bind).toHaveBeenCalledWith('123456789012', 'Admin', '/s3', 'us-west-2');
+    });
+
+    it('stores null for missing optional fields', async () => {
+      const dao = new RoleConfigsDAO(mockDb);
+      await dao.setRoleConfig('123456789012', 'Admin');
+      expect(mockStmt.bind).toHaveBeenCalledWith('123456789012', 'Admin', null, null);
+    });
+
+    it('throws DatabaseError on failure', async () => {
+      vi.mocked(mockStmt.run).mockResolvedValue({ success: false, error: 'fail' } as unknown as D1Result);
+      const dao = new RoleConfigsDAO(mockDb);
+      await expect(dao.setRoleConfig('123456789012', 'Admin')).rejects.toThrow(DatabaseError);
+    });
+  });
+
+  describe('deleteRoleConfig', () => {
+    it('deletes role config', async () => {
+      const dao = new RoleConfigsDAO(mockDb);
+      await dao.deleteRoleConfig('123456789012', 'Admin');
+      expect(mockDb.prepare).toHaveBeenCalledWith(expect.stringContaining('DELETE'));
+      expect(mockStmt.bind).toHaveBeenCalledWith('123456789012', 'Admin');
+    });
+
+    it('throws DatabaseError on failure', async () => {
+      vi.mocked(mockStmt.run).mockResolvedValue({ success: false, error: 'fail' } as unknown as D1Result);
+      const dao = new RoleConfigsDAO(mockDb);
+      await expect(dao.deleteRoleConfig('123456789012', 'Admin')).rejects.toThrow(DatabaseError);
+    });
+  });
+});
