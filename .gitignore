@@ -1,6 +1,9 @@
 wrangler.jsonc
 worker-configuration.d.ts
 
+# Local only directory
+local/
+
 # Visual Studio Code
 .vscode/
 
