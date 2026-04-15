@@ -10,3 +10,5 @@ export type { RoleConfig, RoleConfigInternal } from './RoleConfig';
 export type { UserMetadata, UserMetadataInternal } from './UserMetadata';
 export type { UserAccessToken, UserAccessTokenMetadata, UserAccessTokenInternal } from './UserAccessToken';
 export type { AuditLog, AuditLogInternal } from './AuditLog';
+export type { CostData, CostDataInternal } from './CostData';
+export type { SpendAlert, SpendAlertInternal } from './SpendAlert';

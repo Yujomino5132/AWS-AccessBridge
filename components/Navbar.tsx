@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 interface NavbarProps {
   isSuperAdmin?: boolean;
-  currentView?: 'accounts' | 'admin';
+  currentView?: 'accounts' | 'costs' | 'resources' | 'admin';
   userEmail?: string;
 }
 
@@ -15,16 +15,24 @@ export default function Navbar({ isSuperAdmin = false, currentView = 'accounts',
         <div className="text-xl font-bold">
           <span className="text-blue-400">AWS</span> AccessBridge
         </div>
-        {isSuperAdmin && (
-          <div className="flex space-x-4">
-            <Link
-              href="/"
-              className={`px-3 py-1 rounded transition-colors ${
-                currentView === 'accounts' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'
-              }`}
-            >
-              Accounts
-            </Link>
+        <div className="flex space-x-4">
+          <Link
+            href="/"
+            className={`px-3 py-1 rounded transition-colors ${
+              currentView === 'accounts' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'
+            }`}
+          >
+            Accounts
+          </Link>
+          <Link
+            href="/costs"
+            className={`px-3 py-1 rounded transition-colors ${
+              currentView === 'costs' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'
+            }`}
+          >
+            Costs
+          </Link>
+          {isSuperAdmin && (
             <Link
               href="/admin"
               className={`px-3 py-1 rounded transition-colors ${
@@ -33,8 +41,8 @@ export default function Navbar({ isSuperAdmin = false, currentView = 'accounts',
             >
               Admin
             </Link>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       <div className="text-sm flex items-center gap-2">
         {isSuperAdmin && <span className="bg-yellow-600 px-2 py-1 rounded text-xs">ADMIN</span>}

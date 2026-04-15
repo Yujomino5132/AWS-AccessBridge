@@ -27,6 +27,13 @@ import { ValidateCredentialsRoute as OriginalValidateCredentialsRoute } from './
 import { TestCredentialChainRoute as OriginalTestCredentialChainRoute } from './api/admin/credentials/test-chain/POST';
 import { ListAccountRolesRoute as OriginalListAccountRolesRoute } from './api/admin/account/roles/POST';
 import { ListAuditLogsRoute as OriginalListAuditLogsRoute } from './api/admin/audit-logs/GET';
+import { GetCostSummaryRoute as OriginalGetCostSummaryRoute } from './api/cost/summary/GET';
+import { GetAccountCostRoute as OriginalGetAccountCostRoute } from './api/cost/account/GET';
+import { GetCostTrendsRoute as OriginalGetCostTrendsRoute } from './api/cost/trends/GET';
+import { CreateSpendAlertRoute as OriginalCreateSpendAlertRoute } from './api/admin/cost/alerts/POST';
+import { DeleteSpendAlertRoute as OriginalDeleteSpendAlertRoute } from './api/admin/cost/alerts/DELETE';
+import { EnableDataCollectionRoute as OriginalEnableDataCollectionRoute } from './api/admin/collection/config/POST';
+import { DisableDataCollectionRoute as OriginalDisableDataCollectionRoute } from './api/admin/collection/config/DELETE';
 
 export const GenerateConsoleUrlRoute: any = OriginalGenerateConsoleUrlRoute;
 export const AssumeRoleRoute: any = OriginalAssumeRoleRoute;
@@ -55,3 +62,10 @@ export const ValidateCredentialsRoute: any = OriginalValidateCredentialsRoute;
 export const TestCredentialChainRoute: any = OriginalTestCredentialChainRoute;
 export const ListAccountRolesRoute: any = OriginalListAccountRolesRoute;
 export const ListAuditLogsRoute: any = OriginalListAuditLogsRoute;
+export const GetCostSummaryRoute: any = OriginalGetCostSummaryRoute;
+export const GetAccountCostRoute: any = OriginalGetAccountCostRoute;
+export const GetCostTrendsRoute: any = OriginalGetCostTrendsRoute;
+export const CreateSpendAlertRoute: any = OriginalCreateSpendAlertRoute;
+export const DeleteSpendAlertRoute: any = OriginalDeleteSpendAlertRoute;
+export const EnableDataCollectionRoute: any = OriginalEnableDataCollectionRoute;
+export const DisableDataCollectionRoute: any = OriginalDisableDataCollectionRoute;

@@ -29,8 +29,15 @@ import {
   TestCredentialChainRoute,
   ListAccountRolesRoute,
   ListAuditLogsRoute,
+  GetCostSummaryRoute,
+  GetAccountCostRoute,
+  GetCostTrendsRoute,
+  CreateSpendAlertRoute,
+  DeleteSpendAlertRoute,
+  EnableDataCollectionRoute,
+  DisableDataCollectionRoute,
 } from '@/endpoints';
-import { CredentialCacheRefreshTask, AuditLogCleanupTask } from '@/scheduled';
+import { CredentialCacheRefreshTask, AuditLogCleanupTask, CostDataCollectionTask } from '@/scheduled';
 import { MiddlewareHandlers } from '@/middleware';
 
 class AccessBridgeWorker extends AbstractWorker {
@@ -87,6 +94,15 @@ class AccessBridgeWorker extends AbstractWorker {
     openapi.post('/api/admin/account/roles', ListAccountRolesRoute);
     openapi.get('/api/admin/audit-logs', ListAuditLogsRoute);
 
+    // Cost Routes
+    openapi.get('/api/cost/summary', GetCostSummaryRoute);
+    openapi.get('/api/cost/account', GetAccountCostRoute);
+    openapi.get('/api/cost/trends', GetCostTrendsRoute);
+    openapi.post('/api/admin/cost/alerts', CreateSpendAlertRoute);
+    openapi.delete('/api/admin/cost/alerts', DeleteSpendAlertRoute);
+    openapi.post('/api/admin/collection/config', EnableDataCollectionRoute);
+    openapi.delete('/api/admin/collection/config', DisableDataCollectionRoute);
+
     this.app = openapi;
   }
 
@@ -97,6 +113,7 @@ class AccessBridgeWorker extends AbstractWorker {
   protected async handleScheduled(event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
     await new CredentialCacheRefreshTask().handle(event, env, ctx);
     await new AuditLogCleanupTask().handle(event, env, ctx);
+    await new CostDataCollectionTask().handle(event, env, ctx);
   }
 }
 
