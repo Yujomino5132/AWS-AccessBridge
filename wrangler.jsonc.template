@@ -3,9 +3,9 @@
   // "$minimumVersion": 1766030299,
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "aws-access-bridge",
-  "main": ".open-next/worker.js",
+  "main": "src/index.ts",
   "compatibility_date": "2025-11-29",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": [],
   "preview_urls": false,
   "workers_dev": true,
   "minify": true,
@@ -27,8 +27,7 @@
     "mode": "off",
   },
   "assets": {
-    "directory": ".open-next/assets",
-    "binding": "ASSETS",
+    "directory": "./app/dist/",
   },
   "services": [
     {
