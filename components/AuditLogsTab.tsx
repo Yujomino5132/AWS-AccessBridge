@@ -71,24 +71,46 @@ export default function AuditLogsTab({ showMessage }: AuditLogsTabProps) {
   };
 
   const totalPages = Math.ceil(total / pageSize);
-  const inputClass = 'p-2 bg-gray-700 rounded border border-gray-600 text-white text-sm focus:border-blue-400 focus:outline-none';
+  const inputClass =
+    'p-2 bg-gray-750 rounded-lg border border-gray-700 text-white text-sm placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors';
 
   return (
     <div className="space-y-4">
-      <div className="bg-gray-800 p-4 rounded">
-        <div className="flex gap-3 items-end flex-wrap">
+      <div className="bg-gray-800 border border-gray-700/50 p-4 rounded-xl">
+        <div className="flex gap-4 items-end flex-wrap">
           <div>
-            <label className="block text-xs text-gray-400 mb-1">User Email</label>
-            <input type="text" value={filterEmail} onChange={(e) => { setFilterEmail(e.target.value); setPage(0); }} placeholder="Filter by email" className={inputClass} />
+            <label className="block text-xs text-gray-400 mb-1.5 font-medium">User Email</label>
+            <input
+              type="text"
+              value={filterEmail}
+              onChange={(e) => {
+                setFilterEmail(e.target.value);
+                setPage(0);
+              }}
+              placeholder="Filter by email"
+              className={inputClass}
+            />
           </div>
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Action</label>
-            <input type="text" value={filterAction} onChange={(e) => { setFilterAction(e.target.value); setPage(0); }} placeholder="e.g. ASSUME_ROLE" className={inputClass} />
+            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Action</label>
+            <input
+              type="text"
+              value={filterAction}
+              onChange={(e) => {
+                setFilterAction(e.target.value);
+                setPage(0);
+              }}
+              placeholder="e.g. ASSUME_ROLE"
+              className={inputClass}
+            />
           </div>
-          <button onClick={fetchLogs} className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded text-white text-sm">
+          <button
+            onClick={fetchLogs}
+            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-white text-sm font-medium transition-colors"
+          >
             Refresh
           </button>
-          <span className="text-sm text-gray-400 ml-auto">{total} total entries</span>
+          <span className="text-sm text-gray-500 ml-auto">{total} total entries</span>
         </div>
       </div>
 
@@ -98,21 +120,19 @@ export default function AuditLogsTab({ showMessage }: AuditLogsTabProps) {
         </div>
       )}
 
-      {!isLoading && logs.length === 0 && (
-        <div className="text-center py-8 text-gray-400">No audit logs found.</div>
-      )}
+      {!isLoading && logs.length === 0 && <div className="text-center py-12 text-gray-500">No audit logs found.</div>}
 
       {!isLoading && logs.length > 0 && (
-        <div className="bg-gray-800 rounded overflow-hidden">
+        <div className="bg-gray-800 border border-gray-700/50 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gray-700 text-gray-300">
-                <th className="text-left p-2">Time</th>
-                <th className="text-left p-2">User</th>
-                <th className="text-left p-2">Action</th>
-                <th className="text-left p-2">Method</th>
-                <th className="text-left p-2">Status</th>
-                <th className="text-left p-2">IP</th>
+              <tr className="bg-gray-750 text-gray-400 text-xs uppercase tracking-wider">
+                <th className="text-left p-3 font-medium">Time</th>
+                <th className="text-left p-3 font-medium">User</th>
+                <th className="text-left p-3 font-medium">Action</th>
+                <th className="text-left p-3 font-medium">Method</th>
+                <th className="text-left p-3 font-medium">Status</th>
+                <th className="text-left p-3 font-medium">IP</th>
               </tr>
             </thead>
             <tbody>
@@ -120,24 +140,40 @@ export default function AuditLogsTab({ showMessage }: AuditLogsTabProps) {
                 <>
                   <tr
                     key={log.logId}
-                    className="border-t border-gray-700 hover:bg-gray-750 cursor-pointer"
+                    className="border-t border-gray-700/50 hover:bg-gray-750 cursor-pointer transition-colors"
                     onClick={() => setExpandedLog(expandedLog === log.logId ? null : log.logId)}
                   >
-                    <td className="p-2 text-gray-300 whitespace-nowrap">{formatTimestamp(log.timestamp)}</td>
-                    <td className="p-2 text-gray-300 truncate max-w-32">{log.userEmail}</td>
-                    <td className="p-2 font-medium">{log.action}</td>
-                    <td className="p-2 text-gray-400">{log.method}</td>
-                    <td className={`p-2 ${statusColor(log.statusCode)}`}>{log.statusCode}</td>
-                    <td className="p-2 text-gray-400 text-xs">{log.ipAddress || '-'}</td>
+                    <td className="p-3 text-gray-300 whitespace-nowrap">{formatTimestamp(log.timestamp)}</td>
+                    <td className="p-3 text-gray-300 truncate max-w-32">{log.userEmail}</td>
+                    <td className="p-3 font-medium text-white">{log.action}</td>
+                    <td className="p-3 text-gray-400">{log.method}</td>
+                    <td className={`p-3 font-mono ${statusColor(log.statusCode)}`}>{log.statusCode}</td>
+                    <td className="p-3 text-gray-500 text-xs">{log.ipAddress || '-'}</td>
                   </tr>
                   {expandedLog === log.logId && (
-                    <tr key={`${log.logId}-detail`} className="bg-gray-750">
-                      <td colSpan={6} className="p-3 text-xs text-gray-300 space-y-1">
-                        <div><span className="text-gray-500">Path:</span> {log.path}</div>
-                        {log.resource && <div><span className="text-gray-500">Resource:</span> {log.resource}</div>}
-                        {log.detail && <div><span className="text-gray-500">Detail:</span> {log.detail}</div>}
-                        {log.userAgent && <div><span className="text-gray-500">User Agent:</span> {log.userAgent}</div>}
-                        <div><span className="text-gray-500">Log ID:</span> {log.logId}</div>
+                    <tr key={`${log.logId}-detail`} className="bg-gray-850">
+                      <td colSpan={6} className="p-4 text-xs text-gray-300 space-y-1.5">
+                        <div>
+                          <span className="text-gray-500 font-medium">Path:</span> <span className="font-mono">{log.path}</span>
+                        </div>
+                        {log.resource && (
+                          <div>
+                            <span className="text-gray-500 font-medium">Resource:</span> {log.resource}
+                          </div>
+                        )}
+                        {log.detail && (
+                          <div>
+                            <span className="text-gray-500 font-medium">Detail:</span> {log.detail}
+                          </div>
+                        )}
+                        {log.userAgent && (
+                          <div>
+                            <span className="text-gray-500 font-medium">User Agent:</span> {log.userAgent}
+                          </div>
+                        )}
+                        <div>
+                          <span className="text-gray-500 font-medium">Log ID:</span> <span className="font-mono">{log.logId}</span>
+                        </div>
                       </td>
                     </tr>
                   )}
@@ -150,9 +186,23 @@ export default function AuditLogsTab({ showMessage }: AuditLogsTabProps) {
 
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
-          <button onClick={() => setPage(Math.max(0, page - 1))} disabled={page === 0} className="px-3 py-1 text-sm bg-gray-700 rounded disabled:opacity-50">Prev</button>
-          <span className="text-sm text-gray-400">Page {page + 1} of {totalPages}</span>
-          <button onClick={() => setPage(Math.min(totalPages - 1, page + 1))} disabled={page >= totalPages - 1} className="px-3 py-1 text-sm bg-gray-700 rounded disabled:opacity-50">Next</button>
+          <button
+            onClick={() => setPage(Math.max(0, page - 1))}
+            disabled={page === 0}
+            className="px-3 py-1.5 text-sm bg-gray-800 border border-gray-700 rounded-lg disabled:opacity-40 hover:bg-gray-750 transition-colors"
+          >
+            Prev
+          </button>
+          <span className="text-sm text-gray-500">
+            Page {page + 1} of {totalPages}
+          </span>
+          <button
+            onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+            disabled={page >= totalPages - 1}
+            className="px-3 py-1.5 text-sm bg-gray-800 border border-gray-700 rounded-lg disabled:opacity-40 hover:bg-gray-750 transition-colors"
+          >
+            Next
+          </button>
         </div>
       )}
     </div>

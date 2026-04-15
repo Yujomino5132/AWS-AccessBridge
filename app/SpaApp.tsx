@@ -89,135 +89,214 @@ export default function SpaApp() {
   return (
     <div className="bg-gray-900 min-h-screen text-white">
       {isDemoMode && (
-        <div className="bg-yellow-500 text-black text-center py-2 font-semibold text-sm sticky top-0 z-50">
+        <div className="bg-gradient-to-r from-yellow-500 to-amber-500 text-black text-center py-2 font-semibold text-sm sticky top-0 z-50 shadow-md">
           Demo Mode — Data shown is for demonstration purposes only. Admin operations are disabled.
         </div>
       )}
-      <SpaNavbar
-        isSuperAdmin={isSuperAdmin}
-        currentView={currentView}
-        setCurrentView={setCurrentView}
-        userEmail={userEmail}
-      />
-      <div className="max-w-6xl mx-auto py-8">
+      <SpaNavbar isSuperAdmin={isSuperAdmin} currentView={currentView} setCurrentView={setCurrentView} userEmail={userEmail} />
+      <div className="max-w-6xl mx-auto px-6 py-8">
         <div key={currentView} className="animate-fade-in-up">
-        {currentView === 'admin' && isSuperAdmin ? (
-          <AdminPage />
-        ) : currentView === 'costs' ? (
-          <div>
-            <h2 className="text-2xl font-bold mb-6">Cost Analytics</h2>
-            <CostDashboard />
-          </div>
-        ) : currentView === 'resources' ? (
-          <div>
-            <h2 className="text-2xl font-bold mb-6">Resource Inventory</h2>
-            <ResourceInventory />
-          </div>
-        ) : (
-          <>
-            <div className="flex items-center mb-4">
-              <h2 className="text-2xl font-bold flex-shrink-0">AWS Accounts</h2>
-              <input
-                type="text"
-                placeholder="Search by account id or nickname"
-                value={searchTerm}
-                onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                className="flex-1 mx-6 px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-400 focus:outline-none"
-              />
-              <div className="relative filter-dropdown flex-shrink-0">
-                <button
-                  onClick={() => setFilterOpen(!filterOpen)}
-                  className="flex items-center text-gray-300 hover:text-white transition-colors"
-                >
-                  <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+          {currentView === 'admin' && isSuperAdmin ? (
+            <AdminPage />
+          ) : currentView === 'costs' ? (
+            <div>
+              <h2 className="text-2xl font-bold mb-6 text-gray-100">Cost Analytics</h2>
+              <CostDashboard />
+            </div>
+          ) : currentView === 'resources' ? (
+            <div>
+              <h2 className="text-2xl font-bold mb-6 text-gray-100">Resource Inventory</h2>
+              <ResourceInventory />
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center mb-6 gap-4">
+                <h2 className="text-2xl font-bold flex-shrink-0 text-gray-100">AWS Accounts</h2>
+                <div className="flex-1 relative">
+                  <svg
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
-                  Filters
-                </button>
-                {filterOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-600 rounded shadow-lg z-10">
-                    <div className="p-3">
-                      <label className="flex items-center cursor-pointer">
-                        <input type="checkbox" checked={showHidden} onChange={(e) => { setShowHidden(e.target.checked); setCurrentPage(1); }} className="mr-2" />
-                        Include Hidden
-                      </label>
+                  <input
+                    type="text"
+                    placeholder="Search by account id or nickname"
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="w-full pl-10 pr-4 py-2.5 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 focus:outline-none placeholder-gray-500 transition-colors"
+                  />
+                </div>
+                <div className="relative filter-dropdown flex-shrink-0">
+                  <button
+                    onClick={() => setFilterOpen(!filterOpen)}
+                    className="flex items-center gap-1.5 px-3 py-2.5 text-gray-300 hover:text-white bg-gray-800 border border-gray-700 rounded-lg hover:border-gray-600 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                      />
+                    </svg>
+                    Filters
+                  </button>
+                  {filterOpen && (
+                    <div className="absolute right-0 mt-2 w-52 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-10 animate-slide-down">
+                      <div className="p-3">
+                        <label className="flex items-center cursor-pointer text-sm">
+                          <input
+                            type="checkbox"
+                            checked={showHidden}
+                            onChange={(e) => {
+                              setShowHidden(e.target.checked);
+                              setCurrentPage(1);
+                            }}
+                            className="mr-2.5 rounded"
+                          />
+                          Include Hidden
+                        </label>
+                      </div>
                     </div>
+                  )}
+                </div>
+              </div>
+              <div className="mb-4">
+                {!searchTerm.trim() && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm text-gray-400">Per page:</label>
+                      <select
+                        value={pageSize}
+                        onChange={(e) => setPageSize(Number(e.target.value))}
+                        className="px-2 py-1.5 bg-gray-800 text-white text-sm rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none transition-colors"
+                      >
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                        <option value={50}>50</option>
+                        <option value={100}>100</option>
+                      </select>
+                    </div>
+                    {totalAccounts > 0 && (
+                      <>
+                        <div className="text-sm text-gray-500">
+                          {Math.min((currentPage - 1) * pageSize + 1, totalAccounts)}&ndash;
+                          {Math.min(currentPage * pageSize, totalAccounts)} of {totalAccounts}
+                        </div>
+                        {Math.ceil(totalAccounts / pageSize) > 1 && (
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                              disabled={currentPage === 1}
+                              className="px-2.5 py-1.5 text-sm bg-gray-800 text-white rounded-lg border border-gray-700 hover:bg-gray-750 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                            >
+                              Prev
+                            </button>
+                            {Array.from({ length: Math.min(5, Math.ceil(totalAccounts / pageSize)) }, (_, i) => {
+                              const totalPages = Math.ceil(totalAccounts / pageSize);
+                              let pageNum;
+                              if (totalPages <= 5) pageNum = i + 1;
+                              else if (currentPage <= 3) pageNum = i + 1;
+                              else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
+                              else pageNum = currentPage - 2 + i;
+                              return (
+                                <button
+                                  key={pageNum}
+                                  onClick={() => setCurrentPage(pageNum)}
+                                  className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${currentPage === pageNum ? 'bg-blue-600 text-white border-blue-500' : 'bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-750'}`}
+                                >
+                                  {pageNum}
+                                </button>
+                              );
+                            })}
+                            <button
+                              onClick={() => setCurrentPage(Math.min(Math.ceil(totalAccounts / pageSize), currentPage + 1))}
+                              disabled={currentPage === Math.ceil(totalAccounts / pageSize)}
+                              className="px-2.5 py-1.5 text-sm bg-gray-800 text-white rounded-lg border border-gray-700 hover:bg-gray-750 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                            >
+                              Next
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 )}
               </div>
-            </div>
-            <div className="mb-4 space-y-4">
-              {!searchTerm.trim() && (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <label className="text-sm text-gray-300">Accounts per page:</label>
-                    <select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))} className="px-2 py-1 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-400 focus:outline-none">
-                      <option value={10}>10</option>
-                      <option value={20}>20</option>
-                      <option value={50}>50</option>
-                      <option value={100}>100</option>
-                    </select>
-                  </div>
-                  {totalAccounts > 0 && (
-                    <>
-                      <div className="text-sm text-gray-400">
-                        Showing {Math.min((currentPage - 1) * pageSize + 1, totalAccounts)}-{Math.min(currentPage * pageSize, totalAccounts)} of {totalAccounts} accounts
-                      </div>
-                      {Math.ceil(totalAccounts / pageSize) > 1 && (
-                        <div className="flex items-center space-x-1">
-                          <button onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1} className="px-2 py-1 text-sm bg-gray-700 text-white rounded border border-gray-600 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">Previous</button>
-                          {Array.from({ length: Math.min(5, Math.ceil(totalAccounts / pageSize)) }, (_, i) => {
-                            const totalPages = Math.ceil(totalAccounts / pageSize);
-                            let pageNum;
-                            if (totalPages <= 5) pageNum = i + 1;
-                            else if (currentPage <= 3) pageNum = i + 1;
-                            else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
-                            else pageNum = currentPage - 2 + i;
-                            return (
-                              <button key={pageNum} onClick={() => setCurrentPage(pageNum)} className={`px-3 py-1 text-sm rounded border ${currentPage === pageNum ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-700 text-white border-gray-600 hover:bg-gray-600'}`}>{pageNum}</button>
-                            );
-                          })}
-                          <button onClick={() => setCurrentPage(Math.min(Math.ceil(totalAccounts / pageSize), currentPage + 1))} disabled={currentPage === Math.ceil(totalAccounts / pageSize)} className="px-2 py-1 text-sm bg-gray-700 text-white rounded border border-gray-600 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-            <AccountList showHidden={showHidden} searchTerm={searchTerm} pageSize={pageSize} currentPage={currentPage} setTotalAccounts={handleSetTotalAccounts} />
-          </>
-        )}
+              <AccountList
+                showHidden={showHidden}
+                searchTerm={searchTerm}
+                pageSize={pageSize}
+                currentPage={currentPage}
+                setTotalAccounts={handleSetTotalAccounts}
+              />
+            </>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-function SpaNavbar({ isSuperAdmin, currentView, setCurrentView, userEmail }: {
+function SpaNavbar({
+  isSuperAdmin,
+  currentView,
+  setCurrentView,
+  userEmail,
+}: {
   isSuperAdmin: boolean;
   currentView: View;
   setCurrentView: (view: View) => void;
   userEmail: string;
 }) {
   return (
-    <nav className="bg-gray-900 text-white px-6 py-4 flex justify-between items-center shadow">
-      <div className="flex items-center space-x-6">
-        <div className="text-xl font-bold">
+    <nav className="bg-gray-900/95 backdrop-blur-sm text-white px-6 py-3 flex justify-between items-center border-b border-gray-800 sticky top-0 z-40">
+      <div className="flex items-center gap-8">
+        <div className="text-xl font-bold tracking-tight">
           <span className="text-blue-400">AWS</span> AccessBridge
         </div>
-        <div className="flex space-x-4">
-          <button onClick={() => setCurrentView('accounts')} className={`px-3 py-1 rounded transition-colors ${currentView === 'accounts' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'}`}>Accounts</button>
-          <button onClick={() => setCurrentView('costs')} className={`px-3 py-1 rounded transition-colors ${currentView === 'costs' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'}`}>Costs</button>
-          <button onClick={() => setCurrentView('resources')} className={`px-3 py-1 rounded transition-colors ${currentView === 'resources' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'}`}>Resources</button>
+        <div className="flex gap-1 bg-gray-800/50 p-1 rounded-lg">
+          <button
+            onClick={() => setCurrentView('accounts')}
+            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${currentView === 'accounts' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-gray-400 hover:text-white hover:bg-gray-700/50'}`}
+          >
+            Accounts
+          </button>
+          <button
+            onClick={() => setCurrentView('costs')}
+            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${currentView === 'costs' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-gray-400 hover:text-white hover:bg-gray-700/50'}`}
+          >
+            Costs
+          </button>
+          <button
+            onClick={() => setCurrentView('resources')}
+            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${currentView === 'resources' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-gray-400 hover:text-white hover:bg-gray-700/50'}`}
+          >
+            Resources
+          </button>
           {isSuperAdmin && (
-            <button onClick={() => setCurrentView('admin')} className={`px-3 py-1 rounded transition-colors ${currentView === 'admin' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'}`}>Admin</button>
+            <button
+              onClick={() => setCurrentView('admin')}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${currentView === 'admin' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-gray-400 hover:text-white hover:bg-gray-700/50'}`}
+            >
+              Admin
+            </button>
           )}
         </div>
       </div>
-      <div className="text-sm flex items-center gap-2">
-        {isSuperAdmin && <span className="bg-yellow-600 px-2 py-1 rounded text-xs">ADMIN</span>}
-        <span>{userEmail}</span>
+      <div className="text-sm flex items-center gap-3">
+        {isSuperAdmin && (
+          <span className="bg-amber-500/15 text-amber-400 border border-amber-500/25 px-2.5 py-0.5 rounded-full text-xs font-medium">
+            ADMIN
+          </span>
+        )}
+        <span className="text-gray-400">{userEmail}</span>
       </div>
     </nav>
   );

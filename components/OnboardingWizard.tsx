@@ -42,7 +42,11 @@ export default function OnboardingWizard({ showMessage }: OnboardingWizardProps)
   // Loading states
   const [isLoading, setIsLoading] = useState(false);
 
-  const apiCall = async (url: string, method: string, body: Record<string, unknown>): Promise<{ ok: boolean; data: unknown; error?: string }> => {
+  const apiCall = async (
+    url: string,
+    method: string,
+    body: Record<string, unknown>,
+  ): Promise<{ ok: boolean; data: unknown; error?: string }> => {
     try {
       const response = await fetch(url, {
         method,
@@ -51,7 +55,11 @@ export default function OnboardingWizard({ showMessage }: OnboardingWizardProps)
       });
       const text = await response.text();
       let data: unknown;
-      try { data = JSON.parse(text); } catch { data = text; }
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = text;
+      }
       if (!response.ok) {
         const err = (data as { Exception?: { Message?: string } })?.Exception?.Message || `HTTP ${response.status}`;
         return { ok: false, data, error: err };
@@ -71,7 +79,11 @@ export default function OnboardingWizard({ showMessage }: OnboardingWizardProps)
     setIsLoading(true);
     if (nickname.trim()) {
       const result = await apiCall('/api/admin/account/nickname', 'PUT', { awsAccountId, nickname: nickname.trim() });
-      if (!result.ok) { showMessage('error', result.error!); setIsLoading(false); return; }
+      if (!result.ok) {
+        showMessage('error', result.error!);
+        setIsLoading(false);
+        return;
+      }
     }
     setAccountSaved(true);
     showMessage('success', 'Account configured.');
@@ -81,7 +93,11 @@ export default function OnboardingWizard({ showMessage }: OnboardingWizardProps)
   // Step 2 handlers
   const handleValidateCredentials = async () => {
     setIsLoading(true);
-    const result = await apiCall('/api/admin/credentials/validate', 'POST', { accessKeyId, secretAccessKey, sessionToken: sessionToken || undefined });
+    const result = await apiCall('/api/admin/credentials/validate', 'POST', {
+      accessKeyId,
+      secretAccessKey,
+      sessionToken: sessionToken || undefined,
+    });
     if (result.ok) {
       const d = result.data as { arn: string; accountId: string };
       setValidationResult(d);
@@ -94,10 +110,15 @@ export default function OnboardingWizard({ showMessage }: OnboardingWizardProps)
   };
 
   const handleStoreCredentials = async () => {
-    if (!principalArn.trim()) { showMessage('error', 'Principal ARN is required.'); return; }
+    if (!principalArn.trim()) {
+      showMessage('error', 'Principal ARN is required.');
+      return;
+    }
     setIsLoading(true);
     const result = await apiCall('/api/admin/credentials', 'POST', {
-      principalArn, accessKeyId, secretAccessKey,
+      principalArn,
+      accessKeyId,
+      secretAccessKey,
       ...(sessionToken && { sessionToken }),
     });
     if (result.ok) {
@@ -111,7 +132,10 @@ export default function OnboardingWizard({ showMessage }: OnboardingWizardProps)
 
   // Step 3 handlers
   const handleSetChain = async () => {
-    if (!assumedBy.trim()) { showMessage('error', 'Assumed By ARN is required.'); return; }
+    if (!assumedBy.trim()) {
+      showMessage('error', 'Assumed By ARN is required.');
+      return;
+    }
     setIsLoading(true);
     const result = await apiCall('/api/admin/credentials/relationship', 'POST', { principalArn, assumedBy });
     if (result.ok) {
@@ -191,80 +215,160 @@ export default function OnboardingWizard({ showMessage }: OnboardingWizardProps)
     setIsLoading(false);
   };
 
-  const inputClass = 'w-full p-3 bg-gray-700 rounded border border-gray-600 text-white focus:border-blue-400 focus:outline-none';
-  const btnPrimary = 'bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white';
-  const btnSuccess = 'bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white';
-  const btnSecondary = 'bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded text-white';
+  const inputClass =
+    'w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 focus:outline-none transition-colors';
+  const btnPrimary =
+    'bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-5 py-2.5 rounded-lg text-white font-medium transition-colors';
+  const btnSuccess =
+    'bg-green-600 hover:bg-green-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-5 py-2.5 rounded-lg text-white font-medium transition-colors';
+  const btnSecondary =
+    'bg-gray-700 hover:bg-gray-600 border border-gray-600 px-5 py-2.5 rounded-lg text-gray-300 font-medium transition-colors';
 
   return (
     <div className="max-w-4xl mx-auto">
       {/* Step indicator */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center" style={{ marginBottom: '2.5rem' }}>
         {STEPS.map((label, i) => (
-          <div key={label} className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-              i < step ? 'bg-green-600' : i === step ? 'bg-blue-600' : 'bg-gray-700'
-            }`}>
-              {i < step ? '✓' : i + 1}
+          <div key={label} className="flex items-center" style={{ flex: i < STEPS.length - 1 ? '1' : 'none' }}>
+            <div className="flex items-center" style={{ gap: '10px' }}>
+              <div
+                className={`rounded-full flex items-center justify-center text-sm font-bold ${
+                  i < step ? 'bg-green-600 text-white' : i === step ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-400'
+                }`}
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  minWidth: '36px',
+                  boxShadow: i === step ? '0 0 0 4px rgba(37, 99, 235, 0.2)' : 'none',
+                }}
+              >
+                {i < step ? '✓' : i + 1}
+              </div>
+              <span
+                className={`text-sm font-medium ${i === step ? 'text-white' : i < step ? 'text-green-400' : 'text-gray-500'}`}
+                style={{ whiteSpace: 'nowrap' }}
+              >
+                {label}
+              </span>
             </div>
-            <span className={`ml-2 text-sm ${i === step ? 'text-white' : 'text-gray-400'}`}>{label}</span>
-            {i < STEPS.length - 1 && <div className={`w-8 h-0.5 mx-2 ${i < step ? 'bg-green-600' : 'bg-gray-700'}`} />}
+            {i < STEPS.length - 1 && (
+              <div className={`${i < step ? 'bg-green-600' : 'bg-gray-700'}`} style={{ flex: 1, height: '1px', margin: '0 16px' }} />
+            )}
           </div>
         ))}
       </div>
 
       {/* Step 1: Account */}
       {step === 0 && (
-        <div className="bg-gray-800 p-6 rounded space-y-4">
+        <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl space-y-4">
           <h3 className="text-xl font-semibold">Add AWS Account</h3>
           <p className="text-gray-400 text-sm">Enter the 12-digit AWS Account ID and an optional nickname.</p>
-          <input type="text" placeholder="AWS Account ID (12 digits)" value={awsAccountId} onChange={(e) => setAwsAccountId(e.target.value)} className={inputClass} pattern="[0-9]{12}" />
-          <input type="text" placeholder="Nickname (optional)" value={nickname} onChange={(e) => setNickname(e.target.value)} className={inputClass} />
+          <input
+            type="text"
+            placeholder="AWS Account ID (12 digits)"
+            value={awsAccountId}
+            onChange={(e) => setAwsAccountId(e.target.value)}
+            className={inputClass}
+            pattern="[0-9]{12}"
+          />
+          <input
+            type="text"
+            placeholder="Nickname (optional)"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            className={inputClass}
+          />
           {accountSaved && <p className="text-green-400 text-sm">Account configured.</p>}
           <div className="flex justify-between">
             <button onClick={handleSaveAccount} disabled={isLoading || !/^[0-9]{12}$/.test(awsAccountId)} className={btnPrimary}>
               {isLoading ? 'Saving...' : 'Save Account'}
             </button>
-            <button onClick={() => setStep(1)} disabled={!accountSaved} className={btnSuccess}>Next</button>
+            <button onClick={() => setStep(1)} disabled={!accountSaved} className={btnSuccess}>
+              Next
+            </button>
           </div>
         </div>
       )}
 
       {/* Step 2: Credentials */}
       {step === 1 && (
-        <div className="bg-gray-800 p-6 rounded space-y-4">
+        <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl space-y-4">
           <h3 className="text-xl font-semibold">Store Credentials</h3>
           <p className="text-gray-400 text-sm">Enter IAM credentials. Validate first to confirm they work, then store them securely.</p>
-          <input type="text" placeholder="Principal ARN (e.g., arn:aws:iam::123456789012:user/username)" value={principalArn} onChange={(e) => setPrincipalArn(e.target.value)} className={inputClass} />
-          <input type="text" placeholder="Access Key ID" value={accessKeyId} onChange={(e) => setAccessKeyId(e.target.value)} className={inputClass} />
-          <input type="password" placeholder="Secret Access Key" value={secretAccessKey} onChange={(e) => setSecretAccessKey(e.target.value)} className={inputClass} />
-          <input type="password" placeholder="Session Token (optional)" value={sessionToken} onChange={(e) => setSessionToken(e.target.value)} className={inputClass} />
-          {validationResult && <p className="text-green-400 text-sm">Identity: {validationResult.arn} (Account: {validationResult.accountId})</p>}
+          <input
+            type="text"
+            placeholder="Principal ARN (e.g., arn:aws:iam::123456789012:user/username)"
+            value={principalArn}
+            onChange={(e) => setPrincipalArn(e.target.value)}
+            className={inputClass}
+          />
+          <input
+            type="text"
+            placeholder="Access Key ID"
+            value={accessKeyId}
+            onChange={(e) => setAccessKeyId(e.target.value)}
+            className={inputClass}
+          />
+          <input
+            type="password"
+            placeholder="Secret Access Key"
+            value={secretAccessKey}
+            onChange={(e) => setSecretAccessKey(e.target.value)}
+            className={inputClass}
+          />
+          <input
+            type="password"
+            placeholder="Session Token (optional)"
+            value={sessionToken}
+            onChange={(e) => setSessionToken(e.target.value)}
+            className={inputClass}
+          />
+          {validationResult && (
+            <p className="text-green-400 text-sm">
+              Identity: {validationResult.arn} (Account: {validationResult.accountId})
+            </p>
+          )}
           {credentialStored && <p className="text-green-400 text-sm">Credentials stored securely.</p>}
           <div className="flex gap-3 flex-wrap">
             <button onClick={handleValidateCredentials} disabled={isLoading || !accessKeyId || !secretAccessKey} className={btnPrimary}>
               {isLoading ? 'Validating...' : 'Validate'}
             </button>
-            <button onClick={handleStoreCredentials} disabled={isLoading || !principalArn || !accessKeyId || !secretAccessKey} className={btnSuccess}>
+            <button
+              onClick={handleStoreCredentials}
+              disabled={isLoading || !principalArn || !accessKeyId || !secretAccessKey}
+              className={btnSuccess}
+            >
               {isLoading ? 'Storing...' : 'Store Credentials'}
             </button>
           </div>
           <div className="flex justify-between pt-4">
-            <button onClick={() => setStep(0)} className={btnSecondary}>Back</button>
-            <button onClick={() => setStep(2)} disabled={!credentialStored} className={btnSuccess}>Next</button>
+            <button onClick={() => setStep(0)} className={btnSecondary}>
+              Back
+            </button>
+            <button onClick={() => setStep(2)} disabled={!credentialStored} className={btnSuccess}>
+              Next
+            </button>
           </div>
         </div>
       )}
 
       {/* Step 3: Credential Chain */}
       {step === 2 && (
-        <div className="bg-gray-800 p-6 rounded space-y-4">
+        <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl space-y-4">
           <h3 className="text-xl font-semibold">Credential Chain (Optional)</h3>
-          <p className="text-gray-400 text-sm">If this credential needs to assume an intermediate role first, configure the chain here. Skip if not needed.</p>
-          <input type="text" placeholder="Assumed By ARN (the base credential that assumes this role)" value={assumedBy} onChange={(e) => setAssumedBy(e.target.value)} className={inputClass} />
+          <p className="text-gray-400 text-sm">
+            If this credential needs to assume an intermediate role first, configure the chain here. Skip if not needed.
+          </p>
+          <input
+            type="text"
+            placeholder="Assumed By ARN (the base credential that assumes this role)"
+            value={assumedBy}
+            onChange={(e) => setAssumedBy(e.target.value)}
+            className={inputClass}
+          />
           {chainConfigured && <p className="text-green-400 text-sm">Chain relationship configured.</p>}
           {chainTestResult && (
-            <div className="bg-gray-700 p-3 rounded text-sm space-y-1">
+            <div className="bg-gray-750 border border-gray-700/30 p-3 rounded-lg text-sm space-y-1">
               {chainTestResult.map((r, i) => (
                 <div key={i} className={r.status.startsWith('ok') ? 'text-green-400' : 'text-red-400'}>
                   {r.arn}: {r.status}
@@ -285,15 +389,19 @@ export default function OnboardingWizard({ showMessage }: OnboardingWizardProps)
             )}
           </div>
           <div className="flex justify-between pt-4">
-            <button onClick={() => setStep(1)} className={btnSecondary}>Back</button>
-            <button onClick={() => setStep(3)} className={btnSuccess}>Next</button>
+            <button onClick={() => setStep(1)} className={btnSecondary}>
+              Back
+            </button>
+            <button onClick={() => setStep(3)} className={btnSuccess}>
+              Next
+            </button>
           </div>
         </div>
       )}
 
       {/* Step 4: Roles */}
       {step === 3 && (
-        <div className="bg-gray-800 p-6 rounded space-y-4">
+        <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl space-y-4">
           <h3 className="text-xl font-semibold">Discover & Select Roles</h3>
           <p className="text-gray-400 text-sm">Discover IAM roles in the account or add them manually.</p>
           <button onClick={handleDiscoverRoles} disabled={isLoading} className={btnPrimary}>
@@ -311,69 +419,107 @@ export default function OnboardingWizard({ showMessage }: OnboardingWizardProps)
             </div>
           )}
           <div className="flex gap-2">
-            <input type="text" placeholder="Manually add role name" value={manualRoleName} onChange={(e) => setManualRoleName(e.target.value)} className={inputClass}
-              onKeyDown={(e) => { if (e.key === 'Enter') handleAddManualRole(); }}
+            <input
+              type="text"
+              placeholder="Manually add role name"
+              value={manualRoleName}
+              onChange={(e) => setManualRoleName(e.target.value)}
+              className={inputClass}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleAddManualRole();
+              }}
             />
-            <button onClick={handleAddManualRole} disabled={!manualRoleName.trim()} className={btnPrimary}>Add</button>
+            <button onClick={handleAddManualRole} disabled={!manualRoleName.trim()} className={btnPrimary}>
+              Add
+            </button>
           </div>
           <p className="text-sm text-gray-400">{selectedRoles.size} role(s) selected</p>
           <div className="flex justify-between pt-4">
-            <button onClick={() => setStep(2)} className={btnSecondary}>Back</button>
-            <button onClick={() => setStep(4)} disabled={selectedRoles.size === 0} className={btnSuccess}>Next</button>
+            <button onClick={() => setStep(2)} className={btnSecondary}>
+              Back
+            </button>
+            <button onClick={() => setStep(4)} disabled={selectedRoles.size === 0} className={btnSuccess}>
+              Next
+            </button>
           </div>
         </div>
       )}
 
       {/* Step 5: Users */}
       {step === 4 && (
-        <div className="bg-gray-800 p-6 rounded space-y-4">
+        <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl space-y-4">
           <h3 className="text-xl font-semibold">Assign Users</h3>
           <p className="text-gray-400 text-sm">Enter email addresses of users to grant access to the selected roles.</p>
           {userEmails.map((email, i) => (
             <div key={i} className="flex gap-2">
-              <input type="email" placeholder="user@example.com" value={email} onChange={(e) => { const next = [...userEmails]; next[i] = e.target.value; setUserEmails(next); }} className={inputClass} />
+              <input
+                type="email"
+                placeholder="user@example.com"
+                value={email}
+                onChange={(e) => {
+                  const next = [...userEmails];
+                  next[i] = e.target.value;
+                  setUserEmails(next);
+                }}
+                className={inputClass}
+              />
               {userEmails.length > 1 && (
-                <button onClick={() => setUserEmails(userEmails.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-300 px-2">X</button>
+                <button
+                  onClick={() => setUserEmails(userEmails.filter((_, j) => j !== i))}
+                  className="text-red-400 hover:text-red-300 px-2"
+                >
+                  X
+                </button>
               )}
             </div>
           ))}
-          <button onClick={() => setUserEmails([...userEmails, ''])} className="text-blue-400 hover:text-blue-300 text-sm">+ Add another user</button>
+          <button onClick={() => setUserEmails([...userEmails, ''])} className="text-blue-400 hover:text-blue-300 text-sm">
+            + Add another user
+          </button>
           <p className="text-sm text-gray-400">
             Granting access to: {Array.from(selectedRoles).join(', ')} in account {awsAccountId}
           </p>
           {accessGranted && <p className="text-green-400 text-sm">Access granted successfully.</p>}
           <div className="flex gap-3">
-            <button onClick={handleGrantAccess} disabled={isLoading || userEmails.every((e) => !e.trim()) || selectedRoles.size === 0} className={btnSuccess}>
+            <button
+              onClick={handleGrantAccess}
+              disabled={isLoading || userEmails.every((e) => !e.trim()) || selectedRoles.size === 0}
+              className={btnSuccess}
+            >
               {isLoading ? 'Granting...' : 'Grant Access'}
             </button>
           </div>
           <div className="flex justify-between pt-4">
-            <button onClick={() => setStep(3)} className={btnSecondary}>Back</button>
-            <button onClick={() => setStep(5)} className={btnSuccess}>Next</button>
+            <button onClick={() => setStep(3)} className={btnSecondary}>
+              Back
+            </button>
+            <button onClick={() => setStep(5)} className={btnSuccess}>
+              Next
+            </button>
           </div>
         </div>
       )}
 
       {/* Step 6: Summary */}
       {step === 5 && (
-        <div className="bg-gray-800 p-6 rounded space-y-4">
+        <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl space-y-4">
           <h3 className="text-xl font-semibold">Setup Complete</h3>
           <div className="space-y-3 text-sm">
-            <div className="bg-gray-700 p-3 rounded">
+            <div className="bg-gray-750 border border-gray-700/30 p-3 rounded-lg">
               <span className="text-gray-400">Account:</span> {nickname ? `${nickname} (${awsAccountId})` : awsAccountId}
             </div>
-            <div className="bg-gray-700 p-3 rounded">
+            <div className="bg-gray-750 border border-gray-700/30 p-3 rounded-lg">
               <span className="text-gray-400">Principal:</span> {principalArn}
             </div>
             {assumedBy && (
-              <div className="bg-gray-700 p-3 rounded">
+              <div className="bg-gray-750 border border-gray-700/30 p-3 rounded-lg">
                 <span className="text-gray-400">Chain:</span> {assumedBy} → {principalArn}
               </div>
             )}
-            <div className="bg-gray-700 p-3 rounded">
+            <div className="bg-gray-750 border border-gray-700/30 p-3 rounded-lg">
               <span className="text-gray-400">Roles:</span> {Array.from(selectedRoles).join(', ')}
             </div>
-            <div className="bg-gray-700 p-3 rounded">
+            <div className="bg-gray-750 border border-gray-700/30 p-3 rounded-lg">
               <span className="text-gray-400">Users:</span> {userEmails.filter((e) => e.trim()).join(', ') || '(none assigned)'}
             </div>
           </div>
@@ -381,10 +527,12 @@ export default function OnboardingWizard({ showMessage }: OnboardingWizardProps)
             <button onClick={handleTestChain} disabled={isLoading} className={btnPrimary}>
               {isLoading ? 'Testing...' : 'Test Connection'}
             </button>
-            <button onClick={() => setStep(0)} className={btnSecondary}>Back to Start</button>
+            <button onClick={() => setStep(0)} className={btnSecondary}>
+              Back to Start
+            </button>
           </div>
           {chainTestResult && (
-            <div className="bg-gray-700 p-3 rounded text-sm space-y-1">
+            <div className="bg-gray-750 border border-gray-700/30 p-3 rounded-lg text-sm space-y-1">
               {chainTestResult.map((r, i) => (
                 <div key={i} className={r.status.startsWith('ok') ? 'text-green-400' : 'text-red-400'}>
                   {r.arn}: {r.status}

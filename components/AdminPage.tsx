@@ -63,28 +63,30 @@ export default function AdminPage() {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto py-8">
+    <div className="max-w-6xl mx-auto px-6 py-8">
       {message && (
         <div
-          className={`fixed top-0 left-0 right-0 z-50 p-4 ${message.type === 'success' ? 'bg-green-600' : 'bg-red-600'} text-white shadow-lg`}
+          className={`fixed top-12 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-lg shadow-xl animate-slide-down ${message.type === 'success' ? 'bg-green-600/90 backdrop-blur-sm' : 'bg-red-600/90 backdrop-blur-sm'} text-white`}
         >
-          <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
             <span>{message.text}</span>
-            <button onClick={() => setMessage(null)} className="ml-4 text-white hover:text-gray-200">
+            <button onClick={() => setMessage(null)} className="text-white/80 hover:text-white">
               ✕
             </button>
           </div>
         </div>
       )}
 
-      <div className="mb-6">
-        <div className="flex space-x-1 bg-gray-800 p-1 rounded">
+      <div className="mb-8">
+        <div className="flex gap-1 bg-gray-800 border border-gray-700/50 p-1.5 rounded-xl overflow-x-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 rounded transition-colors ${
-                activeTab === tab.id ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'
+              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+                activeTab === tab.id
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
               }`}
             >
               {tab.label}
@@ -93,12 +95,14 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {activeTab === 'wizard' && <OnboardingWizard showMessage={showMessage} />}
-      {activeTab === 'credentials' && <CredentialsTab showMessage={showMessage} />}
-      {activeTab === 'access' && <AccessTab showMessage={showMessage} />}
-      {activeTab === 'accounts' && <AccountsTab showMessage={showMessage} />}
-      {activeTab === 'roleconfig' && <RoleConfigTab showMessage={showMessage} />}
-      {activeTab === 'auditlogs' && <AuditLogsTab showMessage={showMessage} />}
+      <div className="animate-fade-in-up">
+        {activeTab === 'wizard' && <OnboardingWizard showMessage={showMessage} />}
+        {activeTab === 'credentials' && <CredentialsTab showMessage={showMessage} />}
+        {activeTab === 'access' && <AccessTab showMessage={showMessage} />}
+        {activeTab === 'accounts' && <AccountsTab showMessage={showMessage} />}
+        {activeTab === 'roleconfig' && <RoleConfigTab showMessage={showMessage} />}
+        {activeTab === 'auditlogs' && <AuditLogsTab showMessage={showMessage} />}
+      </div>
     </div>
   );
 }
@@ -229,7 +233,7 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
 
   return (
     <div className="space-y-8">
-      <div className="bg-gray-800 p-6 rounded">
+      <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl">
         <h3 className="text-xl font-semibold mb-4">Add AWS Credentials</h3>
         <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
           <input
@@ -237,7 +241,7 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
             placeholder="Principal ARN (e.g., arn:aws:iam::123456789012:user/username)"
             value={credForm.principalArn}
             onChange={(e) => setCredForm({ ...credForm, principalArn: e.target.value })}
-            className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+            className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
             required
           />
           <input
@@ -245,7 +249,7 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
             placeholder="Access Key ID"
             value={credForm.accessKeyId}
             onChange={(e) => setCredForm({ ...credForm, accessKeyId: e.target.value })}
-            className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+            className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
             required
           />
           <input
@@ -253,7 +257,7 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
             placeholder="Secret Access Key"
             value={credForm.secretAccessKey}
             onChange={(e) => setCredForm({ ...credForm, secretAccessKey: e.target.value })}
-            className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+            className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
             required
           />
           <input
@@ -261,20 +265,20 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
             placeholder="Session Token (Optional)"
             value={credForm.sessionToken}
             onChange={(e) => setCredForm({ ...credForm, sessionToken: e.target.value })}
-            className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+            className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
           />
           <LoadingButton
             type="submit"
             onClick={handleAddCredentials}
             disabled={!isCredFormValid}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
+            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-white font-medium transition-colors"
           >
             Add Credentials
           </LoadingButton>
         </form>
       </div>
 
-      <div className="bg-gray-800 p-6 rounded">
+      <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl">
         <h3 className="text-xl font-semibold mb-4">Manage Credential Relationships</h3>
         <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
           <input
@@ -282,7 +286,7 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
             placeholder="Principal ARN"
             value={relationForm.principalArn}
             onChange={(e) => setRelationForm({ ...relationForm, principalArn: e.target.value })}
-            className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+            className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
             required
           />
           <input
@@ -290,21 +294,21 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
             placeholder="Assumed By ARN"
             value={relationForm.assumedBy}
             onChange={(e) => setRelationForm({ ...relationForm, assumedBy: e.target.value })}
-            className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+            className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
             required
           />
           <div className="flex space-x-4">
             <LoadingButton
               onClick={handleAddRelation}
               disabled={!isRelationFormValid}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
+              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-white font-medium transition-colors"
             >
               Add Relationship
             </LoadingButton>
             <LoadingButton
               onClick={handleRemoveRelation}
               disabled={!isRemoveRelationFormValid}
-              className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
+              className="bg-red-600 hover:bg-red-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-white font-medium transition-colors"
             >
               Remove Relationship
             </LoadingButton>
@@ -397,7 +401,7 @@ function AccessTab({ showMessage }: { showMessage: (type: 'success' | 'error', t
   };
 
   return (
-    <div className="bg-gray-800 p-6 rounded">
+    <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl">
       <h3 className="text-xl font-semibold mb-4">Manage User Access</h3>
       <div className="space-y-4">
         <input
@@ -405,7 +409,7 @@ function AccessTab({ showMessage }: { showMessage: (type: 'success' | 'error', t
           placeholder="AWS Account ID (12 digits)"
           value={accessForm.awsAccountId}
           onChange={(e) => setAccessForm({ ...accessForm, awsAccountId: e.target.value })}
-          className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+          className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
           pattern="[0-9]{12}"
         />
         <input
@@ -413,27 +417,27 @@ function AccessTab({ showMessage }: { showMessage: (type: 'success' | 'error', t
           placeholder="Role Name"
           value={accessForm.roleName}
           onChange={(e) => setAccessForm({ ...accessForm, roleName: e.target.value })}
-          className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+          className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
         />
         <input
           type="email"
           placeholder="User Email (Optional, defaults to current user)"
           value={accessForm.userEmail}
           onChange={(e) => setAccessForm({ ...accessForm, userEmail: e.target.value })}
-          className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+          className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
         />
         <div className="flex space-x-4">
           <LoadingButton
             onClick={handleGrantAccess}
             disabled={!isFormValid}
-            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
+            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-white font-medium transition-colors"
           >
             Grant Access
           </LoadingButton>
           <LoadingButton
             onClick={handleRevokeAccess}
             disabled={!isFormValid}
-            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
+            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-white font-medium transition-colors"
           >
             Revoke Access
           </LoadingButton>
@@ -522,7 +526,7 @@ function AccountsTab({ showMessage }: { showMessage: (type: 'success' | 'error',
   };
 
   return (
-    <div className="bg-gray-800 p-6 rounded">
+    <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl">
       <h3 className="text-xl font-semibold mb-4">Manage Account Nicknames</h3>
       <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
         <input
@@ -530,7 +534,7 @@ function AccountsTab({ showMessage }: { showMessage: (type: 'success' | 'error',
           placeholder="AWS Account ID (12 digits)"
           value={nicknameForm.awsAccountId}
           onChange={(e) => setNicknameForm({ ...nicknameForm, awsAccountId: e.target.value })}
-          className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+          className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
           pattern="[0-9]{12}"
           required
         />
@@ -539,20 +543,20 @@ function AccountsTab({ showMessage }: { showMessage: (type: 'success' | 'error',
           placeholder="Account Nickname"
           value={nicknameForm.nickname}
           onChange={(e) => setNicknameForm({ ...nicknameForm, nickname: e.target.value })}
-          className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+          className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
         />
         <div className="flex space-x-4">
           <LoadingButton
             onClick={handleSetNickname}
             disabled={!isSetNicknameValid}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
+            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-white font-medium transition-colors"
           >
             Set Nickname
           </LoadingButton>
           <LoadingButton
             onClick={handleRemoveNickname}
             disabled={!isRemoveNicknameValid}
-            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
+            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-white font-medium transition-colors"
           >
             Remove Nickname
           </LoadingButton>
@@ -646,7 +650,7 @@ function RoleConfigTab({ showMessage }: { showMessage: (type: 'success' | 'error
   };
 
   return (
-    <div className="bg-gray-800 p-6 rounded">
+    <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl">
       <h3 className="text-xl font-semibold mb-4">Manage Role Configurations</h3>
       <p className="text-gray-300 mb-6">
         Configure custom destination paths and regions for AWS Console redirection when users assume specific roles.
@@ -657,7 +661,7 @@ function RoleConfigTab({ showMessage }: { showMessage: (type: 'success' | 'error
           placeholder="AWS Account ID (12 digits)"
           value={configForm.awsAccountId}
           onChange={(e) => setConfigForm({ ...configForm, awsAccountId: e.target.value })}
-          className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+          className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
           pattern="[0-9]{12}"
           required
         />
@@ -666,7 +670,7 @@ function RoleConfigTab({ showMessage }: { showMessage: (type: 'success' | 'error
           placeholder="Role Name"
           value={configForm.roleName}
           onChange={(e) => setConfigForm({ ...configForm, roleName: e.target.value })}
-          className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+          className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
           required
         />
         <input
@@ -674,27 +678,27 @@ function RoleConfigTab({ showMessage }: { showMessage: (type: 'success' | 'error
           placeholder="Destination Path (Optional, e.g., /ec2/home)"
           value={configForm.destinationPath}
           onChange={(e) => setConfigForm({ ...configForm, destinationPath: e.target.value })}
-          className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+          className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
         />
         <input
           type="text"
           placeholder="Destination Region (Optional, e.g., us-east-1)"
           value={configForm.destinationRegion}
           onChange={(e) => setConfigForm({ ...configForm, destinationRegion: e.target.value })}
-          className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+          className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
         />
         <div className="flex space-x-4">
           <LoadingButton
             onClick={handleSetConfig}
             disabled={!isSetConfigValid}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
+            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-white font-medium transition-colors"
           >
             Set Configuration
           </LoadingButton>
           <LoadingButton
             onClick={handleDeleteConfig}
             disabled={!isDeleteConfigValid}
-            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-4 py-2 rounded text-white"
+            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-white font-medium transition-colors"
           >
             Delete Configuration
           </LoadingButton>

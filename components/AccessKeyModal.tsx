@@ -32,18 +32,24 @@ export default function AccessKeyModal({ accessKeyId, secretAccessKey, sessionTo
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 animate-backdrop-in">
-      <div className="bg-gray-800 text-white p-6 rounded-xl shadow-2xl w-full max-w-xl animate-fade-in">
-        <h2 className="text-2xl font-bold mb-4">Access Keys</h2>
-        <pre className="bg-gray-700 p-4 rounded text-sm overflow-x-auto whitespace-pre-wrap">
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 animate-backdrop-in"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="bg-gray-800 border border-gray-700/50 text-white p-6 rounded-2xl shadow-2xl w-full max-w-xl mx-4 animate-fade-in">
+        <h2 className="text-xl font-bold mb-4 text-gray-100">Access Keys</h2>
+        <pre className="bg-gray-900 border border-gray-700/50 p-4 rounded-xl text-sm overflow-x-auto whitespace-pre-wrap font-mono text-gray-300">
           export AWS_ACCESS_KEY_ID="{accessKeyId}"<br />
           export AWS_SECRET_ACCESS_KEY="{secretAccessKey}"<br />
-          export AWS_SESSION_TOKEN="{sessionToken}"<br /># Expiration: {expiration}
+          export AWS_SESSION_TOKEN="{sessionToken}"<br />
+          <span className="text-gray-500"># Expiration: {expiration}</span>
         </pre>
         <div className="mt-6 flex justify-end gap-3">
           <button
-            className={`px-4 py-2 rounded transition-all duration-200 ${
-              copied ? 'bg-green-500 hover:bg-green-600 scale-105' : 'bg-blue-500 hover:bg-blue-600'
+            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              copied ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'
             }`}
             onClick={() =>
               copyToClipboard(
@@ -51,10 +57,13 @@ export default function AccessKeyModal({ accessKeyId, secretAccessKey, sessionTo
               )
             }
           >
-            {copied ? '✅ Copied!' : '📋 Copy All'}
+            {copied ? 'Copied!' : 'Copy All'}
           </button>
-          <button className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded transition" onClick={onClose}>
-            ✖ Close
+          <button
+            className="bg-gray-700 hover:bg-gray-600 border border-gray-600 px-4 py-2 rounded-lg font-medium transition-colors"
+            onClick={onClose}
+          >
+            Close
           </button>
         </div>
       </div>
