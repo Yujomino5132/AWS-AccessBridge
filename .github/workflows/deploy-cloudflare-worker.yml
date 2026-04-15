@@ -1,9 +1,6 @@
 name: Deploy Cloudflare Worker
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
   workflow_run:
     workflows: [Upstream Sync]
@@ -11,6 +8,7 @@ on:
 
 jobs:
   deploy:
+    if: ${{ github.repository != 'Rexezuge-CloudflareWorkers/AWS-AccessBridge' }}
     name: Deploy to Cloudflare
     runs-on: ubuntu-latest
     permissions:
