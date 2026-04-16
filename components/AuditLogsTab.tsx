@@ -84,6 +84,7 @@ export default function AuditLogsTab({ showMessage }: AuditLogsTabProps) {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [expandedLog, setExpandedLog] = useState<string | null>(null);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
@@ -96,6 +97,7 @@ export default function AuditLogsTab({ showMessage }: AuditLogsTabProps) {
 
   const fetchLogs = useCallback(async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const params = new URLSearchParams();
       if (filterEmail.trim()) params.set('userEmail', filterEmail.trim());
@@ -112,11 +114,11 @@ export default function AuditLogsTab({ showMessage }: AuditLogsTabProps) {
       setLogs(data.logs);
       setTotal(data.total);
     } catch (err) {
-      showMessage('error', err instanceof Error ? err.message : 'Failed to load audit logs');
+      setError(err instanceof Error ? err.message : 'Failed to load audit logs');
     } finally {
       setIsLoading(false);
     }
-  }, [filterEmail, filterAction, page, showMessage]);
+  }, [filterEmail, filterAction, page]);
 
   useEffect(() => {
     fetchLogs();
@@ -212,8 +214,15 @@ export default function AuditLogsTab({ showMessage }: AuditLogsTabProps) {
         </div>
       )}
 
+      {/* Error state */}
+      {!isLoading && error && (
+        <div style={{ background: 'rgba(127, 29, 29, 0.3)', color: '#fca5a5', padding: '12px 16px', borderRadius: '12px' }}>
+          {error}
+        </div>
+      )}
+
       {/* Empty state */}
-      {!isLoading && logs.length === 0 && (
+      {!isLoading && !error && logs.length === 0 && (
         <div style={{ textAlign: 'center', padding: '48px 0', color: '#6b7280' }}>No audit logs found.</div>
       )}
 
