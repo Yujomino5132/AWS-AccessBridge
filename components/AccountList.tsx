@@ -197,6 +197,14 @@ export default function AccountList({ showHidden, searchTerm, pageSize, currentP
 
   const [hoveredRole, setHoveredRole] = useState<string | null>(null);
   const [hoveredEye, setHoveredEye] = useState<string | null>(null);
+  const [confirmHideKey, setConfirmHideKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!confirmHideKey) return;
+    const handleDocClick = () => setConfirmHideKey(null);
+    document.addEventListener('click', handleDocClick);
+    return () => document.removeEventListener('click', handleDocClick);
+  }, [confirmHideKey]);
 
   return (
     <div>
@@ -386,32 +394,112 @@ export default function AccountList({ showHidden, searchTerm, pageSize, currentP
                             {isLoadingConsole ? 'Opening Console...' : role}
                           </a>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <button
-                              onClick={() => toggleHidden(accountId, role, roleHidden)}
-                              onMouseEnter={() => setHoveredEye(loadingKey)}
-                              onMouseLeave={() => setHoveredEye(null)}
-                              title={roleHidden ? 'Unhide role' : 'Hide role'}
-                              aria-label={roleHidden ? 'Unhide role' : 'Hide role'}
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                width: '24px',
-                                height: '24px',
-                                padding: 0,
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                color: isEyeHovered ? '#f87171' : '#6b7280',
-                                transition: 'color 0.15s',
-                              }}
-                            >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" />
-                                <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" />
-                                {roleHidden && <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />}
-                              </svg>
-                            </button>
+                            <div style={{ position: 'relative', display: 'inline-flex' }}>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setConfirmHideKey((prev) => (prev === loadingKey ? null : loadingKey));
+                                }}
+                                onMouseEnter={() => setHoveredEye(loadingKey)}
+                                onMouseLeave={() => setHoveredEye(null)}
+                                title={roleHidden ? 'Unhide role' : 'Hide role'}
+                                aria-label={roleHidden ? 'Unhide role' : 'Hide role'}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  width: '24px',
+                                  height: '24px',
+                                  padding: 0,
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  color: isEyeHovered ? '#f87171' : '#6b7280',
+                                  transition: 'color 0.15s',
+                                }}
+                              >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" />
+                                  <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" />
+                                  {roleHidden && <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />}
+                                </svg>
+                              </button>
+                              {confirmHideKey === loadingKey && (
+                                <div
+                                  onClick={(e) => e.stopPropagation()}
+                                  role="dialog"
+                                  aria-label={roleHidden ? 'Confirm unhide role' : 'Confirm hide role'}
+                                  style={{
+                                    position: 'absolute',
+                                    top: '100%',
+                                    right: '-4px',
+                                    marginTop: '10px',
+                                    background: '#111827',
+                                    border: '1px solid #374151',
+                                    borderRadius: '10px',
+                                    padding: '10px 12px',
+                                    boxShadow: '0 10px 20px -5px rgba(0, 0, 0, 0.6)',
+                                    whiteSpace: 'nowrap',
+                                    zIndex: 20,
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      position: 'absolute',
+                                      top: '-5px',
+                                      right: '10px',
+                                      width: '10px',
+                                      height: '10px',
+                                      background: '#111827',
+                                      borderLeft: '1px solid #374151',
+                                      borderTop: '1px solid #374151',
+                                      transform: 'rotate(45deg)',
+                                    }}
+                                  />
+                                  <div style={{ fontSize: '12px', color: '#e5e7eb', marginBottom: '8px' }}>
+                                    {roleHidden ? 'Unhide this role?' : 'Hide this role?'}
+                                  </div>
+                                  <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setConfirmHideKey(null);
+                                      }}
+                                      style={{
+                                        fontSize: '12px',
+                                        padding: '4px 10px',
+                                        borderRadius: '6px',
+                                        background: 'transparent',
+                                        color: '#9ca3af',
+                                        border: '1px solid #374151',
+                                        cursor: 'pointer',
+                                      }}
+                                    >
+                                      Cancel
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setConfirmHideKey(null);
+                                        toggleHidden(accountId, role, roleHidden);
+                                      }}
+                                      style={{
+                                        fontSize: '12px',
+                                        padding: '4px 10px',
+                                        borderRadius: '6px',
+                                        background: roleHidden ? '#2563eb' : '#dc2626',
+                                        color: '#ffffff',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        fontWeight: 500,
+                                      }}
+                                    >
+                                      {roleHidden ? 'Unhide' : 'Hide'}
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                             <button
                               className="text-sm"
                               style={{
