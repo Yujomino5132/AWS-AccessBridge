@@ -13,6 +13,13 @@ interface TrendMonth {
   byAccount: Record<string, number>;
 }
 
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+function formatMonthLabel(period: string): string {
+  const monthNum = parseInt(period.substring(5, 7), 10);
+  return MONTH_NAMES[monthNum - 1] ?? period.substring(5);
+}
+
 export default function CostDashboard() {
   const [summary, setSummary] = useState<CostSummary | null>(null);
   const [trends, setTrends] = useState<TrendMonth[]>([]);
@@ -104,7 +111,7 @@ export default function CostDashboard() {
                     transition: 'all 0.2s',
                   }}
                 />
-                <span style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px' }}>{month.period.substring(5)}</span>
+                <span style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px' }}>{formatMonthLabel(month.period)}</span>
               </div>
             ))}
           </div>
