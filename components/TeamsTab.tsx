@@ -340,12 +340,7 @@ export default function TeamsTab({ showMessage }: TeamsTabProps) {
           style={{ display: 'flex', gap: '12px', alignItems: 'center' }}
         >
           <div style={{ flex: 1 }}>
-            <FocusInput
-              type="text"
-              placeholder="Team name"
-              value={createTeamName}
-              onChange={(e) => setCreateTeamName(e.target.value)}
-            />
+            <FocusInput type="text" placeholder="Team name" value={createTeamName} onChange={(e) => setCreateTeamName(e.target.value)} />
           </div>
           <button
             type="submit"
@@ -435,9 +430,7 @@ export default function TeamsTab({ showMessage }: TeamsTabProps) {
         <>
           {/* Rename Team */}
           <div style={styles.card}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px' }}>
-              Team Settings — {selectedTeam.name}
-            </h3>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px' }}>Team Settings — {selectedTeam.name}</h3>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -462,8 +455,7 @@ export default function TeamsTab({ showMessage }: TeamsTabProps) {
                   cursor: !renameTeamName.trim() || renameTeamName.trim() === selectedTeam.name ? 'not-allowed' : 'pointer',
                 }}
                 onMouseEnter={(e) => {
-                  if (renameTeamName.trim() && renameTeamName.trim() !== selectedTeam.name)
-                    e.currentTarget.style.background = '#1d4ed8';
+                  if (renameTeamName.trim() && renameTeamName.trim() !== selectedTeam.name) e.currentTarget.style.background = '#1d4ed8';
                 }}
                 onMouseLeave={(e) => (e.currentTarget.style.background = '#2563eb')}
               >
@@ -485,12 +477,7 @@ export default function TeamsTab({ showMessage }: TeamsTabProps) {
               style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '16px' }}
             >
               <div style={{ flex: 1 }}>
-                <FocusInput
-                  type="email"
-                  placeholder="User email"
-                  value={memberEmail}
-                  onChange={(e) => setMemberEmail(e.target.value)}
-                />
+                <FocusInput type="email" placeholder="User email" value={memberEmail} onChange={(e) => setMemberEmail(e.target.value)} />
               </div>
               <select
                 value={memberRole}

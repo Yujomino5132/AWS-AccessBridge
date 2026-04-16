@@ -82,7 +82,17 @@ export default function HomePage() {
     return (
       <div className="bg-gray-900 min-h-screen text-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin" style={{ width: '48px', height: '48px', borderRadius: '50%', border: '2px solid #60a5fa', borderTopColor: 'transparent', margin: '0 auto 16px' }}></div>
+          <div
+            className="animate-spin"
+            style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '50%',
+              border: '2px solid #60a5fa',
+              borderTopColor: 'transparent',
+              margin: '0 auto 16px',
+            }}
+          ></div>
           <p className="text-gray-400">Loading...</p>
         </div>
       </div>
@@ -98,7 +108,9 @@ export default function HomePage() {
       <Navbar isSuperAdmin={isSuperAdmin} currentView="accounts" userEmail={userEmail} />
       <div style={{ maxWidth: '72rem', margin: '0 auto', padding: '32px 24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px', gap: '16px' }}>
-          <h2 className="text-2xl font-bold" style={{ flexShrink: 0, color: '#f3f4f6' }}>AWS Accounts</h2>
+          <h2 className="text-2xl font-bold" style={{ flexShrink: 0, color: '#f3f4f6' }}>
+            AWS Accounts
+          </h2>
           <input
             type="text"
             placeholder="Search by account id or nickname"
@@ -114,15 +126,28 @@ export default function HomePage() {
               style={{ padding: '10px 12px', background: '#1e2433', borderRadius: '8px', border: 'none', cursor: 'pointer' }}
             >
               <svg style={{ width: '16px', height: '16px', marginRight: '6px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                />
               </svg>
               Filters
             </button>
             {filterOpen && (
-              <div className="absolute right-0 shadow-xl z-10" style={{ marginTop: '8px', width: '208px', background: '#1e2433', borderRadius: '8px' }}>
+              <div
+                className="absolute right-0 shadow-xl z-10"
+                style={{ marginTop: '8px', width: '208px', background: '#1e2433', borderRadius: '8px' }}
+              >
                 <div style={{ padding: '12px' }}>
                   <label className="flex items-center cursor-pointer text-sm">
-                    <input type="checkbox" checked={showHidden} onChange={(e) => handleShowHiddenChange(e.target.checked)} style={{ marginRight: '10px' }} />
+                    <input
+                      type="checkbox"
+                      checked={showHidden}
+                      onChange={(e) => handleShowHiddenChange(e.target.checked)}
+                      style={{ marginRight: '10px' }}
+                    />
                     Include Hidden
                   </label>
                 </div>
@@ -134,7 +159,9 @@ export default function HomePage() {
           {!searchTerm.trim() && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <label className="text-sm" style={{ color: '#9ca3af' }}>Per page:</label>
+                <label className="text-sm" style={{ color: '#9ca3af' }}>
+                  Per page:
+                </label>
                 <select
                   value={pageSize}
                   onChange={(e) => setPageSize(Number(e.target.value))}
@@ -150,7 +177,8 @@ export default function HomePage() {
               {totalAccounts > 0 && (
                 <>
                   <div className="text-sm" style={{ color: '#6b7280' }}>
-                    {Math.min((currentPage - 1) * pageSize + 1, totalAccounts)}&ndash;{Math.min(currentPage * pageSize, totalAccounts)} of {totalAccounts}
+                    {Math.min((currentPage - 1) * pageSize + 1, totalAccounts)}&ndash;{Math.min(currentPage * pageSize, totalAccounts)} of{' '}
+                    {totalAccounts}
                   </div>
                   {Math.ceil(totalAccounts / pageSize) > 1 && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -158,7 +186,13 @@ export default function HomePage() {
                         onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                         disabled={currentPage === 1}
                         className="text-sm text-white disabled:opacity-40 disabled:cursor-not-allowed"
-                        style={{ padding: '6px 10px', background: '#252d3d', borderRadius: '6px', border: 'none', cursor: currentPage === 1 ? 'default' : 'pointer' }}
+                        style={{
+                          padding: '6px 10px',
+                          background: '#252d3d',
+                          borderRadius: '6px',
+                          border: 'none',
+                          cursor: currentPage === 1 ? 'default' : 'pointer',
+                        }}
                       >
                         Prev
                       </button>
@@ -170,16 +204,34 @@ export default function HomePage() {
                         else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
                         else pageNum = currentPage - 2 + i;
                         return (
-                          <button key={pageNum} onClick={() => setCurrentPage(pageNum)} className="text-sm"
-                            style={{ padding: '6px 12px', background: currentPage === pageNum ? '#2563eb' : '#252d3d', color: currentPage === pageNum ? '#fff' : '#d1d5db', borderRadius: '6px', border: 'none', cursor: 'pointer' }}
-                          >{pageNum}</button>
+                          <button
+                            key={pageNum}
+                            onClick={() => setCurrentPage(pageNum)}
+                            className="text-sm"
+                            style={{
+                              padding: '6px 12px',
+                              background: currentPage === pageNum ? '#2563eb' : '#252d3d',
+                              color: currentPage === pageNum ? '#fff' : '#d1d5db',
+                              borderRadius: '6px',
+                              border: 'none',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            {pageNum}
+                          </button>
                         );
                       })}
                       <button
                         onClick={() => setCurrentPage(Math.min(Math.ceil(totalAccounts / pageSize), currentPage + 1))}
                         disabled={currentPage === Math.ceil(totalAccounts / pageSize)}
                         className="text-sm text-white disabled:opacity-40 disabled:cursor-not-allowed"
-                        style={{ padding: '6px 10px', background: '#252d3d', borderRadius: '6px', border: 'none', cursor: currentPage === Math.ceil(totalAccounts / pageSize) ? 'default' : 'pointer' }}
+                        style={{
+                          padding: '6px 10px',
+                          background: '#252d3d',
+                          borderRadius: '6px',
+                          border: 'none',
+                          cursor: currentPage === Math.ceil(totalAccounts / pageSize) ? 'default' : 'pointer',
+                        }}
                       >
                         Next
                       </button>
@@ -190,7 +242,13 @@ export default function HomePage() {
             </div>
           )}
         </div>
-        <AccountList showHidden={showHidden} searchTerm={searchTerm} pageSize={pageSize} currentPage={currentPage} setTotalAccounts={handleSetTotalAccounts} />
+        <AccountList
+          showHidden={showHidden}
+          searchTerm={searchTerm}
+          pageSize={pageSize}
+          currentPage={currentPage}
+          setTotalAccounts={handleSetTotalAccounts}
+        />
       </div>
     </div>
   );

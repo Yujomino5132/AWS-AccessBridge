@@ -216,9 +216,7 @@ export default function AuditLogsTab({ showMessage }: AuditLogsTabProps) {
 
       {/* Error state */}
       {!isLoading && error && (
-        <div style={{ background: 'rgba(127, 29, 29, 0.3)', color: '#fca5a5', padding: '12px 16px', borderRadius: '12px' }}>
-          {error}
-        </div>
+        <div style={{ background: 'rgba(127, 29, 29, 0.3)', color: '#fca5a5', padding: '12px 16px', borderRadius: '12px' }}>{error}</div>
       )}
 
       {/* Empty state */}

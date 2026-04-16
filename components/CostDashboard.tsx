@@ -46,7 +46,14 @@ export default function CostDashboard() {
       <div style={{ textAlign: 'center', padding: '48px 0' }}>
         <div
           className="animate-spin"
-          style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid #60a5fa', borderTopColor: 'transparent', margin: '0 auto 16px' }}
+          style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            border: '2px solid #60a5fa',
+            borderTopColor: 'transparent',
+            margin: '0 auto 16px',
+          }}
         ></div>
         <p style={{ color: '#9ca3af' }}>Loading cost data...</p>
       </div>
@@ -54,7 +61,9 @@ export default function CostDashboard() {
   }
 
   if (error) {
-    return <div style={{ background: 'rgba(127, 29, 29, 0.3)', color: '#fca5a5', padding: '12px 16px', borderRadius: '12px' }}>{error}</div>;
+    return (
+      <div style={{ background: 'rgba(127, 29, 29, 0.3)', color: '#fca5a5', padding: '12px 16px', borderRadius: '12px' }}>{error}</div>
+    );
   }
 
   const maxTrend: number = trends.length > 0 ? Math.max(...trends.map((t) => t.total), 1) : 1;

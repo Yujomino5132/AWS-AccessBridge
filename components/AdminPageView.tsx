@@ -36,7 +36,17 @@ export default function AdminPageView() {
     return (
       <div className="bg-gray-900 min-h-screen text-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin" style={{ width: '48px', height: '48px', borderRadius: '50%', border: '2px solid #60a5fa', borderTopColor: 'transparent', margin: '0 auto 16px' }}></div>
+          <div
+            className="animate-spin"
+            style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '50%',
+              border: '2px solid #60a5fa',
+              borderTopColor: 'transparent',
+              margin: '0 auto 16px',
+            }}
+          ></div>
           <p className="text-gray-400">Loading...</p>
         </div>
       </div>

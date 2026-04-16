@@ -34,7 +34,17 @@ export default function ResourceInventoryView() {
   if (isAuthorized === null) {
     return (
       <div className="bg-gray-900 min-h-screen text-white flex items-center justify-center">
-        <div className="animate-spin" style={{ width: '48px', height: '48px', borderRadius: '50%', border: '2px solid #60a5fa', borderTopColor: 'transparent', margin: '0 auto' }}></div>
+        <div
+          className="animate-spin"
+          style={{
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            border: '2px solid #60a5fa',
+            borderTopColor: 'transparent',
+            margin: '0 auto',
+          }}
+        ></div>
       </div>
     );
   }

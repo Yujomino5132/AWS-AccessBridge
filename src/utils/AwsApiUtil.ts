@@ -54,13 +54,11 @@ class AwsApiUtil {
     const data: any = JSON.parse(responseText);
     const results: CostExplorerResult[] = [];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     for (const result of data.ResultsByTime || []) {
       const serviceBreakdown: Record<string, number> = {};
       let totalCost: number = 0;
       let currency: string = 'USD';
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       for (const group of result.Groups || []) {
         const serviceName: string = group.Keys?.[0] || 'Unknown';
         const amount: number = parseFloat(group.Metrics?.UnblendedCost?.Amount || '0');
@@ -185,7 +183,6 @@ class AwsApiUtil {
     const data: any = await response.json();
     const items: ResourceDiscoveryItem[] = [];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     for (const fn of data.Functions || []) {
       items.push({
         resourceType: 'lambda',
