@@ -99,7 +99,7 @@ export default function OnboardingWizard({ showMessage }: OnboardingWizardProps)
   const [accessKeyId, setAccessKeyId] = useState('');
   const [secretAccessKey, setSecretAccessKey] = useState('');
   const [sessionToken, setSessionToken] = useState('');
-  const [credentialValidated, setCredentialValidated] = useState(false);
+  const [_credentialValidated, setCredentialValidated] = useState(false);
   const [credentialStored, setCredentialStored] = useState(false);
   const [validationResult, setValidationResult] = useState<{ arn: string; accountId: string } | null>(null);
 

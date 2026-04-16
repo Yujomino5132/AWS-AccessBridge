@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
   HMAC_HANDLER_ERROR_MISSING_AUTHENTICATION_HEADERS,
   HMAC_HANDLER_ERROR_SIGNATURE_INVALID,

@@ -80,7 +80,7 @@ const styles = {
   } as React.CSSProperties,
 };
 
-export default function AuditLogsTab({ showMessage }: AuditLogsTabProps) {
+export default function AuditLogsTab({ showMessage: _showMessage }: AuditLogsTabProps) {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(false);

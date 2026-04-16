@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import Navbar from '../components/Navbar';
 import AccountList from '../components/AccountList';
 import AdminPage from '../components/AdminPage';
 import CostDashboard from '../components/CostDashboard';

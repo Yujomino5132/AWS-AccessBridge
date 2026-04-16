@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { CredentialsDAO } from '@/dao/CredentialsDAO';
-import { DatabaseError, ForbiddenError, InternalServerError, UnauthorizedError } from '@/error';
+import { DatabaseError, InternalServerError, UnauthorizedError } from '@/error';
 
 describe('CredentialsDAO', () => {
   let mockDb: D1Database;

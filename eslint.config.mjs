@@ -3,6 +3,7 @@ import tseslint from 'typescript-eslint';
 import { defineConfig } from 'eslint/config';
 
 export default defineConfig([
+  { ignores: ['app/dist/**', 'next-env.d.ts'] },
   { files: ['**/*.js'], languageOptions: { sourceType: 'script' } },
   { files: ['**/*.{js,mjs,cjs,ts,mts,cts}'], languageOptions: { globals: globals.node } },
   ...tseslint.configs.recommended,
