@@ -49,14 +49,9 @@ import {
   AddTeamAccountRoute,
   RemoveTeamAccountRoute,
   ListTeamAccountsRoute,
+  CleanupOrphanedDataRoute,
 } from '@/endpoints';
-import {
-  CredentialCacheRefreshTask,
-  AuditLogCleanupTask,
-  CostDataCollectionTask,
-  ResourceInventoryCollectionTask,
-  OrphanedDataCleanupTask,
-} from '@/scheduled';
+import { CredentialCacheRefreshTask, AuditLogCleanupTask, CostDataCollectionTask, ResourceInventoryCollectionTask } from '@/scheduled';
 import { MiddlewareHandlers } from '@/middleware';
 import { SPA_HTML } from '@/generated/spa-shell';
 
@@ -140,6 +135,9 @@ class AccessBridgeWorker extends AbstractWorker {
     openapi.delete('/api/admin/team/account', RemoveTeamAccountRoute);
     openapi.get('/api/admin/team/accounts', ListTeamAccountsRoute);
 
+    // Maintenance Routes
+    openapi.post('/api/admin/cleanup/orphaned', CleanupOrphanedDataRoute);
+
     // SPA catch-all: serve embedded index.html for frontend routes
     app.get('*', (c) => {
       const path: string = new URL(c.req.url).pathname;
@@ -161,7 +159,6 @@ class AccessBridgeWorker extends AbstractWorker {
     await new AuditLogCleanupTask().handle(event, env, ctx);
     await new CostDataCollectionTask().handle(event, env, ctx);
     await new ResourceInventoryCollectionTask().handle(event, env, ctx);
-    await new OrphanedDataCleanupTask().handle(event, env, ctx);
   }
 }
 
