@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
+const DEFAULT_TEAM_ID = '00000000-0000-0000-0000-000000000000';
+
 interface Team {
   teamId: string;
   teamName: string;
@@ -413,9 +415,20 @@ export default function TeamsTab({ showMessage }: TeamsTabProps) {
                     e.stopPropagation();
                     handleDeleteTeam(team.teamId);
                   }}
-                  style={{ ...styles.btnSmall, background: '#dc2626' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = '#b91c1c')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = '#dc2626')}
+                  disabled={team.teamId === DEFAULT_TEAM_ID}
+                  title={team.teamId === DEFAULT_TEAM_ID ? 'The default team cannot be deleted' : undefined}
+                  style={{
+                    ...styles.btnSmall,
+                    background: team.teamId === DEFAULT_TEAM_ID ? '#4b5563' : '#dc2626',
+                    cursor: team.teamId === DEFAULT_TEAM_ID ? 'not-allowed' : 'pointer',
+                    opacity: team.teamId === DEFAULT_TEAM_ID ? 0.6 : 1,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (team.teamId !== DEFAULT_TEAM_ID) e.currentTarget.style.background = '#b91c1c';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (team.teamId !== DEFAULT_TEAM_ID) e.currentTarget.style.background = '#dc2626';
+                  }}
                 >
                   Delete
                 </button>
