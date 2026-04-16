@@ -12,7 +12,6 @@ const PATH_TO_VIEW: Record<string, View> = {
   '/': 'accounts',
   '/costs': 'costs',
   '/resources': 'resources',
-  '/admin': 'admin',
 };
 
 const VIEW_TO_PATH: Record<View, string> = {
@@ -22,9 +21,13 @@ const VIEW_TO_PATH: Record<View, string> = {
   admin: '/admin',
 };
 
-function getViewFromPath(): View {
+function parseRoute(): { view: View; adminTab?: string } {
   const path: string = window.location.pathname.replace(/\/$/, '') || '/';
-  return PATH_TO_VIEW[path] ?? 'accounts';
+  if (path === '/admin' || path.startsWith('/admin/')) {
+    const tab: string | undefined = path.split('/')[2] || undefined;
+    return { view: 'admin', adminTab: tab };
+  }
+  return { view: PATH_TO_VIEW[path] ?? 'accounts' };
 }
 
 export default function SpaApp() {
@@ -32,7 +35,8 @@ export default function SpaApp() {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [userEmail, setUserEmail] = useState('');
-  const [currentView, setCurrentView] = useState<View>(getViewFromPath);
+  const [currentView, setCurrentView] = useState<View>(() => parseRoute().view);
+  const [adminTab, setAdminTab] = useState<string | undefined>(() => parseRoute().adminTab);
   const [showHidden, setShowHidden] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,16 +62,28 @@ export default function SpaApp() {
     sessionStorage.setItem('aws-access-bridge-current-page', currentPage.toString());
   }, [currentPage]);
 
-  const navigateTo = useCallback((view: View) => {
+  const navigateTo = useCallback((view: View, tab?: string) => {
     setCurrentView(view);
-    const path: string = VIEW_TO_PATH[view];
+    setAdminTab(view === 'admin' ? tab : undefined);
+    const path: string = view === 'admin' && tab ? `/admin/${tab}` : VIEW_TO_PATH[view];
     if (window.location.pathname !== path) {
       history.pushState(null, '', path);
     }
   }, []);
 
+  const handleAdminTabChange = useCallback(
+    (tab: string) => {
+      navigateTo('admin', tab);
+    },
+    [navigateTo],
+  );
+
   useEffect(() => {
-    const onPopState = () => setCurrentView(getViewFromPath());
+    const onPopState = () => {
+      const route = parseRoute();
+      setCurrentView(route.view);
+      setAdminTab(route.adminTab);
+    };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
@@ -140,7 +156,7 @@ export default function SpaApp() {
       <div className="max-w-6xl mx-auto px-6 py-8">
         <div key={currentView} className="animate-fade-in-up">
           {currentView === 'admin' && isSuperAdmin ? (
-            <AdminPage />
+            <AdminPage activeTab={adminTab} onTabChange={handleAdminTabChange} />
           ) : currentView === 'costs' ? (
             <div>
               <h2 className="text-2xl font-bold mb-6 text-gray-100">Cost Analytics</h2>

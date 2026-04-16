@@ -118,8 +118,13 @@ function FocusInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   );
 }
 
-export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState('wizard');
+interface AdminPageProps {
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
+}
+
+export default function AdminPage({ activeTab: activeTabProp, onTabChange }: AdminPageProps = {}) {
+  const activeTab: string = activeTabProp || 'wizard';
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const showMessage = useCallback((type: 'success' | 'error', text: string) => {
@@ -182,7 +187,7 @@ export default function AdminPage() {
           }}
         >
           {tabs.map((tab) => (
-            <TabButton key={tab.id} active={activeTab === tab.id} onClick={() => setActiveTab(tab.id)}>
+            <TabButton key={tab.id} active={activeTab === tab.id} onClick={() => onTabChange?.(tab.id)}>
               {tab.label}
             </TabButton>
           ))}

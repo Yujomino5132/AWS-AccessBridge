@@ -52,6 +52,7 @@ import {
 } from '@/endpoints';
 import { CredentialCacheRefreshTask, AuditLogCleanupTask, CostDataCollectionTask, ResourceInventoryCollectionTask } from '@/scheduled';
 import { MiddlewareHandlers } from '@/middleware';
+import { SPA_HTML } from '@/generated/spa-shell';
 
 class AccessBridgeWorker extends AbstractWorker {
   protected readonly app: Hono<{ Bindings: Env }>;
@@ -132,6 +133,15 @@ class AccessBridgeWorker extends AbstractWorker {
     openapi.post('/api/admin/team/account', AddTeamAccountRoute);
     openapi.delete('/api/admin/team/account', RemoveTeamAccountRoute);
     openapi.get('/api/admin/team/accounts', ListTeamAccountsRoute);
+
+    // SPA catch-all: serve embedded index.html for frontend routes
+    app.get('*', (c) => {
+      const path: string = new URL(c.req.url).pathname;
+      if (path.startsWith('/api/') || path.startsWith('/openapi.') || path === '/docs' || path === '/redocs' || /\.\w+$/.test(path)) {
+        return c.notFound();
+      }
+      return c.html(SPA_HTML);
+    });
 
     this.app = openapi;
   }
