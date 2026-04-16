@@ -57,38 +57,42 @@ export default function CostDashboard() {
   const maxTrend: number = trends.length > 0 ? Math.max(...trends.map((t) => t.total), 1) : 1;
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Summary Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
-        <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl">
-          <p className="text-gray-400 text-sm mb-1">Total Spend (30d)</p>
-          <p className="text-3xl font-bold text-white">${summary?.grandTotal?.toFixed(2) || '0.00'}</p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+        <div style={{ background: '#1e2433', borderRadius: '12px', padding: '24px' }}>
+          <p style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '6px' }}>Total Spend (30d)</p>
+          <p style={{ color: '#fff', fontSize: '30px', fontWeight: 700 }}>${summary?.grandTotal?.toFixed(2) || '0.00'}</p>
         </div>
-        <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl">
-          <p className="text-gray-400 text-sm mb-1">Accounts Tracked</p>
-          <p className="text-3xl font-bold text-white">{Object.keys(summary?.accounts || {}).length}</p>
+        <div style={{ background: '#1e2433', borderRadius: '12px', padding: '24px' }}>
+          <p style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '6px' }}>Accounts Tracked</p>
+          <p style={{ color: '#fff', fontSize: '30px', fontWeight: 700 }}>{Object.keys(summary?.accounts || {}).length}</p>
         </div>
-        <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl">
-          <p className="text-gray-400 text-sm mb-1">Months of Data</p>
-          <p className="text-3xl font-bold text-white">{trends.length}</p>
+        <div style={{ background: '#1e2433', borderRadius: '12px', padding: '24px' }}>
+          <p style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '6px' }}>Months of Data</p>
+          <p style={{ color: '#fff', fontSize: '30px', fontWeight: 700 }}>{trends.length}</p>
         </div>
       </div>
 
-      {/* Trend Chart (SVG bar chart) */}
+      {/* Trend Chart */}
       {trends.length > 0 && (
-        <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl">
-          <h3 className="text-lg font-semibold mb-4 text-gray-200">Monthly Cost Trends</h3>
-          <div className="flex items-end gap-3 h-48">
+        <div style={{ background: '#1e2433', borderRadius: '12px', padding: '24px' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: '#e5e7eb' }}>Monthly Cost Trends</h3>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', height: '192px' }}>
             {trends.map((month) => (
-              <div key={month.period} className="flex-1 flex flex-col items-center group">
-                <span className="text-xs text-gray-400 mb-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  ${month.total.toFixed(0)}
-                </span>
+              <div key={month.period} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <span style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '4px' }}>${month.total.toFixed(0)}</span>
                 <div
-                  className="w-full bg-gradient-to-t from-blue-600 to-blue-400 rounded-t transition-all group-hover:from-blue-500 group-hover:to-blue-300"
-                  style={{ height: `${(month.total / maxTrend) * 100}%`, minHeight: month.total > 0 ? '4px' : '0' }}
+                  style={{
+                    width: '100%',
+                    background: 'linear-gradient(to top, #2563eb, #60a5fa)',
+                    borderRadius: '4px 4px 0 0',
+                    height: `${(month.total / maxTrend) * 100}%`,
+                    minHeight: month.total > 0 ? '4px' : '0',
+                    transition: 'all 0.2s',
+                  }}
                 />
-                <span className="text-xs text-gray-500 mt-2">{month.period.substring(5)}</span>
+                <span style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px' }}>{month.period.substring(5)}</span>
               </div>
             ))}
           </div>
@@ -97,18 +101,27 @@ export default function CostDashboard() {
 
       {/* Account Breakdown */}
       {summary && Object.keys(summary.accounts).length > 0 && (
-        <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl">
-          <h3 className="text-lg font-semibold mb-4 text-gray-200">Account Breakdown</h3>
-          <div className="space-y-2">
+        <div style={{ background: '#1e2433', borderRadius: '12px', padding: '24px' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: '#e5e7eb' }}>Account Breakdown</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {Object.entries(summary.accounts)
               .sort(([, a], [, b]) => b.totalCost - a.totalCost)
               .map(([accountId, data]) => (
                 <div
                   key={accountId}
-                  className="flex items-center justify-between p-3 bg-gray-750 border border-gray-700/30 rounded-lg hover:bg-gray-700 transition-colors"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 16px',
+                    background: '#252d3d',
+                    borderRadius: '8px',
+                  }}
                 >
-                  <span className="font-mono text-sm text-gray-300">{accountId}</span>
-                  <span className="font-semibold">
+                  <span className="font-mono" style={{ fontSize: '14px', color: '#d1d5db' }}>
+                    {accountId}
+                  </span>
+                  <span style={{ fontWeight: 600, color: '#fff' }}>
                     ${data.totalCost.toFixed(2)} {data.currency}
                   </span>
                 </div>
@@ -118,8 +131,13 @@ export default function CostDashboard() {
       )}
 
       {!summary || Object.keys(summary.accounts).length === 0 ? (
-        <div className="bg-gray-800 border border-gray-700/50 p-12 rounded-xl text-center">
-          <svg className="w-12 h-12 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div style={{ background: '#1e2433', borderRadius: '12px', padding: '48px', textAlign: 'center' }}>
+          <svg
+            style={{ width: '48px', height: '48px', color: '#4b5563', margin: '0 auto 16px' }}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -127,8 +145,10 @@ export default function CostDashboard() {
               d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <p className="text-lg text-gray-300 mb-2">No cost data available yet.</p>
-          <p className="text-sm text-gray-500">Enable data collection for your accounts in the Admin panel to start tracking costs.</p>
+          <p style={{ fontSize: '18px', color: '#d1d5db', marginBottom: '8px' }}>No cost data available yet.</p>
+          <p style={{ fontSize: '14px', color: '#6b7280' }}>
+            Enable data collection for your accounts in the Admin panel to start tracking costs.
+          </p>
         </div>
       ) : null}
     </div>

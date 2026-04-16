@@ -7,13 +7,20 @@ import AuditLogsTab from './AuditLogsTab';
 interface LoadingButtonProps {
   onClick: () => Promise<void> | void;
   disabled?: boolean;
-  className?: string;
+  variant?: 'blue' | 'green' | 'red';
   children: React.ReactNode;
   type?: 'button' | 'submit';
 }
 
-function LoadingButton({ onClick, disabled = false, className = '', children, type = 'button' }: LoadingButtonProps) {
+const buttonColors: Record<string, { bg: string; hover: string }> = {
+  blue: { bg: '#2563eb', hover: '#1d4ed8' },
+  green: { bg: '#16a34a', hover: '#15803d' },
+  red: { bg: '#dc2626', hover: '#b91c1c' },
+};
+
+function LoadingButton({ onClick, disabled = false, variant = 'blue', children, type = 'button' }: LoadingButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleClick = async () => {
     if (disabled || isLoading) return;
@@ -26,21 +33,87 @@ function LoadingButton({ onClick, disabled = false, className = '', children, ty
     }
   };
 
+  const colors = buttonColors[variant] || buttonColors.blue;
+  const isDisabledOrLoading = disabled || isLoading;
+
+  const btnStyle: React.CSSProperties = {
+    borderRadius: '8px',
+    padding: '10px 20px',
+    fontWeight: 500,
+    color: isDisabledOrLoading ? '#6b7280' : '#ffffff',
+    background: isDisabledOrLoading ? '#374151' : isHovered ? colors.hover : colors.bg,
+    cursor: isDisabledOrLoading ? 'not-allowed' : 'pointer',
+    border: 'none',
+    transition: 'background 0.15s',
+  };
+
   return (
     <button
       type={type}
       onClick={handleClick}
-      disabled={disabled || isLoading}
-      className={`${className} ${isLoading ? 'cursor-not-allowed' : ''}`}
+      disabled={isDisabledOrLoading}
+      style={btnStyle}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {isLoading ? (
-        <div className="flex items-center justify-center">
-          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div
+            className="animate-spin"
+            style={{
+              width: '16px',
+              height: '16px',
+              borderRadius: '9999px',
+              border: '2px solid #ffffff',
+              borderTopColor: 'transparent',
+            }}
+          />
         </div>
       ) : (
         children
       )}
     </button>
+  );
+}
+
+const cardStyle: React.CSSProperties = {
+  background: '#1e2433',
+  borderRadius: '12px',
+  padding: '24px',
+};
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '12px',
+  background: '#252d3d',
+  borderRadius: '8px',
+  border: '1px solid #374151',
+  color: '#ffffff',
+  outline: 'none',
+  boxSizing: 'border-box',
+  transition: 'border-color 0.15s',
+};
+
+function FocusInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
+  const [focused, setFocused] = useState(false);
+  const { style: extraStyle, ...rest } = props;
+  return (
+    <input
+      {...rest}
+      style={{
+        ...inputStyle,
+        borderColor: focused ? '#3b82f6' : '#374151',
+        ...extraStyle,
+      }}
+      onFocus={(e) => {
+        setFocused(true);
+        props.onFocus?.(e);
+      }}
+      onBlur={(e) => {
+        setFocused(false);
+        props.onBlur?.(e);
+      }}
+    />
   );
 }
 
@@ -63,34 +136,51 @@ export default function AdminPage() {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8">
+    <div style={{ maxWidth: '72rem', margin: '0 auto', padding: '32px 24px' }}>
       {message && (
         <div
-          className={`fixed top-12 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-lg shadow-xl animate-slide-down ${message.type === 'success' ? 'bg-green-600/90 backdrop-blur-sm' : 'bg-red-600/90 backdrop-blur-sm'} text-white`}
+          className="animate-slide-down"
+          style={{
+            position: 'fixed',
+            top: '48px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 50,
+            padding: '12px 24px',
+            borderRadius: '12px',
+            boxShadow: '0 20px 25px -5px rgba(0,0,0,0.3)',
+            background: message.type === 'success' ? 'rgba(22,163,74,0.9)' : 'rgba(220,38,38,0.9)',
+            backdropFilter: 'blur(8px)',
+            color: '#ffffff',
+          }}
         >
-          <div className="flex items-center gap-3">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <span>{message.text}</span>
-            <button onClick={() => setMessage(null)} className="text-white/80 hover:text-white">
+            <button
+              onClick={() => setMessage(null)}
+              style={{ color: 'rgba(255,255,255,0.8)', background: 'none', border: 'none', cursor: 'pointer' }}
+            >
               ✕
             </button>
           </div>
         </div>
       )}
 
-      <div className="mb-8">
-        <div className="flex gap-1 bg-gray-800 border border-gray-700/50 p-1.5 rounded-xl overflow-x-auto">
+      <div style={{ marginBottom: '32px' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '4px',
+            background: '#1e2433',
+            padding: '6px',
+            borderRadius: '12px',
+            overflowX: 'auto',
+          }}
+        >
           {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
-                activeTab === tab.id
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
-              }`}
-            >
+            <TabButton key={tab.id} active={activeTab === tab.id} onClick={() => setActiveTab(tab.id)}>
               {tab.label}
-            </button>
+            </TabButton>
           ))}
         </div>
       </div>
@@ -104,6 +194,30 @@ export default function AdminPage() {
         {activeTab === 'auditlogs' && <AuditLogsTab showMessage={showMessage} />}
       </div>
     </div>
+  );
+}
+
+function TabButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  const [hovered, setHovered] = useState(false);
+
+  const style: React.CSSProperties = {
+    padding: '8px 16px',
+    borderRadius: '8px',
+    fontSize: '14px',
+    fontWeight: 500,
+    whiteSpace: 'nowrap',
+    border: 'none',
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+    background: active ? '#2563eb' : hovered ? 'rgba(55,65,81,0.5)' : 'transparent',
+    color: active ? '#ffffff' : hovered ? '#ffffff' : '#9ca3af',
+    boxShadow: active ? '0 4px 6px -1px rgba(37,99,235,0.2)' : 'none',
+  };
+
+  return (
+    <button onClick={onClick} style={style} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
+      {children}
+    </button>
   );
 }
 
@@ -232,84 +346,65 @@ function CredentialsTab({ showMessage }: { showMessage: (type: 'success' | 'erro
   };
 
   return (
-    <div className="space-y-8">
-      <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl">
-        <h3 className="text-xl font-semibold mb-4">Add AWS Credentials</h3>
-        <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
-          <input
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div style={cardStyle}>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px' }}>Add AWS Credentials</h3>
+        <form onSubmit={(e) => e.preventDefault()} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <FocusInput
             type="text"
             placeholder="Principal ARN (e.g., arn:aws:iam::123456789012:user/username)"
             value={credForm.principalArn}
             onChange={(e) => setCredForm({ ...credForm, principalArn: e.target.value })}
-            className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
             required
           />
-          <input
+          <FocusInput
             type="text"
             placeholder="Access Key ID"
             value={credForm.accessKeyId}
             onChange={(e) => setCredForm({ ...credForm, accessKeyId: e.target.value })}
-            className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
             required
           />
-          <input
+          <FocusInput
             type="password"
             placeholder="Secret Access Key"
             value={credForm.secretAccessKey}
             onChange={(e) => setCredForm({ ...credForm, secretAccessKey: e.target.value })}
-            className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
             required
           />
-          <input
+          <FocusInput
             type="password"
             placeholder="Session Token (Optional)"
             value={credForm.sessionToken}
             onChange={(e) => setCredForm({ ...credForm, sessionToken: e.target.value })}
-            className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
           />
-          <LoadingButton
-            type="submit"
-            onClick={handleAddCredentials}
-            disabled={!isCredFormValid}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-white font-medium transition-colors"
-          >
+          <LoadingButton type="submit" onClick={handleAddCredentials} disabled={!isCredFormValid} variant="blue">
             Add Credentials
           </LoadingButton>
         </form>
       </div>
 
-      <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl">
-        <h3 className="text-xl font-semibold mb-4">Manage Credential Relationships</h3>
-        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-          <input
+      <div style={cardStyle}>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px' }}>Manage Credential Relationships</h3>
+        <form style={{ display: 'flex', flexDirection: 'column', gap: '16px' }} onSubmit={(e) => e.preventDefault()}>
+          <FocusInput
             type="text"
             placeholder="Principal ARN"
             value={relationForm.principalArn}
             onChange={(e) => setRelationForm({ ...relationForm, principalArn: e.target.value })}
-            className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
             required
           />
-          <input
+          <FocusInput
             type="text"
             placeholder="Assumed By ARN"
             value={relationForm.assumedBy}
             onChange={(e) => setRelationForm({ ...relationForm, assumedBy: e.target.value })}
-            className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
             required
           />
-          <div className="flex space-x-4">
-            <LoadingButton
-              onClick={handleAddRelation}
-              disabled={!isRelationFormValid}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-white font-medium transition-colors"
-            >
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <LoadingButton onClick={handleAddRelation} disabled={!isRelationFormValid} variant="green">
               Add Relationship
             </LoadingButton>
-            <LoadingButton
-              onClick={handleRemoveRelation}
-              disabled={!isRemoveRelationFormValid}
-              className="bg-red-600 hover:bg-red-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-white font-medium transition-colors"
-            >
+            <LoadingButton onClick={handleRemoveRelation} disabled={!isRemoveRelationFormValid} variant="red">
               Remove Relationship
             </LoadingButton>
           </div>
@@ -401,44 +496,33 @@ function AccessTab({ showMessage }: { showMessage: (type: 'success' | 'error', t
   };
 
   return (
-    <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl">
-      <h3 className="text-xl font-semibold mb-4">Manage User Access</h3>
-      <div className="space-y-4">
-        <input
+    <div style={cardStyle}>
+      <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px' }}>Manage User Access</h3>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <FocusInput
           type="text"
           placeholder="AWS Account ID (12 digits)"
           value={accessForm.awsAccountId}
           onChange={(e) => setAccessForm({ ...accessForm, awsAccountId: e.target.value })}
-          className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
           pattern="[0-9]{12}"
         />
-        <input
+        <FocusInput
           type="text"
           placeholder="Role Name"
           value={accessForm.roleName}
           onChange={(e) => setAccessForm({ ...accessForm, roleName: e.target.value })}
-          className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
         />
-        <input
+        <FocusInput
           type="email"
           placeholder="User Email (Optional, defaults to current user)"
           value={accessForm.userEmail}
           onChange={(e) => setAccessForm({ ...accessForm, userEmail: e.target.value })}
-          className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
         />
-        <div className="flex space-x-4">
-          <LoadingButton
-            onClick={handleGrantAccess}
-            disabled={!isFormValid}
-            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-white font-medium transition-colors"
-          >
+        <div style={{ display: 'flex', gap: '16px' }}>
+          <LoadingButton onClick={handleGrantAccess} disabled={!isFormValid} variant="green">
             Grant Access
           </LoadingButton>
-          <LoadingButton
-            onClick={handleRevokeAccess}
-            disabled={!isFormValid}
-            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-white font-medium transition-colors"
-          >
+          <LoadingButton onClick={handleRevokeAccess} disabled={!isFormValid} variant="red">
             Revoke Access
           </LoadingButton>
         </div>
@@ -526,38 +610,28 @@ function AccountsTab({ showMessage }: { showMessage: (type: 'success' | 'error',
   };
 
   return (
-    <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl">
-      <h3 className="text-xl font-semibold mb-4">Manage Account Nicknames</h3>
-      <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-        <input
+    <div style={cardStyle}>
+      <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px' }}>Manage Account Nicknames</h3>
+      <form style={{ display: 'flex', flexDirection: 'column', gap: '16px' }} onSubmit={(e) => e.preventDefault()}>
+        <FocusInput
           type="text"
           placeholder="AWS Account ID (12 digits)"
           value={nicknameForm.awsAccountId}
           onChange={(e) => setNicknameForm({ ...nicknameForm, awsAccountId: e.target.value })}
-          className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
           pattern="[0-9]{12}"
           required
         />
-        <input
+        <FocusInput
           type="text"
           placeholder="Account Nickname"
           value={nicknameForm.nickname}
           onChange={(e) => setNicknameForm({ ...nicknameForm, nickname: e.target.value })}
-          className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
         />
-        <div className="flex space-x-4">
-          <LoadingButton
-            onClick={handleSetNickname}
-            disabled={!isSetNicknameValid}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-white font-medium transition-colors"
-          >
+        <div style={{ display: 'flex', gap: '16px' }}>
+          <LoadingButton onClick={handleSetNickname} disabled={!isSetNicknameValid} variant="blue">
             Set Nickname
           </LoadingButton>
-          <LoadingButton
-            onClick={handleRemoveNickname}
-            disabled={!isRemoveNicknameValid}
-            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-white font-medium transition-colors"
-          >
+          <LoadingButton onClick={handleRemoveNickname} disabled={!isRemoveNicknameValid} variant="red">
             Remove Nickname
           </LoadingButton>
         </div>
@@ -650,56 +724,44 @@ function RoleConfigTab({ showMessage }: { showMessage: (type: 'success' | 'error
   };
 
   return (
-    <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl">
-      <h3 className="text-xl font-semibold mb-4">Manage Role Configurations</h3>
-      <p className="text-gray-300 mb-6">
+    <div style={cardStyle}>
+      <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px' }}>Manage Role Configurations</h3>
+      <p style={{ color: '#d1d5db', marginBottom: '24px' }}>
         Configure custom destination paths and regions for AWS Console redirection when users assume specific roles.
       </p>
-      <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-        <input
+      <form style={{ display: 'flex', flexDirection: 'column', gap: '16px' }} onSubmit={(e) => e.preventDefault()}>
+        <FocusInput
           type="text"
           placeholder="AWS Account ID (12 digits)"
           value={configForm.awsAccountId}
           onChange={(e) => setConfigForm({ ...configForm, awsAccountId: e.target.value })}
-          className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
           pattern="[0-9]{12}"
           required
         />
-        <input
+        <FocusInput
           type="text"
           placeholder="Role Name"
           value={configForm.roleName}
           onChange={(e) => setConfigForm({ ...configForm, roleName: e.target.value })}
-          className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
           required
         />
-        <input
+        <FocusInput
           type="text"
           placeholder="Destination Path (Optional, e.g., /ec2/home)"
           value={configForm.destinationPath}
           onChange={(e) => setConfigForm({ ...configForm, destinationPath: e.target.value })}
-          className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
         />
-        <input
+        <FocusInput
           type="text"
           placeholder="Destination Region (Optional, e.g., us-east-1)"
           value={configForm.destinationRegion}
           onChange={(e) => setConfigForm({ ...configForm, destinationRegion: e.target.value })}
-          className="w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
         />
-        <div className="flex space-x-4">
-          <LoadingButton
-            onClick={handleSetConfig}
-            disabled={!isSetConfigValid}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-white font-medium transition-colors"
-          >
+        <div style={{ display: 'flex', gap: '16px' }}>
+          <LoadingButton onClick={handleSetConfig} disabled={!isSetConfigValid} variant="blue">
             Set Configuration
           </LoadingButton>
-          <LoadingButton
-            onClick={handleDeleteConfig}
-            disabled={!isDeleteConfigValid}
-            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-white font-medium transition-colors"
-          >
+          <LoadingButton onClick={handleDeleteConfig} disabled={!isDeleteConfigValid} variant="red">
             Delete Configuration
           </LoadingButton>
         </div>

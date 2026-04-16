@@ -10,6 +10,69 @@ interface Props {
   onClose: () => void;
 }
 
+const modalStyles = {
+  backdrop: {
+    position: 'fixed' as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(0,0,0,0.6)',
+    backdropFilter: 'blur(4px)',
+    WebkitBackdropFilter: 'blur(4px)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 50,
+  } as React.CSSProperties,
+  card: {
+    background: '#1e2433',
+    border: '1px solid rgba(55,65,81,0.5)',
+    color: 'white',
+    padding: '24px',
+    borderRadius: '16px',
+    boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+    width: '100%',
+    maxWidth: '36rem',
+    margin: '0 16px',
+  } as React.CSSProperties,
+  title: {
+    fontSize: '1.25rem',
+    color: '#f3f4f6',
+    marginBottom: '16px',
+  } as React.CSSProperties,
+  preBlock: {
+    background: '#111827',
+    border: '1px solid rgba(55,65,81,0.5)',
+    padding: '16px',
+    borderRadius: '12px',
+    overflowX: 'auto' as const,
+    color: '#d1d5db',
+  } as React.CSSProperties,
+  btnRow: {
+    marginTop: '24px',
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '12px',
+  } as React.CSSProperties,
+  btnCopy: (isCopied: boolean): React.CSSProperties => ({
+    padding: '8px 16px',
+    borderRadius: '8px',
+    border: 'none',
+    color: 'white',
+    background: isCopied ? '#16a34a' : '#2563eb',
+    transition: 'background 0.2s',
+  }),
+  btnClose: {
+    background: '#374151',
+    border: '1px solid #4b5563',
+    padding: '8px 16px',
+    borderRadius: '8px',
+    color: '#d1d5db',
+    transition: 'background 0.15s',
+  } as React.CSSProperties,
+};
+
 export default function AccessKeyModal({ accessKeyId, secretAccessKey, sessionToken, expiration, onClose }: Props) {
   const [copied, setCopied] = useState(false);
 
@@ -33,24 +96,28 @@ export default function AccessKeyModal({ accessKeyId, secretAccessKey, sessionTo
 
   return (
     <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 animate-backdrop-in"
+      className="animate-backdrop-in"
+      style={modalStyles.backdrop}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-gray-800 border border-gray-700/50 text-white p-6 rounded-2xl shadow-2xl w-full max-w-xl mx-4 animate-fade-in">
-        <h2 className="text-xl font-bold mb-4 text-gray-100">Access Keys</h2>
-        <pre className="bg-gray-900 border border-gray-700/50 p-4 rounded-xl text-sm overflow-x-auto whitespace-pre-wrap font-mono text-gray-300">
+      <div className="animate-fade-in" style={modalStyles.card}>
+        <h2 className="font-bold" style={modalStyles.title}>
+          Access Keys
+        </h2>
+        <pre className="text-sm font-mono" style={{ ...modalStyles.preBlock, whiteSpace: 'pre-wrap' }}>
           export AWS_ACCESS_KEY_ID="{accessKeyId}"<br />
           export AWS_SECRET_ACCESS_KEY="{secretAccessKey}"<br />
           export AWS_SESSION_TOKEN="{sessionToken}"<br />
-          <span className="text-gray-500"># Expiration: {expiration}</span>
+          <span style={{ color: '#6b7280' }}># Expiration: {expiration}</span>
         </pre>
-        <div className="mt-6 flex justify-end gap-3">
+        <div style={modalStyles.btnRow}>
           <button
-            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-              copied ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'
-            }`}
+            className="font-medium"
+            style={modalStyles.btnCopy(copied)}
+            onMouseEnter={(e) => (e.currentTarget.style.background = copied ? '#15803d' : '#1d4ed8')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = copied ? '#16a34a' : '#2563eb')}
             onClick={() =>
               copyToClipboard(
                 `export AWS_ACCESS_KEY_ID="${accessKeyId}"\nexport AWS_SECRET_ACCESS_KEY="${secretAccessKey}"\nexport AWS_SESSION_TOKEN="${sessionToken}"`,
@@ -60,7 +127,10 @@ export default function AccessKeyModal({ accessKeyId, secretAccessKey, sessionTo
             {copied ? 'Copied!' : 'Copy All'}
           </button>
           <button
-            className="bg-gray-700 hover:bg-gray-600 border border-gray-600 px-4 py-2 rounded-lg font-medium transition-colors"
+            className="font-medium"
+            style={modalStyles.btnClose}
+            onMouseEnter={(e) => (e.currentTarget.style.background = '#4b5563')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = '#374151')}
             onClick={onClose}
           >
             Close

@@ -8,6 +8,84 @@ interface OnboardingWizardProps {
 
 const STEPS = ['Account', 'Credentials', 'Chain', 'Roles', 'Users', 'Summary'] as const;
 
+const wizardStyles = {
+  card: {
+    background: '#1e2433',
+    border: '1px solid rgba(55,65,81,0.5)',
+    padding: '24px',
+    borderRadius: '12px',
+  } as React.CSSProperties,
+  cardInner: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '16px',
+  } as React.CSSProperties,
+  input: {
+    width: '100%',
+    padding: '12px',
+    background: '#252d3d',
+    borderRadius: '8px',
+    border: '1px solid #374151',
+    color: 'white',
+    outline: 'none',
+    transition: 'border-color 0.15s',
+    boxSizing: 'border-box' as const,
+  } as React.CSSProperties,
+  summaryItem: {
+    background: '#252d3d',
+    border: '1px solid rgba(55,65,81,0.3)',
+    padding: '12px',
+    borderRadius: '8px',
+  } as React.CSSProperties,
+  chainResult: {
+    background: '#252d3d',
+    border: '1px solid rgba(55,65,81,0.3)',
+    padding: '12px',
+    borderRadius: '8px',
+  } as React.CSSProperties,
+  btnPrimary: {
+    background: '#2563eb',
+    padding: '10px 20px',
+    borderRadius: '8px',
+    color: 'white',
+    border: 'none',
+    transition: 'background 0.15s',
+    opacity: 1,
+  } as React.CSSProperties,
+  btnSuccess: {
+    background: '#16a34a',
+    padding: '10px 20px',
+    borderRadius: '8px',
+    color: 'white',
+    border: 'none',
+    transition: 'background 0.15s',
+    opacity: 1,
+  } as React.CSSProperties,
+  btnSecondary: {
+    background: '#374151',
+    border: '1px solid #4b5563',
+    padding: '10px 20px',
+    borderRadius: '8px',
+    color: '#d1d5db',
+    transition: 'background 0.15s',
+  } as React.CSSProperties,
+  btnDisabled: {
+    background: '#374151',
+    color: '#6b7280',
+    cursor: 'not-allowed',
+    opacity: 1,
+  } as React.CSSProperties,
+  roleLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '8px',
+    background: '#252d3d',
+    borderRadius: '8px',
+    transition: 'background 0.15s',
+  } as React.CSSProperties,
+};
+
 export default function OnboardingWizard({ showMessage }: OnboardingWizardProps) {
   const [step, setStep] = useState(0);
 
@@ -41,6 +119,12 @@ export default function OnboardingWizard({ showMessage }: OnboardingWizardProps)
 
   // Loading states
   const [isLoading, setIsLoading] = useState(false);
+
+  // Focus tracking for inputs
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
+
+  // Hover tracking for role labels
+  const [hoveredRole, setHoveredRole] = useState<string | null>(null);
 
   const apiCall = async (
     url: string,
@@ -215,44 +299,64 @@ export default function OnboardingWizard({ showMessage }: OnboardingWizardProps)
     setIsLoading(false);
   };
 
-  const inputClass =
-    'w-full p-3 bg-gray-750 rounded-lg border border-gray-700 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 focus:outline-none transition-colors';
-  const btnPrimary =
-    'bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-5 py-2.5 rounded-lg text-white font-medium transition-colors';
-  const btnSuccess =
-    'bg-green-600 hover:bg-green-700 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed px-5 py-2.5 rounded-lg text-white font-medium transition-colors';
-  const btnSecondary =
-    'bg-gray-700 hover:bg-gray-600 border border-gray-600 px-5 py-2.5 rounded-lg text-gray-300 font-medium transition-colors';
+  const getInputStyle = (name: string): React.CSSProperties => ({
+    ...wizardStyles.input,
+    borderColor: focusedInput === name ? '#3b82f6' : '#374151',
+  });
+
+  const getBtnPrimary = (disabled: boolean): React.CSSProperties => ({
+    ...wizardStyles.btnPrimary,
+    ...(disabled ? wizardStyles.btnDisabled : {}),
+  });
+
+  const getBtnSuccess = (disabled: boolean): React.CSSProperties => ({
+    ...wizardStyles.btnSuccess,
+    ...(disabled ? wizardStyles.btnDisabled : {}),
+  });
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div style={{ maxWidth: '56rem', margin: '0 auto' }}>
       {/* Step indicator */}
-      <div className="flex items-center" style={{ marginBottom: '2.5rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '2.5rem' }}>
         {STEPS.map((label, i) => (
-          <div key={label} className="flex items-center" style={{ flex: i < STEPS.length - 1 ? '1' : 'none' }}>
-            <div className="flex items-center" style={{ gap: '10px' }}>
+          <div key={label} style={{ display: 'flex', alignItems: 'center', flex: i < STEPS.length - 1 ? '1' : 'none' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div
-                className={`rounded-full flex items-center justify-center text-sm font-bold ${
-                  i < step ? 'bg-green-600 text-white' : i === step ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-400'
-                }`}
+                className="text-sm font-bold"
                 style={{
                   width: '36px',
                   height: '36px',
                   minWidth: '36px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: i < step ? '#16a34a' : i === step ? '#2563eb' : '#374151',
+                  color: i <= step ? 'white' : '#9ca3af',
                   boxShadow: i === step ? '0 0 0 4px rgba(37, 99, 235, 0.2)' : 'none',
                 }}
               >
-                {i < step ? '✓' : i + 1}
+                {i < step ? '\u2713' : i + 1}
               </div>
               <span
-                className={`text-sm font-medium ${i === step ? 'text-white' : i < step ? 'text-green-400' : 'text-gray-500'}`}
-                style={{ whiteSpace: 'nowrap' }}
+                className="text-sm font-medium"
+                style={{
+                  whiteSpace: 'nowrap',
+                  color: i === step ? 'white' : i < step ? '#4ade80' : '#6b7280',
+                }}
               >
                 {label}
               </span>
             </div>
             {i < STEPS.length - 1 && (
-              <div className={`${i < step ? 'bg-green-600' : 'bg-gray-700'}`} style={{ flex: 1, height: '1px', margin: '0 16px' }} />
+              <div
+                style={{
+                  flex: 1,
+                  height: '1px',
+                  margin: '0 16px',
+                  background: i < step ? '#16a34a' : '#374151',
+                }}
+              />
             )}
           </div>
         ))}
@@ -260,286 +364,424 @@ export default function OnboardingWizard({ showMessage }: OnboardingWizardProps)
 
       {/* Step 1: Account */}
       {step === 0 && (
-        <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl space-y-4">
-          <h3 className="text-xl font-semibold">Add AWS Account</h3>
-          <p className="text-gray-400 text-sm">Enter the 12-digit AWS Account ID and an optional nickname.</p>
-          <input
-            type="text"
-            placeholder="AWS Account ID (12 digits)"
-            value={awsAccountId}
-            onChange={(e) => setAwsAccountId(e.target.value)}
-            className={inputClass}
-            pattern="[0-9]{12}"
-          />
-          <input
-            type="text"
-            placeholder="Nickname (optional)"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            className={inputClass}
-          />
-          {accountSaved && <p className="text-green-400 text-sm">Account configured.</p>}
-          <div className="flex justify-between">
-            <button onClick={handleSaveAccount} disabled={isLoading || !/^[0-9]{12}$/.test(awsAccountId)} className={btnPrimary}>
-              {isLoading ? 'Saving...' : 'Save Account'}
-            </button>
-            <button onClick={() => setStep(1)} disabled={!accountSaved} className={btnSuccess}>
-              Next
-            </button>
+        <div style={wizardStyles.card}>
+          <div style={wizardStyles.cardInner}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'white' }}>Add AWS Account</h3>
+            <p className="text-sm" style={{ color: '#9ca3af' }}>
+              Enter the 12-digit AWS Account ID and an optional nickname.
+            </p>
+            <input
+              type="text"
+              placeholder="AWS Account ID (12 digits)"
+              value={awsAccountId}
+              onChange={(e) => setAwsAccountId(e.target.value)}
+              style={getInputStyle('accountId')}
+              onFocus={() => setFocusedInput('accountId')}
+              onBlur={() => setFocusedInput(null)}
+              pattern="[0-9]{12}"
+            />
+            <input
+              type="text"
+              placeholder="Nickname (optional)"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              style={getInputStyle('nickname')}
+              onFocus={() => setFocusedInput('nickname')}
+              onBlur={() => setFocusedInput(null)}
+            />
+            {accountSaved && (
+              <p className="text-sm" style={{ color: '#4ade80' }}>
+                Account configured.
+              </p>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <button
+                onClick={handleSaveAccount}
+                disabled={isLoading || !/^[0-9]{12}$/.test(awsAccountId)}
+                className="font-medium"
+                style={getBtnPrimary(isLoading || !/^[0-9]{12}$/.test(awsAccountId))}
+              >
+                {isLoading ? 'Saving...' : 'Save Account'}
+              </button>
+              <button onClick={() => setStep(1)} disabled={!accountSaved} className="font-medium" style={getBtnSuccess(!accountSaved)}>
+                Next
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* Step 2: Credentials */}
       {step === 1 && (
-        <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl space-y-4">
-          <h3 className="text-xl font-semibold">Store Credentials</h3>
-          <p className="text-gray-400 text-sm">Enter IAM credentials. Validate first to confirm they work, then store them securely.</p>
-          <input
-            type="text"
-            placeholder="Principal ARN (e.g., arn:aws:iam::123456789012:user/username)"
-            value={principalArn}
-            onChange={(e) => setPrincipalArn(e.target.value)}
-            className={inputClass}
-          />
-          <input
-            type="text"
-            placeholder="Access Key ID"
-            value={accessKeyId}
-            onChange={(e) => setAccessKeyId(e.target.value)}
-            className={inputClass}
-          />
-          <input
-            type="password"
-            placeholder="Secret Access Key"
-            value={secretAccessKey}
-            onChange={(e) => setSecretAccessKey(e.target.value)}
-            className={inputClass}
-          />
-          <input
-            type="password"
-            placeholder="Session Token (optional)"
-            value={sessionToken}
-            onChange={(e) => setSessionToken(e.target.value)}
-            className={inputClass}
-          />
-          {validationResult && (
-            <p className="text-green-400 text-sm">
-              Identity: {validationResult.arn} (Account: {validationResult.accountId})
+        <div style={wizardStyles.card}>
+          <div style={wizardStyles.cardInner}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'white' }}>Store Credentials</h3>
+            <p className="text-sm" style={{ color: '#9ca3af' }}>
+              Enter IAM credentials. Validate first to confirm they work, then store them securely.
             </p>
-          )}
-          {credentialStored && <p className="text-green-400 text-sm">Credentials stored securely.</p>}
-          <div className="flex gap-3 flex-wrap">
-            <button onClick={handleValidateCredentials} disabled={isLoading || !accessKeyId || !secretAccessKey} className={btnPrimary}>
-              {isLoading ? 'Validating...' : 'Validate'}
-            </button>
-            <button
-              onClick={handleStoreCredentials}
-              disabled={isLoading || !principalArn || !accessKeyId || !secretAccessKey}
-              className={btnSuccess}
-            >
-              {isLoading ? 'Storing...' : 'Store Credentials'}
-            </button>
-          </div>
-          <div className="flex justify-between pt-4">
-            <button onClick={() => setStep(0)} className={btnSecondary}>
-              Back
-            </button>
-            <button onClick={() => setStep(2)} disabled={!credentialStored} className={btnSuccess}>
-              Next
-            </button>
+            <input
+              type="text"
+              placeholder="Principal ARN (e.g., arn:aws:iam::123456789012:user/username)"
+              value={principalArn}
+              onChange={(e) => setPrincipalArn(e.target.value)}
+              style={getInputStyle('principalArn')}
+              onFocus={() => setFocusedInput('principalArn')}
+              onBlur={() => setFocusedInput(null)}
+            />
+            <input
+              type="text"
+              placeholder="Access Key ID"
+              value={accessKeyId}
+              onChange={(e) => setAccessKeyId(e.target.value)}
+              style={getInputStyle('accessKeyId')}
+              onFocus={() => setFocusedInput('accessKeyId')}
+              onBlur={() => setFocusedInput(null)}
+            />
+            <input
+              type="password"
+              placeholder="Secret Access Key"
+              value={secretAccessKey}
+              onChange={(e) => setSecretAccessKey(e.target.value)}
+              style={getInputStyle('secretAccessKey')}
+              onFocus={() => setFocusedInput('secretAccessKey')}
+              onBlur={() => setFocusedInput(null)}
+            />
+            <input
+              type="password"
+              placeholder="Session Token (optional)"
+              value={sessionToken}
+              onChange={(e) => setSessionToken(e.target.value)}
+              style={getInputStyle('sessionToken')}
+              onFocus={() => setFocusedInput('sessionToken')}
+              onBlur={() => setFocusedInput(null)}
+            />
+            {validationResult && (
+              <p className="text-sm" style={{ color: '#4ade80' }}>
+                Identity: {validationResult.arn} (Account: {validationResult.accountId})
+              </p>
+            )}
+            {credentialStored && (
+              <p className="text-sm" style={{ color: '#4ade80' }}>
+                Credentials stored securely.
+              </p>
+            )}
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <button
+                onClick={handleValidateCredentials}
+                disabled={isLoading || !accessKeyId || !secretAccessKey}
+                className="font-medium"
+                style={getBtnPrimary(isLoading || !accessKeyId || !secretAccessKey)}
+              >
+                {isLoading ? 'Validating...' : 'Validate'}
+              </button>
+              <button
+                onClick={handleStoreCredentials}
+                disabled={isLoading || !principalArn || !accessKeyId || !secretAccessKey}
+                className="font-medium"
+                style={getBtnSuccess(isLoading || !principalArn || !accessKeyId || !secretAccessKey)}
+              >
+                {isLoading ? 'Storing...' : 'Store Credentials'}
+              </button>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '16px' }}>
+              <button
+                onClick={() => setStep(0)}
+                className="font-medium"
+                style={wizardStyles.btnSecondary}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#4b5563')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = '#374151')}
+              >
+                Back
+              </button>
+              <button
+                onClick={() => setStep(2)}
+                disabled={!credentialStored}
+                className="font-medium"
+                style={getBtnSuccess(!credentialStored)}
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* Step 3: Credential Chain */}
       {step === 2 && (
-        <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl space-y-4">
-          <h3 className="text-xl font-semibold">Credential Chain (Optional)</h3>
-          <p className="text-gray-400 text-sm">
-            If this credential needs to assume an intermediate role first, configure the chain here. Skip if not needed.
-          </p>
-          <input
-            type="text"
-            placeholder="Assumed By ARN (the base credential that assumes this role)"
-            value={assumedBy}
-            onChange={(e) => setAssumedBy(e.target.value)}
-            className={inputClass}
-          />
-          {chainConfigured && <p className="text-green-400 text-sm">Chain relationship configured.</p>}
-          {chainTestResult && (
-            <div className="bg-gray-750 border border-gray-700/30 p-3 rounded-lg text-sm space-y-1">
-              {chainTestResult.map((r, i) => (
-                <div key={i} className={r.status.startsWith('ok') ? 'text-green-400' : 'text-red-400'}>
-                  {r.arn}: {r.status}
+        <div style={wizardStyles.card}>
+          <div style={wizardStyles.cardInner}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'white' }}>Credential Chain (Optional)</h3>
+            <p className="text-sm" style={{ color: '#9ca3af' }}>
+              If this credential needs to assume an intermediate role first, configure the chain here. Skip if not needed.
+            </p>
+            <input
+              type="text"
+              placeholder="Assumed By ARN (the base credential that assumes this role)"
+              value={assumedBy}
+              onChange={(e) => setAssumedBy(e.target.value)}
+              style={getInputStyle('assumedBy')}
+              onFocus={() => setFocusedInput('assumedBy')}
+              onBlur={() => setFocusedInput(null)}
+            />
+            {chainConfigured && (
+              <p className="text-sm" style={{ color: '#4ade80' }}>
+                Chain relationship configured.
+              </p>
+            )}
+            {chainTestResult && (
+              <div className="text-sm" style={wizardStyles.chainResult}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {chainTestResult.map((r, i) => (
+                    <div key={i} style={{ color: r.status.startsWith('ok') ? '#4ade80' : '#f87171' }}>
+                      {r.arn}: {r.status}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              {assumedBy.trim() && (
+                <button onClick={handleSetChain} disabled={isLoading} className="font-medium" style={getBtnPrimary(isLoading)}>
+                  {isLoading ? 'Setting...' : 'Set Chain'}
+                </button>
+              )}
+              {(chainConfigured || credentialStored) && (
+                <button onClick={handleTestChain} disabled={isLoading} className="font-medium" style={getBtnPrimary(isLoading)}>
+                  {isLoading ? 'Testing...' : 'Test Chain'}
+                </button>
+              )}
             </div>
-          )}
-          <div className="flex gap-3 flex-wrap">
-            {assumedBy.trim() && (
-              <button onClick={handleSetChain} disabled={isLoading} className={btnPrimary}>
-                {isLoading ? 'Setting...' : 'Set Chain'}
+            <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '16px' }}>
+              <button
+                onClick={() => setStep(1)}
+                className="font-medium"
+                style={wizardStyles.btnSecondary}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#4b5563')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = '#374151')}
+              >
+                Back
               </button>
-            )}
-            {(chainConfigured || credentialStored) && (
-              <button onClick={handleTestChain} disabled={isLoading} className={btnPrimary}>
-                {isLoading ? 'Testing...' : 'Test Chain'}
+              <button onClick={() => setStep(3)} className="font-medium" style={wizardStyles.btnSuccess}>
+                Next
               </button>
-            )}
-          </div>
-          <div className="flex justify-between pt-4">
-            <button onClick={() => setStep(1)} className={btnSecondary}>
-              Back
-            </button>
-            <button onClick={() => setStep(3)} className={btnSuccess}>
-              Next
-            </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* Step 4: Roles */}
       {step === 3 && (
-        <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl space-y-4">
-          <h3 className="text-xl font-semibold">Discover & Select Roles</h3>
-          <p className="text-gray-400 text-sm">Discover IAM roles in the account or add them manually.</p>
-          <button onClick={handleDiscoverRoles} disabled={isLoading} className={btnPrimary}>
-            {isLoading ? 'Discovering...' : 'Discover Roles'}
-          </button>
-          {discoveredRoles.length > 0 && (
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {discoveredRoles.map((role) => (
-                <label key={role.roleName} className="flex items-center gap-2 p-2 bg-gray-700 rounded cursor-pointer hover:bg-gray-600">
-                  <input type="checkbox" checked={selectedRoles.has(role.roleName)} onChange={() => toggleRole(role.roleName)} />
-                  <span className="font-medium">{role.roleName}</span>
-                  {role.description && <span className="text-gray-400 text-sm">— {role.description}</span>}
-                </label>
-              ))}
+        <div style={wizardStyles.card}>
+          <div style={wizardStyles.cardInner}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'white' }}>Discover & Select Roles</h3>
+            <p className="text-sm" style={{ color: '#9ca3af' }}>
+              Discover IAM roles in the account or add them manually.
+            </p>
+            <button onClick={handleDiscoverRoles} disabled={isLoading} className="font-medium" style={getBtnPrimary(isLoading)}>
+              {isLoading ? 'Discovering...' : 'Discover Roles'}
+            </button>
+            {discoveredRoles.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '256px', overflowY: 'auto' }}>
+                {discoveredRoles.map((role) => (
+                  <label
+                    key={role.roleName}
+                    className="cursor-pointer"
+                    style={{
+                      ...wizardStyles.roleLabel,
+                      background: hoveredRole === role.roleName ? '#313b50' : '#252d3d',
+                    }}
+                    onMouseEnter={() => setHoveredRole(role.roleName)}
+                    onMouseLeave={() => setHoveredRole(null)}
+                  >
+                    <input type="checkbox" checked={selectedRoles.has(role.roleName)} onChange={() => toggleRole(role.roleName)} />
+                    <span className="font-medium">{role.roleName}</span>
+                    {role.description && (
+                      <span className="text-sm" style={{ color: '#9ca3af' }}>
+                        — {role.description}
+                      </span>
+                    )}
+                  </label>
+                ))}
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input
+                type="text"
+                placeholder="Manually add role name"
+                value={manualRoleName}
+                onChange={(e) => setManualRoleName(e.target.value)}
+                style={getInputStyle('manualRole')}
+                onFocus={() => setFocusedInput('manualRole')}
+                onBlur={() => setFocusedInput(null)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleAddManualRole();
+                }}
+              />
+              <button
+                onClick={handleAddManualRole}
+                disabled={!manualRoleName.trim()}
+                className="font-medium"
+                style={getBtnPrimary(!manualRoleName.trim())}
+              >
+                Add
+              </button>
             </div>
-          )}
-          <div className="flex gap-2">
-            <input
-              type="text"
-              placeholder="Manually add role name"
-              value={manualRoleName}
-              onChange={(e) => setManualRoleName(e.target.value)}
-              className={inputClass}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleAddManualRole();
-              }}
-            />
-            <button onClick={handleAddManualRole} disabled={!manualRoleName.trim()} className={btnPrimary}>
-              Add
-            </button>
-          </div>
-          <p className="text-sm text-gray-400">{selectedRoles.size} role(s) selected</p>
-          <div className="flex justify-between pt-4">
-            <button onClick={() => setStep(2)} className={btnSecondary}>
-              Back
-            </button>
-            <button onClick={() => setStep(4)} disabled={selectedRoles.size === 0} className={btnSuccess}>
-              Next
-            </button>
+            <p className="text-sm" style={{ color: '#9ca3af' }}>
+              {selectedRoles.size} role(s) selected
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '16px' }}>
+              <button
+                onClick={() => setStep(2)}
+                className="font-medium"
+                style={wizardStyles.btnSecondary}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#4b5563')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = '#374151')}
+              >
+                Back
+              </button>
+              <button
+                onClick={() => setStep(4)}
+                disabled={selectedRoles.size === 0}
+                className="font-medium"
+                style={getBtnSuccess(selectedRoles.size === 0)}
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* Step 5: Users */}
       {step === 4 && (
-        <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl space-y-4">
-          <h3 className="text-xl font-semibold">Assign Users</h3>
-          <p className="text-gray-400 text-sm">Enter email addresses of users to grant access to the selected roles.</p>
-          {userEmails.map((email, i) => (
-            <div key={i} className="flex gap-2">
-              <input
-                type="email"
-                placeholder="user@example.com"
-                value={email}
-                onChange={(e) => {
-                  const next = [...userEmails];
-                  next[i] = e.target.value;
-                  setUserEmails(next);
-                }}
-                className={inputClass}
-              />
-              {userEmails.length > 1 && (
-                <button
-                  onClick={() => setUserEmails(userEmails.filter((_, j) => j !== i))}
-                  className="text-red-400 hover:text-red-300 px-2"
-                >
-                  X
-                </button>
-              )}
-            </div>
-          ))}
-          <button onClick={() => setUserEmails([...userEmails, ''])} className="text-blue-400 hover:text-blue-300 text-sm">
-            + Add another user
-          </button>
-          <p className="text-sm text-gray-400">
-            Granting access to: {Array.from(selectedRoles).join(', ')} in account {awsAccountId}
-          </p>
-          {accessGranted && <p className="text-green-400 text-sm">Access granted successfully.</p>}
-          <div className="flex gap-3">
+        <div style={wizardStyles.card}>
+          <div style={wizardStyles.cardInner}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'white' }}>Assign Users</h3>
+            <p className="text-sm" style={{ color: '#9ca3af' }}>
+              Enter email addresses of users to grant access to the selected roles.
+            </p>
+            {userEmails.map((email, i) => (
+              <div key={i} style={{ display: 'flex', gap: '8px' }}>
+                <input
+                  type="email"
+                  placeholder="user@example.com"
+                  value={email}
+                  onChange={(e) => {
+                    const next = [...userEmails];
+                    next[i] = e.target.value;
+                    setUserEmails(next);
+                  }}
+                  style={getInputStyle(`email-${i}`)}
+                  onFocus={() => setFocusedInput(`email-${i}`)}
+                  onBlur={() => setFocusedInput(null)}
+                />
+                {userEmails.length > 1 && (
+                  <button
+                    onClick={() => setUserEmails(userEmails.filter((_, j) => j !== i))}
+                    style={{ color: '#f87171', padding: '0 8px', background: 'none', border: 'none', cursor: 'pointer' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#fca5a5')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#f87171')}
+                  >
+                    X
+                  </button>
+                )}
+              </div>
+            ))}
             <button
-              onClick={handleGrantAccess}
-              disabled={isLoading || userEmails.every((e) => !e.trim()) || selectedRoles.size === 0}
-              className={btnSuccess}
+              onClick={() => setUserEmails([...userEmails, ''])}
+              className="text-sm"
+              style={{ color: '#60a5fa', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#93bbfd')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#60a5fa')}
             >
-              {isLoading ? 'Granting...' : 'Grant Access'}
+              + Add another user
             </button>
-          </div>
-          <div className="flex justify-between pt-4">
-            <button onClick={() => setStep(3)} className={btnSecondary}>
-              Back
-            </button>
-            <button onClick={() => setStep(5)} className={btnSuccess}>
-              Next
-            </button>
+            <p className="text-sm" style={{ color: '#9ca3af' }}>
+              Granting access to: {Array.from(selectedRoles).join(', ')} in account {awsAccountId}
+            </p>
+            {accessGranted && (
+              <p className="text-sm" style={{ color: '#4ade80' }}>
+                Access granted successfully.
+              </p>
+            )}
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={handleGrantAccess}
+                disabled={isLoading || userEmails.every((e) => !e.trim()) || selectedRoles.size === 0}
+                className="font-medium"
+                style={getBtnSuccess(isLoading || userEmails.every((e) => !e.trim()) || selectedRoles.size === 0)}
+              >
+                {isLoading ? 'Granting...' : 'Grant Access'}
+              </button>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '16px' }}>
+              <button
+                onClick={() => setStep(3)}
+                className="font-medium"
+                style={wizardStyles.btnSecondary}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#4b5563')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = '#374151')}
+              >
+                Back
+              </button>
+              <button onClick={() => setStep(5)} className="font-medium" style={wizardStyles.btnSuccess}>
+                Next
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* Step 6: Summary */}
       {step === 5 && (
-        <div className="bg-gray-800 border border-gray-700/50 p-6 rounded-xl space-y-4">
-          <h3 className="text-xl font-semibold">Setup Complete</h3>
-          <div className="space-y-3 text-sm">
-            <div className="bg-gray-750 border border-gray-700/30 p-3 rounded-lg">
-              <span className="text-gray-400">Account:</span> {nickname ? `${nickname} (${awsAccountId})` : awsAccountId}
+        <div style={wizardStyles.card}>
+          <div style={wizardStyles.cardInner}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'white' }}>Setup Complete</h3>
+            <div className="text-sm" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={wizardStyles.summaryItem}>
+                <span style={{ color: '#9ca3af' }}>Account:</span> {nickname ? `${nickname} (${awsAccountId})` : awsAccountId}
+              </div>
+              <div style={wizardStyles.summaryItem}>
+                <span style={{ color: '#9ca3af' }}>Principal:</span> {principalArn}
+              </div>
+              {assumedBy && (
+                <div style={wizardStyles.summaryItem}>
+                  <span style={{ color: '#9ca3af' }}>Chain:</span> {assumedBy} → {principalArn}
+                </div>
+              )}
+              <div style={wizardStyles.summaryItem}>
+                <span style={{ color: '#9ca3af' }}>Roles:</span> {Array.from(selectedRoles).join(', ')}
+              </div>
+              <div style={wizardStyles.summaryItem}>
+                <span style={{ color: '#9ca3af' }}>Users:</span> {userEmails.filter((e) => e.trim()).join(', ') || '(none assigned)'}
+              </div>
             </div>
-            <div className="bg-gray-750 border border-gray-700/30 p-3 rounded-lg">
-              <span className="text-gray-400">Principal:</span> {principalArn}
+            <div style={{ display: 'flex', gap: '12px', paddingTop: '16px' }}>
+              <button onClick={handleTestChain} disabled={isLoading} className="font-medium" style={getBtnPrimary(isLoading)}>
+                {isLoading ? 'Testing...' : 'Test Connection'}
+              </button>
+              <button
+                onClick={() => setStep(0)}
+                className="font-medium"
+                style={wizardStyles.btnSecondary}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#4b5563')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = '#374151')}
+              >
+                Back to Start
+              </button>
             </div>
-            {assumedBy && (
-              <div className="bg-gray-750 border border-gray-700/30 p-3 rounded-lg">
-                <span className="text-gray-400">Chain:</span> {assumedBy} → {principalArn}
+            {chainTestResult && (
+              <div className="text-sm" style={wizardStyles.chainResult}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {chainTestResult.map((r, i) => (
+                    <div key={i} style={{ color: r.status.startsWith('ok') ? '#4ade80' : '#f87171' }}>
+                      {r.arn}: {r.status}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
-            <div className="bg-gray-750 border border-gray-700/30 p-3 rounded-lg">
-              <span className="text-gray-400">Roles:</span> {Array.from(selectedRoles).join(', ')}
-            </div>
-            <div className="bg-gray-750 border border-gray-700/30 p-3 rounded-lg">
-              <span className="text-gray-400">Users:</span> {userEmails.filter((e) => e.trim()).join(', ') || '(none assigned)'}
-            </div>
           </div>
-          <div className="flex gap-3 pt-4">
-            <button onClick={handleTestChain} disabled={isLoading} className={btnPrimary}>
-              {isLoading ? 'Testing...' : 'Test Connection'}
-            </button>
-            <button onClick={() => setStep(0)} className={btnSecondary}>
-              Back to Start
-            </button>
-          </div>
-          {chainTestResult && (
-            <div className="bg-gray-750 border border-gray-700/30 p-3 rounded-lg text-sm space-y-1">
-              {chainTestResult.map((r, i) => (
-                <div key={i} className={r.status.startsWith('ok') ? 'text-green-400' : 'text-red-400'}>
-                  {r.arn}: {r.status}
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       )}
     </div>

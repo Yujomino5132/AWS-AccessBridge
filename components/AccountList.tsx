@@ -159,18 +159,38 @@ export default function AccountList({ showHidden, searchTerm, pageSize, currentP
     }
   };
 
+  const [hoveredRole, setHoveredRole] = useState<string | null>(null);
+
   return (
     <div>
       {isLoading && (
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-400 border-t-transparent mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading Accounts...</p>
+        <div style={{ textAlign: 'center', padding: '32px 0' }}>
+          <div
+            className="animate-spin"
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              border: '2px solid #60a5fa',
+              borderTopColor: 'transparent',
+              margin: '0 auto 16px',
+            }}
+          ></div>
+          <p style={{ color: '#9ca3af' }}>Loading Accounts...</p>
         </div>
       )}
       {!isLoading && error && (
-        <div className="bg-red-900/30 border border-red-800/50 text-red-300 px-4 py-3 rounded-xl mb-4">
-          <div className="flex items-center">
-            <svg className="w-5 h-5 mr-2 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+        <div
+          style={{
+            background: 'rgba(127, 29, 29, 0.3)',
+            color: '#fca5a5',
+            padding: '12px 16px',
+            borderRadius: '12px',
+            marginBottom: '16px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <svg style={{ width: '20px', height: '20px', marginRight: '8px', color: '#f87171' }} fill="currentColor" viewBox="0 0 20 20">
               <path
                 fillRule="evenodd"
                 d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -182,8 +202,20 @@ export default function AccountList({ showHidden, searchTerm, pageSize, currentP
         </div>
       )}
       {!error && Object.keys(rolesData).length === 0 && !isLoading && (
-        <div className="bg-gray-800 border border-gray-700/50 p-12 rounded-xl text-center">
-          <svg className="w-12 h-12 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div
+          style={{
+            background: '#1e2433',
+            padding: '48px',
+            borderRadius: '12px',
+            textAlign: 'center',
+          }}
+        >
+          <svg
+            style={{ width: '48px', height: '48px', color: '#4b5563', margin: '0 auto 16px' }}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -191,22 +223,43 @@ export default function AccountList({ showHidden, searchTerm, pageSize, currentP
               d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
             />
           </svg>
-          <p className="text-lg text-gray-300 mb-2">No AWS accounts available</p>
-          <p className="text-sm text-gray-500">You don't have access to any AWS accounts. Contact your administrator to request access.</p>
+          <p style={{ fontSize: '18px', color: '#d1d5db', marginBottom: '8px' }}>No AWS accounts available</p>
+          <p style={{ fontSize: '14px', color: '#6b7280' }}>
+            You don't have access to any AWS accounts. Contact your administrator to request access.
+          </p>
         </div>
       )}
       {!isLoading &&
         Object.entries(rolesData).map(([accountId, accountData]) => (
           <div
             key={accountId}
-            className="bg-gray-800 border border-gray-700/50 rounded-xl p-4 my-3 text-white animate-fade-in-up hover:border-gray-600/50 transition-colors"
+            className="animate-fade-in-up"
+            style={{
+              background: '#1e2433',
+              borderRadius: '12px',
+              padding: '16px',
+              marginTop: '12px',
+              marginBottom: '12px',
+              color: '#ffffff',
+              transition: 'background 0.15s',
+            }}
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center cursor-pointer group flex-1" onClick={() => toggleExpand(accountId)}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div
+                className="group"
+                style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', flex: 1 }}
+                onClick={() => toggleExpand(accountId)}
+              >
                 <svg
                   width="14"
                   height="14"
-                  className={`shrink-0 mr-3 text-gray-500 group-hover:text-gray-300 transition-all duration-200 ${expanded[accountId] ? 'rotate-90' : ''}`}
+                  className="shrink-0 group-hover:text-gray-300"
+                  style={{
+                    marginRight: '12px',
+                    color: '#6b7280',
+                    transition: 'transform 0.2s, color 0.2s',
+                    transform: expanded[accountId] ? 'rotate(90deg)' : 'rotate(0deg)',
+                  }}
                   fill="none"
                   stroke="currentColor"
                   strokeWidth={2}
@@ -214,42 +267,65 @@ export default function AccountList({ showHidden, searchTerm, pageSize, currentP
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
-                <div className="text-base font-semibold">
+                <div className="font-semibold" style={{ fontSize: '16px' }}>
                   {accountData.nickname ? (
                     <>
-                      <span className="text-gray-100">{accountData.nickname}</span>{' '}
-                      <span className="text-gray-500 font-normal text-sm ml-1">{accountId}</span>
+                      <span style={{ color: '#f3f4f6' }}>{accountData.nickname}</span>{' '}
+                      <span className="font-normal" style={{ color: '#6b7280', fontSize: '14px', marginLeft: '4px' }}>
+                        {accountId}
+                      </span>
                     </>
                   ) : (
-                    <span className="font-mono text-gray-200">{accountId}</span>
+                    <span className="font-mono" style={{ color: '#e5e7eb' }}>
+                      {accountId}
+                    </span>
                   )}
                 </div>
               </div>
               <button
                 onClick={() => toggleFavorite(accountId)}
-                className="text-xl hover:scale-110 transition-transform ml-4"
+                style={{
+                  fontSize: '20px',
+                  marginLeft: '16px',
+                  transition: 'transform 0.15s',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
                 title={accountData.favorite ? 'Remove from favorites' : 'Add to favorites'}
               >
-                {accountData.favorite ? '⭐' : '☆'}
+                {accountData.favorite ? '\u2B50' : '\u2606'}
               </button>
             </div>
             <div
-              className="overflow-hidden transition-all duration-200 ease-out"
               style={{
+                overflow: 'hidden',
+                transition: 'max-height 0.2s ease-out, opacity 0.2s ease-out',
                 maxHeight: expanded[accountId] ? `${accountData.roles.length * 44 + 16}px` : '0px',
                 opacity: expanded[accountId] ? 1 : 0,
               }}
             >
-              <div className="ml-7 mt-3 space-y-1">
+              <div style={{ marginLeft: '28px', marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {accountData.roles.map((role) => {
                   const loadingKey = `${accountId}-${role}`;
                   const isLoadingKeys = loadingKeys === loadingKey;
                   const isLoadingConsole = loadingConsole === loadingKey;
+                  const isHovered = hoveredRole === loadingKey;
 
                   return (
                     <div
                       key={role}
-                      className="flex justify-between items-center py-1.5 px-3 rounded-lg hover:bg-gray-750 transition-colors group/role"
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '6px 12px',
+                        borderRadius: '8px',
+                        background: isHovered ? '#252d3d' : 'transparent',
+                        transition: 'background 0.15s',
+                      }}
+                      onMouseEnter={() => setHoveredRole(loadingKey)}
+                      onMouseLeave={() => setHoveredRole(null)}
                     >
                       <a
                         href="#"
@@ -260,11 +336,19 @@ export default function AccountList({ showHidden, searchTerm, pageSize, currentP
                         className={`transition-colors ${
                           isLoadingConsole ? 'text-gray-400 cursor-not-allowed' : 'text-blue-400 hover:text-blue-300'
                         }`}
+                        style={{ textDecoration: 'none' }}
                       >
                         {isLoadingConsole ? 'Opening Console...' : role}
                       </a>
                       <button
-                        className={`text-sm transition-all ${isLoadingKeys ? 'text-gray-400' : 'text-gray-500 group-hover/role:text-blue-400 hover:text-blue-300'}`}
+                        className="text-sm"
+                        style={{
+                          transition: 'color 0.15s',
+                          color: isLoadingKeys ? '#9ca3af' : isHovered ? '#60a5fa' : '#6b7280',
+                          background: 'none',
+                          border: 'none',
+                          cursor: isLoadingKeys ? 'default' : 'pointer',
+                        }}
                         onClick={() => handleAccessKeys(accountId, role)}
                         disabled={isLoadingKeys}
                       >
