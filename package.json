@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite --config vite.config.ts",
     "dev:ssr": "next dev",
-    "build": "vite build --config vite.config.ts",
+    "build": "npm run prettier && npm run lint && vite build --config vite.config.ts && wrangler deploy --dry-run",
     "build:ssr": "opennextjs-cloudflare build",
     "deploy": "npm run build && wrangler deploy",
     "deploy:ssr": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
