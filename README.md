@@ -167,18 +167,23 @@ openssl rand -base64 32 | npx wrangler secrets-store secret create <STORE_ID> \
 3. On the next screen, create at least one **Access policy**:
    - **Action**: Allow
    - **Include**: the emails, email domains, or IdP groups that should be allowed in.
-4. Finish creating the application, then open its overview and copy the **Application Audience (AUD) tag**.
-5. Also note your **team domain** (e.g. `https://acme.cloudflareaccess.com`).
+4. Save the application.
 
-Put both into `wrangler.jsonc` under `vars`:
+**If your worker and your domain live in the same Cloudflare account** (the common case), you're done — AccessBridge infers the Zero Trust team and application audience automatically at runtime. You do **not** need to set `POLICY_AUD` or `TEAM_DOMAIN`.
 
-```jsonc
-"vars": {
-  "POLICY_AUD": "abcdef…the AUD tag…",
-  "TEAM_DOMAIN": "https://acme.cloudflareaccess.com",
-  // ...
-}
-```
+**If your worker lives in a different Cloudflare account from the domain owner** (e.g. you're serving a customer's domain via [Cloudflare for SaaS](https://developers.cloudflare.com/cloudflare-for-saas/)), the worker can't infer the owning account's Zero Trust config, so you must set both explicitly:
+
+1. On the Zero Trust application overview, copy the **Application Audience (AUD) tag**.
+2. Note the owning account's **team domain** (e.g. `https://acme.cloudflareaccess.com`).
+3. Add both to `wrangler.jsonc`:
+
+   ```jsonc
+   "vars": {
+     "POLICY_AUD": "abcdef…the AUD tag…",
+     "TEAM_DOMAIN": "https://acme.cloudflareaccess.com",
+     // ...
+   }
+   ```
 
 ### Step 5. Apply database migrations
 
@@ -324,15 +329,15 @@ After the first account, you can repeat for additional accounts from the same Ad
 
 All of these live in `wrangler.jsonc` under `vars`.
 
-| Variable                      | Purpose                                                                       | Default   |
-| ----------------------------- | ----------------------------------------------------------------------------- | --------- |
-| `POLICY_AUD`                  | Cloudflare Zero Trust Application Audience tag — required for auth.           | —         |
-| `TEAM_DOMAIN`                 | Your Zero Trust team domain (e.g. `https://acme.cloudflareaccess.com`).       | —         |
-| `MAX_TOKENS_PER_USER`         | How many active Personal Access Tokens a user can hold.                       | `5`       |
-| `MAX_TOKEN_EXPIRY_DAYS`       | Max expiry a user can set on a PAT.                                           | `90`      |
-| `PRINCIPAL_TRUST_CHAIN_LIMIT` | Max depth of role assumption chain.                                           | `3`       |
-| `AUDIT_LOG_RETENTION_DAYS`    | How long to keep audit log entries.                                           | `90`      |
-| `DEMO_MODE`                   | When `"true"`, all admin write operations are blocked. Safe for public demos. | `"false"` |
+| Variable                      | Purpose                                                                                                                                                                           | Default   |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `POLICY_AUD`                  | Zero Trust Application Audience tag. **Optional** — only required when the worker and domain are in different Cloudflare accounts (Cloudflare for SaaS). Auto-inferred otherwise. | —         |
+| `TEAM_DOMAIN`                 | Zero Trust team domain (e.g. `https://acme.cloudflareaccess.com`). **Optional** — same conditions as `POLICY_AUD`.                                                                | —         |
+| `MAX_TOKENS_PER_USER`         | How many active Personal Access Tokens a user can hold.                                                                                                                           | `5`       |
+| `MAX_TOKEN_EXPIRY_DAYS`       | Max expiry a user can set on a PAT.                                                                                                                                               | `90`      |
+| `PRINCIPAL_TRUST_CHAIN_LIMIT` | Max depth of role assumption chain.                                                                                                                                               | `3`       |
+| `AUDIT_LOG_RETENTION_DAYS`    | How long to keep audit log entries.                                                                                                                                               | `90`      |
+| `DEMO_MODE`                   | When `"true"`, all admin write operations are blocked. Safe for public demos.                                                                                                     | `"false"` |
 
 ---
 
@@ -356,7 +361,7 @@ open https://<your-worker-url>/docs
 
 ## Troubleshooting
 
-- **"Unauthorized" on every request** — double-check `POLICY_AUD` and `TEAM_DOMAIN` match the Zero Trust application you created.
+- **"Unauthorized" on every request** — if your worker and domain are in different Cloudflare accounts (Cloudflare for SaaS), make sure `POLICY_AUD` and `TEAM_DOMAIN` are set and match the owning account's Zero Trust application. If they're in the same account, these vars should be unset so auto-inference kicks in.
 - **Admin tab is missing** — you haven't been promoted to superadmin yet. See Step 7 of the manual guide.
 - **CI fails with "version below minimum"** — your `WRANGLER_JSONC` GitHub variable is stale. Diff it against `wrangler.jsonc.template` and bump the `$version` field.
 - **`wrangler deploy` OOMs in CI** — make sure the workflow's "Prepare for Deploy" step is hiding `open-next.config.ts` and `next.config.ts`. Without that, wrangler delegates to the OpenNext Next.js build which needs 2GB+ RAM.

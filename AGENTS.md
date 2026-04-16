@@ -188,7 +188,7 @@ Vitest (`vitest.config.ts`) runs ~24 test files under `test/`, organized by area
 
 **Environment variables** (in `vars`):
 
-- `POLICY_AUD` / `TEAM_DOMAIN` — Cloudflare Zero Trust config
+- `POLICY_AUD` / `TEAM_DOMAIN` — Cloudflare Zero Trust config. **Optional**; only required when the worker and domain live in different Cloudflare accounts (Cloudflare for SaaS). When both are in the same account, Zero Trust's team domain and application AUD are auto-inferred at runtime.
 - `MAX_TOKENS_PER_USER` / `MAX_TOKEN_EXPIRY_DAYS` — PAT limits
 - `PRINCIPAL_TRUST_CHAIN_LIMIT` — Max credential chain depth
 - `AUDIT_LOG_RETENTION_DAYS` — Audit log retention (default 90)
