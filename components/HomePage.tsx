@@ -157,8 +157,8 @@ export default function HomePage() {
               {totalAccounts > 0 && (
                 <>
                   <div className="text-sm text-gray-400">
-                    Showing {Math.min((currentPage - 1) * pageSize + 1, totalAccounts)}-
-                    {Math.min(currentPage * pageSize, totalAccounts)} of {totalAccounts} accounts
+                    Showing {Math.min((currentPage - 1) * pageSize + 1, totalAccounts)}-{Math.min(currentPage * pageSize, totalAccounts)} of{' '}
+                    {totalAccounts} accounts
                   </div>
                   {Math.ceil(totalAccounts / pageSize) > 1 && (
                     <div className="flex items-center space-x-1">

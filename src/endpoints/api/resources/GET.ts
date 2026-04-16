@@ -19,11 +19,7 @@ class ListResourcesRoute extends IActivityAPIRoute<ListResourcesRequest, ListRes
     security: [{ CloudflareAccess: [] }],
   };
 
-  protected async handleRequest(
-    _request: ListResourcesRequest,
-    env: IEnv,
-    cxt: ActivityContext<IEnv>,
-  ): Promise<ListResourcesResponse> {
+  protected async handleRequest(_request: ListResourcesRequest, env: IEnv, cxt: ActivityContext<IEnv>): Promise<ListResourcesResponse> {
     const userEmail: string = this.getAuthenticatedUserEmailAddress(cxt);
     const url: URL = new URL(cxt.req.url);
 
@@ -49,6 +45,9 @@ class ListResourcesRoute extends IActivityAPIRoute<ListResourcesRequest, ListRes
 }
 
 type ListResourcesRequest = IRequest;
-interface ListResourcesResponse extends IResponse { items: ResourceInventoryItem[]; total: number; }
+interface ListResourcesResponse extends IResponse {
+  items: ResourceInventoryItem[];
+  total: number;
+}
 
 export { ListResourcesRoute };

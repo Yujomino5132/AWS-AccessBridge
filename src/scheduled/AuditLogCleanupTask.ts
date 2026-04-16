@@ -5,11 +5,7 @@ import type { IEnv } from './IScheduledTask';
 import { DEFAULT_AUDIT_LOG_RETENTION_DAYS } from '@/constants';
 
 class AuditLogCleanupTask extends IScheduledTask<AuditLogCleanupTaskEnv> {
-  protected async handleScheduledTask(
-    _event: ScheduledController,
-    env: AuditLogCleanupTaskEnv,
-    _ctx: ExecutionContext,
-  ): Promise<void> {
+  protected async handleScheduledTask(_event: ScheduledController, env: AuditLogCleanupTaskEnv, _ctx: ExecutionContext): Promise<void> {
     const retentionDays: number = parseInt(env.AUDIT_LOG_RETENTION_DAYS || DEFAULT_AUDIT_LOG_RETENTION_DAYS);
     const cutoff: number = TimestampUtil.getCurrentUnixTimestampInSeconds() - retentionDays * 86400;
     const auditLogDAO: AuditLogDAO = new AuditLogDAO(env.AccessBridgeDB);

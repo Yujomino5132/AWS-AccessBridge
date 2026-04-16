@@ -10,19 +10,24 @@ class EnableDataCollectionRoute extends IAdminActivityAPIRoute<EnableDataCollect
     description: 'Enable cost and/or resource data collection for a credential.',
     requestBody: {
       required: true,
-      content: { 'application/json': { schema: { type: 'object' as const, required: ['principalArn', 'collectionTypes'], properties: {
-        principalArn: { type: 'string' as const },
-        collectionTypes: { type: 'array' as const, items: { type: 'string' as const, enum: ['cost', 'resource'] } },
-      }}}},
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object' as const,
+            required: ['principalArn', 'collectionTypes'],
+            properties: {
+              principalArn: { type: 'string' as const },
+              collectionTypes: { type: 'array' as const, items: { type: 'string' as const, enum: ['cost', 'resource'] } },
+            },
+          },
+        },
+      },
     },
     responses: { '200': { description: 'Collection enabled' } },
     security: [{ CloudflareAccess: [] }],
   };
 
-  protected async handleAdminRequest(
-    request: EnableDataCollectionRequest,
-    env: IAdminEnv,
-  ): Promise<EnableDataCollectionResponse> {
+  protected async handleAdminRequest(request: EnableDataCollectionRequest, env: IAdminEnv): Promise<EnableDataCollectionResponse> {
     if (!request.principalArn || !request.collectionTypes?.length) {
       throw new BadRequestError('Missing required fields: principalArn and collectionTypes.');
     }
@@ -34,7 +39,13 @@ class EnableDataCollectionRoute extends IAdminActivityAPIRoute<EnableDataCollect
   }
 }
 
-interface EnableDataCollectionRequest extends IRequest { principalArn: string; collectionTypes: string[]; }
-interface EnableDataCollectionResponse extends IResponse { success: boolean; message: string; }
+interface EnableDataCollectionRequest extends IRequest {
+  principalArn: string;
+  collectionTypes: string[];
+}
+interface EnableDataCollectionResponse extends IResponse {
+  success: boolean;
+  message: string;
+}
 
 export { EnableDataCollectionRoute };

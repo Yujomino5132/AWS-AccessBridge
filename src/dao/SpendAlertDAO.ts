@@ -35,7 +35,9 @@ class SpendAlertDAO {
   }
 
   public async getAllAlerts(): Promise<SpendAlert[]> {
-    const results = await this.database.prepare('SELECT * FROM spend_alerts WHERE enabled = 1 ORDER BY created_at DESC').all<SpendAlertInternal>();
+    const results = await this.database
+      .prepare('SELECT * FROM spend_alerts WHERE enabled = 1 ORDER BY created_at DESC')
+      .all<SpendAlertInternal>();
     return (results.results || []).map(this.mapToExternal);
   }
 

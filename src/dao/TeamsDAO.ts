@@ -19,10 +19,7 @@ class TeamsDAO {
   }
 
   public async getTeamById(teamId: string): Promise<Team | null> {
-    const result = await this.database
-      .prepare('SELECT * FROM teams WHERE team_id = ?')
-      .bind(teamId)
-      .first<TeamInternal>();
+    const result = await this.database.prepare('SELECT * FROM teams WHERE team_id = ?').bind(teamId).first<TeamInternal>();
     if (!result) return null;
     return { teamId: result.team_id, teamName: result.team_name, createdAt: result.created_at, createdBy: result.created_by };
   }
@@ -30,7 +27,10 @@ class TeamsDAO {
   public async listTeams(): Promise<Team[]> {
     const results = await this.database.prepare('SELECT * FROM teams ORDER BY team_name').all<TeamInternal>();
     return (results.results || []).map((r) => ({
-      teamId: r.team_id, teamName: r.team_name, createdAt: r.created_at, createdBy: r.created_by,
+      teamId: r.team_id,
+      teamName: r.team_name,
+      createdAt: r.created_at,
+      createdBy: r.created_by,
     }));
   }
 

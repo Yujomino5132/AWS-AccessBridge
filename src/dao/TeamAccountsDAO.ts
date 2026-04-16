@@ -13,10 +13,7 @@ class TeamAccountsDAO {
   }
 
   public async removeAccountFromTeam(teamId: string, awsAccountId: string): Promise<void> {
-    await this.database
-      .prepare('DELETE FROM team_accounts WHERE team_id = ? AND aws_account_id = ?')
-      .bind(teamId, awsAccountId)
-      .run();
+    await this.database.prepare('DELETE FROM team_accounts WHERE team_id = ? AND aws_account_id = ?').bind(teamId, awsAccountId).run();
   }
 
   public async getAccountsByTeam(teamId: string): Promise<string[]> {

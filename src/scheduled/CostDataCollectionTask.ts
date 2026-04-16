@@ -11,11 +11,7 @@ const MAX_ACCOUNTS_PER_COLLECTION: number = 3;
 const COST_LOOKBACK_DAYS: number = 30;
 
 class CostDataCollectionTask extends IScheduledTask<CostDataCollectionTaskEnv> {
-  protected async handleScheduledTask(
-    _event: ScheduledController,
-    env: CostDataCollectionTaskEnv,
-    _ctx: ExecutionContext,
-  ): Promise<void> {
+  protected async handleScheduledTask(_event: ScheduledController, env: CostDataCollectionTaskEnv, _ctx: ExecutionContext): Promise<void> {
     const cutoffTime: number = TimestampUtil.getCurrentUnixTimestampInSeconds() - COST_COLLECTION_INTERVAL_HOURS * 3600;
     const dataCollectionConfigDAO: DataCollectionConfigDAO = new DataCollectionConfigDAO(env.AccessBridgeDB);
     const principalArns: string[] = await dataCollectionConfigDAO.getPrincipalArnsNeedingCollection(

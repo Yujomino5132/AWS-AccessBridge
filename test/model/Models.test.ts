@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type {
-  AccessableAccount,
-  AccessableAccountInternal,
-} from '@/model/AccessableAccount';
+import type { AccessableAccount, AccessableAccountInternal } from '@/model/AccessableAccount';
 import type { AccessKeys, AccessKeysWithExpiration } from '@/model/AccessKeys';
 import type { Credential, CredentialInternal } from '@/model/Credential';
 import type { CredentialCache } from '@/model/CredentialCache';

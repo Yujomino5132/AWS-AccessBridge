@@ -30,7 +30,9 @@ class TeamMembersDAO {
 
   public async getTeamsByUserEmail(userEmail: string): Promise<Array<{ teamId: string; teamName: string; role: string }>> {
     const results = await this.database
-      .prepare('SELECT tm.team_id, t.team_name, tm.role FROM team_members tm JOIN teams t ON tm.team_id = t.team_id WHERE tm.user_email = ?')
+      .prepare(
+        'SELECT tm.team_id, t.team_name, tm.role FROM team_members tm JOIN teams t ON tm.team_id = t.team_id WHERE tm.user_email = ?',
+      )
       .bind(userEmail)
       .all<{ team_id: string; team_name: string; role: string }>();
     return (results.results || []).map((r) => ({ teamId: r.team_id, teamName: r.team_name, role: r.role }));
@@ -42,7 +44,10 @@ class TeamMembersDAO {
       .bind(teamId)
       .all<TeamMemberInternal>();
     return (results.results || []).map((r) => ({
-      teamId: r.team_id, userEmail: r.user_email, role: r.role as 'admin' | 'member', joinedAt: r.joined_at,
+      teamId: r.team_id,
+      userEmail: r.user_email,
+      role: r.role as 'admin' | 'member',
+      joinedAt: r.joined_at,
     }));
   }
 

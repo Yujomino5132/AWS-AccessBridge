@@ -100,9 +100,7 @@ class ValidateCredentialsRoute extends IAdminActivityAPIRoute<
       if (error instanceof BadRequestError || error instanceof InternalServerError) {
         throw error;
       }
-      throw new BadRequestError(
-        `Failed to validate credentials: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new BadRequestError(`Failed to validate credentials: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 }

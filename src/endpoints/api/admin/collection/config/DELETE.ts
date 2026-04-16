@@ -9,19 +9,24 @@ class DisableDataCollectionRoute extends IAdminActivityAPIRoute<DisableDataColle
     summary: 'Disable Data Collection',
     requestBody: {
       required: true,
-      content: { 'application/json': { schema: { type: 'object' as const, required: ['principalArn', 'collectionType'], properties: {
-        principalArn: { type: 'string' as const },
-        collectionType: { type: 'string' as const },
-      }}}},
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object' as const,
+            required: ['principalArn', 'collectionType'],
+            properties: {
+              principalArn: { type: 'string' as const },
+              collectionType: { type: 'string' as const },
+            },
+          },
+        },
+      },
     },
     responses: { '200': { description: 'Collection disabled' } },
     security: [{ CloudflareAccess: [] }],
   };
 
-  protected async handleAdminRequest(
-    request: DisableDataCollectionRequest,
-    env: IAdminEnv,
-  ): Promise<DisableDataCollectionResponse> {
+  protected async handleAdminRequest(request: DisableDataCollectionRequest, env: IAdminEnv): Promise<DisableDataCollectionResponse> {
     if (!request.principalArn || !request.collectionType) {
       throw new BadRequestError('Missing required fields: principalArn and collectionType.');
     }
@@ -31,7 +36,13 @@ class DisableDataCollectionRoute extends IAdminActivityAPIRoute<DisableDataColle
   }
 }
 
-interface DisableDataCollectionRequest extends IRequest { principalArn: string; collectionType: string; }
-interface DisableDataCollectionResponse extends IResponse { success: boolean; message: string; }
+interface DisableDataCollectionRequest extends IRequest {
+  principalArn: string;
+  collectionType: string;
+}
+interface DisableDataCollectionResponse extends IResponse {
+  success: boolean;
+  message: string;
+}
 
 export { DisableDataCollectionRoute };

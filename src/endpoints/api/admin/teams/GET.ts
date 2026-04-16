@@ -4,7 +4,12 @@ import type { IAdminEnv, IRequest, IResponse } from '@/endpoints/IAdminActivityA
 import type { Team } from '@/model';
 
 class ListTeamsRoute extends IAdminActivityAPIRoute<IRequest, ListTeamsResponse, IAdminEnv> {
-  schema = { tags: ['Admin'], summary: 'List Teams', responses: { '200': { description: 'List of teams' } }, security: [{ CloudflareAccess: [] }] };
+  schema = {
+    tags: ['Admin'],
+    summary: 'List Teams',
+    responses: { '200': { description: 'List of teams' } },
+    security: [{ CloudflareAccess: [] }],
+  };
 
   protected async handleAdminRequest(_request: IRequest, env: IAdminEnv): Promise<ListTeamsResponse> {
     const teams: Team[] = await new TeamsDAO(env.AccessBridgeDB).listTeams();
@@ -12,5 +17,7 @@ class ListTeamsRoute extends IAdminActivityAPIRoute<IRequest, ListTeamsResponse,
   }
 }
 
-interface ListTeamsResponse extends IResponse { teams: Team[]; }
+interface ListTeamsResponse extends IResponse {
+  teams: Team[];
+}
 export { ListTeamsRoute };

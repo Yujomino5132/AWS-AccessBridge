@@ -11,11 +11,19 @@ class CreateSpendAlertRoute extends IAdminActivityAPIRoute<CreateSpendAlertReque
     description: 'Creates a configurable spend alert for an AWS account.',
     requestBody: {
       required: true,
-      content: { 'application/json': { schema: { type: 'object' as const, required: ['awsAccountId', 'thresholdAmount'], properties: {
-        awsAccountId: { type: 'string' as const },
-        thresholdAmount: { type: 'number' as const },
-        periodType: { type: 'string' as const, enum: ['daily', 'monthly'], default: 'monthly' },
-      }}}},
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object' as const,
+            required: ['awsAccountId', 'thresholdAmount'],
+            properties: {
+              awsAccountId: { type: 'string' as const },
+              thresholdAmount: { type: 'number' as const },
+              periodType: { type: 'string' as const, enum: ['daily', 'monthly'], default: 'monthly' },
+            },
+          },
+        },
+      },
     },
     responses: { '200': { description: 'Alert created' } },
     security: [{ CloudflareAccess: [] }],

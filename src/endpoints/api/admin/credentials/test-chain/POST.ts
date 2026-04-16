@@ -92,11 +92,7 @@ class TestCredentialChainRoute extends IAdminActivityAPIRoute<
     for (let i = credentialChain.principalArns.length - 2; i >= 0; i--) {
       const roleArn: string = credentialChain.principalArns[i];
       try {
-        const assumed: AccessKeysWithExpiration = await AssumeRoleUtil.assumeRole(
-          roleArn,
-          credential,
-          'AccessBridge-ChainTest',
-        );
+        const assumed: AccessKeysWithExpiration = await AssumeRoleUtil.assumeRole(roleArn, credential, 'AccessBridge-ChainTest');
         credential = assumed;
         chainResults.push({ arn: roleArn, status: 'ok' });
       } catch (error: unknown) {

@@ -12,7 +12,16 @@ class ResourceInventoryDAO {
       .prepare(
         'INSERT OR REPLACE INTO resource_inventory (aws_account_id, region, resource_type, resource_id, resource_name, state, metadata, collected_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       )
-      .bind(item.awsAccountId, item.region, item.resourceType, item.resourceId, item.resourceName, item.state, JSON.stringify(item.metadata), item.collectedAt)
+      .bind(
+        item.awsAccountId,
+        item.region,
+        item.resourceType,
+        item.resourceId,
+        item.resourceName,
+        item.state,
+        JSON.stringify(item.metadata),
+        item.collectedAt,
+      )
       .run();
   }
 
@@ -67,7 +76,9 @@ class ResourceInventoryDAO {
     if (accountIds.length === 0) return {};
     const placeholders: string = accountIds.map(() => '?').join(',');
     const results = await this.database
-      .prepare(`SELECT aws_account_id, resource_type, COUNT(*) as count FROM resource_inventory WHERE aws_account_id IN (${placeholders}) GROUP BY aws_account_id, resource_type`)
+      .prepare(
+        `SELECT aws_account_id, resource_type, COUNT(*) as count FROM resource_inventory WHERE aws_account_id IN (${placeholders}) GROUP BY aws_account_id, resource_type`,
+      )
       .bind(...accountIds)
       .all<{ aws_account_id: string; resource_type: string; count: number }>();
 

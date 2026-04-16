@@ -9,7 +9,9 @@ class DataCollectionConfigDAO {
 
   public async create(principalArn: string, collectionType: string): Promise<void> {
     await this.database
-      .prepare('INSERT OR IGNORE INTO data_collection_config (principal_arn, collection_type, last_collected_at, enabled) VALUES (?, ?, 0, 1)')
+      .prepare(
+        'INSERT OR IGNORE INTO data_collection_config (principal_arn, collection_type, last_collected_at, enabled) VALUES (?, ?, 0, 1)',
+      )
       .bind(principalArn, collectionType)
       .run();
   }

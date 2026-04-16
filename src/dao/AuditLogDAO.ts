@@ -26,18 +26,26 @@ class AuditLogDAO {
       .prepare(
         'INSERT INTO audit_logs (log_id, timestamp, user_email, action, resource, method, path, status_code, detail, ip_address, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       )
-      .bind(logId, timestamp, userEmail, action, resource || null, method, path, statusCode, detail || null, ipAddress || null, userAgent || null)
+      .bind(
+        logId,
+        timestamp,
+        userEmail,
+        action,
+        resource || null,
+        method,
+        path,
+        statusCode,
+        detail || null,
+        ipAddress || null,
+        userAgent || null,
+      )
       .run();
     if (!result.success) {
       throw new DatabaseError(`Failed to create audit log: ${result.error}`);
     }
   }
 
-  public async query(
-    filters: AuditLogQueryFilters,
-    limit: number = 50,
-    offset: number = 0,
-  ): Promise<{ logs: AuditLog[]; total: number }> {
+  public async query(filters: AuditLogQueryFilters, limit: number = 50, offset: number = 0): Promise<{ logs: AuditLog[]; total: number }> {
     const conditions: string[] = [];
     const bindings: unknown[] = [];
 

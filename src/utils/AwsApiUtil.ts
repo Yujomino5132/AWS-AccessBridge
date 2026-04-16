@@ -84,10 +84,7 @@ class AwsApiUtil {
     return results;
   }
 
-  public static async describeInstances(
-    accessKeys: AccessKeys,
-    region: string = 'us-east-1',
-  ): Promise<ResourceDiscoveryItem[]> {
+  public static async describeInstances(accessKeys: AccessKeys, region: string = 'us-east-1'): Promise<ResourceDiscoveryItem[]> {
     const client: AwsClient = new AwsClient({
       service: 'ec2',
       region,
@@ -168,10 +165,7 @@ class AwsApiUtil {
     return items;
   }
 
-  public static async listFunctions(
-    accessKeys: AccessKeys,
-    region: string = 'us-east-1',
-  ): Promise<ResourceDiscoveryItem[]> {
+  public static async listFunctions(accessKeys: AccessKeys, region: string = 'us-east-1'): Promise<ResourceDiscoveryItem[]> {
     const client: AwsClient = new AwsClient({
       service: 'lambda',
       region,
@@ -206,10 +200,7 @@ class AwsApiUtil {
     return items;
   }
 
-  public static async describeDBInstances(
-    accessKeys: AccessKeys,
-    region: string = 'us-east-1',
-  ): Promise<ResourceDiscoveryItem[]> {
+  public static async describeDBInstances(accessKeys: AccessKeys, region: string = 'us-east-1'): Promise<ResourceDiscoveryItem[]> {
     const client: AwsClient = new AwsClient({
       service: 'rds',
       region,

@@ -7,11 +7,7 @@ import type { ActivityContext, IAdminEnv, IRequest, IResponse } from '@/endpoint
 import type { CredentialChain, AccessKeys, AccessKeysWithExpiration } from '@/model';
 import { DEFAULT_PRINCIPAL_TRUST_CHAIN_LIMIT } from '@/constants';
 
-class ListAccountRolesRoute extends IAdminActivityAPIRoute<
-  ListAccountRolesRequest,
-  ListAccountRolesResponse,
-  ListAccountRolesEnv
-> {
+class ListAccountRolesRoute extends IAdminActivityAPIRoute<ListAccountRolesRequest, ListAccountRolesResponse, ListAccountRolesEnv> {
   schema = {
     tags: ['Admin'],
     summary: 'List IAM Roles in AWS Account',
@@ -86,11 +82,7 @@ class ListAccountRolesRoute extends IAdminActivityAPIRoute<
 
     for (let i = credentialChain.principalArns.length - 2; i >= 0; i--) {
       const roleArn: string = credentialChain.principalArns[i];
-      const assumed: AccessKeysWithExpiration = await AssumeRoleUtil.assumeRole(
-        roleArn,
-        credential,
-        'AccessBridge-RoleDiscovery',
-      );
+      const assumed: AccessKeysWithExpiration = await AssumeRoleUtil.assumeRole(roleArn, credential, 'AccessBridge-RoleDiscovery');
       credential = assumed;
     }
 
@@ -116,9 +108,7 @@ class ListAccountRolesRoute extends IAdminActivityAPIRoute<
 
     if (!response.ok) {
       if (xmlText.includes('AccessDenied') || xmlText.includes('not authorized')) {
-        throw new BadRequestError(
-          'The assumed role does not have iam:ListRoles permission. You can still manually enter role names.',
-        );
+        throw new BadRequestError('The assumed role does not have iam:ListRoles permission. You can still manually enter role names.');
       }
       throw new InternalServerError(`IAM ListRoles failed: ${response.status}`);
     }

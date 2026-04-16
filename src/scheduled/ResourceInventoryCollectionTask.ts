@@ -50,10 +50,26 @@ class ResourceInventoryCollectionTask extends IScheduledTask<ResourceInventoryCo
 
         // Collect from multiple services
         const allItems: ResourceDiscoveryItem[] = [];
-        try { allItems.push(...await AwsApiUtil.describeInstances(credential)); } catch (e) { console.warn('EC2 collection failed:', e); }
-        try { allItems.push(...await AwsApiUtil.listBuckets(credential)); } catch (e) { console.warn('S3 collection failed:', e); }
-        try { allItems.push(...await AwsApiUtil.listFunctions(credential)); } catch (e) { console.warn('Lambda collection failed:', e); }
-        try { allItems.push(...await AwsApiUtil.describeDBInstances(credential)); } catch (e) { console.warn('RDS collection failed:', e); }
+        try {
+          allItems.push(...(await AwsApiUtil.describeInstances(credential)));
+        } catch (e) {
+          console.warn('EC2 collection failed:', e);
+        }
+        try {
+          allItems.push(...(await AwsApiUtil.listBuckets(credential)));
+        } catch (e) {
+          console.warn('S3 collection failed:', e);
+        }
+        try {
+          allItems.push(...(await AwsApiUtil.listFunctions(credential)));
+        } catch (e) {
+          console.warn('Lambda collection failed:', e);
+        }
+        try {
+          allItems.push(...(await AwsApiUtil.describeDBInstances(credential)));
+        } catch (e) {
+          console.warn('RDS collection failed:', e);
+        }
 
         for (const item of allItems) {
           const resource: ResourceInventoryItem = {

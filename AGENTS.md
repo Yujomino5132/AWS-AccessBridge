@@ -124,6 +124,7 @@ Always use `@/` imports for backend source.
 Shared React components live in `components/` at the project root. All interactive components use the `'use client'` directive (needed for Next.js compatibility). The Vite SPA entry point is `app/SpaApp.tsx` which provides client-side view switching between Accounts, Costs, Resources, and Admin views.
 
 Key components:
+
 - `components/AccountList.tsx` — Main account list with role assumption and favorites
 - `components/AdminPage.tsx` — Tabbed admin interface (Setup Wizard, Credentials, User Access, Account Nicknames, Role Config, Audit Logs)
 - `components/OnboardingWizard.tsx` — 6-step guided admin account setup
@@ -152,6 +153,7 @@ The `npm run tsc` command checks both configs.
 `wrangler.jsonc` contains the worker config (D1 binding, KV binding, secrets store, vars, cron triggers). It is gitignored. A `wrangler.jsonc.template` is the public version with placeholder IDs. The template has a `$minimumVersion` field used by CI to validate that fork configs are not outdated.
 
 **Environment variables** (in `vars`):
+
 - `POLICY_AUD` / `TEAM_DOMAIN` — Cloudflare Zero Trust config
 - `MAX_TOKENS_PER_USER` / `MAX_TOKEN_EXPIRY_DAYS` — PAT limits
 - `PRINCIPAL_TRUST_CHAIN_LIMIT` — Max credential chain depth
@@ -166,6 +168,7 @@ The OpenNext config files are temporarily hidden during deploy so wrangler doesn
 ## Database
 
 26 D1 migrations in `migrations/`. Key tables:
+
 - `credentials` — Encrypted AWS IAM credentials with assumption chains
 - `assumable_roles` — User-to-account-to-role access mappings
 - `aws_accounts` — Account metadata and nicknames

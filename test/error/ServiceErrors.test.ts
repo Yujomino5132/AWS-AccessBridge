@@ -53,9 +53,7 @@ describe('Service Errors', () => {
     });
 
     it('uses default message when none provided', () => {
-      expect(new UnauthorizedError().getErrorMessage()).toBe(
-        'Authentication is required and has failed or has not yet been provided.',
-      );
+      expect(new UnauthorizedError().getErrorMessage()).toBe('Authentication is required and has failed or has not yet been provided.');
     });
 
     it('uses custom message', () => {

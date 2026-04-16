@@ -8,9 +8,7 @@ class GetCostTrendsRoute extends IActivityAPIRoute<GetCostTrendsRequest, GetCost
     tags: ['Cost'],
     summary: 'Get Cost Trends',
     description: 'Returns monthly cost totals across all user-accessible accounts for trend charts.',
-    parameters: [
-      { name: 'months', in: 'query' as const, required: false, schema: { type: 'integer' as const, default: 6 } },
-    ],
+    parameters: [{ name: 'months', in: 'query' as const, required: false, schema: { type: 'integer' as const, default: 6 } }],
     responses: { '200': { description: 'Monthly cost trends' } },
     security: [{ CloudflareAccess: [] }],
   };
