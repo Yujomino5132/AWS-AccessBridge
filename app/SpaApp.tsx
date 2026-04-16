@@ -8,12 +8,30 @@ import Unauthorized from '../components/Unauthorized';
 
 type View = 'accounts' | 'costs' | 'resources' | 'admin';
 
+const PATH_TO_VIEW: Record<string, View> = {
+  '/': 'accounts',
+  '/costs': 'costs',
+  '/resources': 'resources',
+  '/admin': 'admin',
+};
+
+const VIEW_TO_PATH: Record<View, string> = {
+  accounts: '/',
+  costs: '/costs',
+  resources: '/resources',
+  admin: '/admin',
+};
+
+function getViewFromPath(): View {
+  return PATH_TO_VIEW[window.location.pathname] ?? 'accounts';
+}
+
 export default function SpaApp() {
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [userEmail, setUserEmail] = useState('');
-  const [currentView, setCurrentView] = useState<View>('accounts');
+  const [currentView, setCurrentView] = useState<View>(getViewFromPath);
   const [showHidden, setShowHidden] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -38,6 +56,20 @@ export default function SpaApp() {
   useEffect(() => {
     sessionStorage.setItem('aws-access-bridge-current-page', currentPage.toString());
   }, [currentPage]);
+
+  const navigateTo = useCallback((view: View) => {
+    setCurrentView(view);
+    const path: string = VIEW_TO_PATH[view];
+    if (window.location.pathname !== path) {
+      history.pushState(null, '', path);
+    }
+  }, []);
+
+  useEffect(() => {
+    const onPopState = () => setCurrentView(getViewFromPath());
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -75,7 +107,17 @@ export default function SpaApp() {
     return (
       <div className="bg-gray-900 min-h-screen text-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin" style={{ width: '48px', height: '48px', borderRadius: '50%', border: '2px solid #60a5fa', borderTopColor: 'transparent', margin: '0 auto 16px' }}></div>
+          <div
+            className="animate-spin"
+            style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '50%',
+              border: '2px solid #60a5fa',
+              borderTopColor: 'transparent',
+              margin: '0 auto 16px',
+            }}
+          ></div>
           <p className="text-gray-400">Loading...</p>
         </div>
       </div>
@@ -93,7 +135,7 @@ export default function SpaApp() {
           Demo Mode — Data shown is for demonstration purposes only. Admin operations are disabled.
         </div>
       )}
-      <SpaNavbar isSuperAdmin={isSuperAdmin} currentView={currentView} setCurrentView={setCurrentView} userEmail={userEmail} />
+      <SpaNavbar isSuperAdmin={isSuperAdmin} currentView={currentView} setCurrentView={navigateTo} userEmail={userEmail} />
       <div className="max-w-6xl mx-auto px-6 py-8">
         <div key={currentView} className="animate-fade-in-up">
           {currentView === 'admin' && isSuperAdmin ? (
@@ -324,7 +366,16 @@ function SpaNavbar({
       </div>
       <div style={{ fontSize: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
         {isSuperAdmin && (
-          <span style={{ background: 'rgba(245,158,11,0.15)', color: '#fbbf24', padding: '2px 10px', borderRadius: '9999px', fontSize: '12px', fontWeight: 500 }}>
+          <span
+            style={{
+              background: 'rgba(245,158,11,0.15)',
+              color: '#fbbf24',
+              padding: '2px 10px',
+              borderRadius: '9999px',
+              fontSize: '12px',
+              fontWeight: 500,
+            }}
+          >
             ADMIN
           </span>
         )}
