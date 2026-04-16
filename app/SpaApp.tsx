@@ -75,7 +75,7 @@ export default function SpaApp() {
     return (
       <div className="bg-gray-900 min-h-screen text-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-2 border-blue-400 border-t-transparent mx-auto mb-4"></div>
+          <div className="animate-spin" style={{ width: '48px', height: '48px', borderRadius: '50%', border: '2px solid #60a5fa', borderTopColor: 'transparent', margin: '0 auto 16px' }}></div>
           <p className="text-gray-400">Loading...</p>
         </div>
       </div>
@@ -305,47 +305,55 @@ function SpaNavbar({
         zIndex: 40,
       }}
     >
-      <div className="flex items-center gap-8">
-        <div className="text-xl font-bold tracking-tight">
-          <span className="text-blue-400">AWS</span> AccessBridge
+      <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+        <div style={{ fontSize: '20px', fontWeight: 700, letterSpacing: '-0.025em' }}>
+          <span style={{ color: '#60a5fa' }}>AWS</span> AccessBridge
         </div>
-        <div className="flex gap-1 bg-gray-800/50 p-1 rounded-lg">
-          <button
-            onClick={() => setCurrentView('accounts')}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${currentView === 'accounts' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-gray-400 hover:text-white hover:bg-gray-700/50'}`}
-          >
-            Accounts
-          </button>
-          <button
-            onClick={() => setCurrentView('costs')}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${currentView === 'costs' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-gray-400 hover:text-white hover:bg-gray-700/50'}`}
-          >
-            Costs
-          </button>
-          <button
-            onClick={() => setCurrentView('resources')}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${currentView === 'resources' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-gray-400 hover:text-white hover:bg-gray-700/50'}`}
-          >
-            Resources
-          </button>
+        <div style={{ display: 'flex', gap: '4px', background: 'rgba(30,36,51,0.5)', padding: '4px', borderRadius: '8px' }}>
+          {(['accounts', 'costs', 'resources'] as const).map((view) => (
+            <NavTab key={view} active={currentView === view} onClick={() => setCurrentView(view)}>
+              {view.charAt(0).toUpperCase() + view.slice(1)}
+            </NavTab>
+          ))}
           {isSuperAdmin && (
-            <button
-              onClick={() => setCurrentView('admin')}
-              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${currentView === 'admin' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-gray-400 hover:text-white hover:bg-gray-700/50'}`}
-            >
+            <NavTab active={currentView === 'admin'} onClick={() => setCurrentView('admin')}>
               Admin
-            </button>
+            </NavTab>
           )}
         </div>
       </div>
-      <div className="text-sm flex items-center gap-3">
+      <div style={{ fontSize: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
         {isSuperAdmin && (
-          <span className="bg-amber-500/15 text-amber-400 border border-amber-500/25 px-2.5 py-0.5 rounded-full text-xs font-medium">
+          <span style={{ background: 'rgba(245,158,11,0.15)', color: '#fbbf24', padding: '2px 10px', borderRadius: '9999px', fontSize: '12px', fontWeight: 500 }}>
             ADMIN
           </span>
         )}
-        <span className="text-gray-400">{userEmail}</span>
+        <span style={{ color: '#9ca3af' }}>{userEmail}</span>
       </div>
     </nav>
+  );
+}
+
+function NavTab({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        padding: '6px 16px',
+        borderRadius: '6px',
+        fontSize: '14px',
+        fontWeight: 500,
+        border: 'none',
+        cursor: 'pointer',
+        transition: 'all 0.15s',
+        background: active ? '#2563eb' : hovered ? 'rgba(55,65,81,0.5)' : 'transparent',
+        color: active ? '#fff' : hovered ? '#fff' : '#9ca3af',
+      }}
+    >
+      {children}
+    </button>
   );
 }
