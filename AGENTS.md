@@ -11,16 +11,19 @@ AWS AccessBridge is a Cloudflare Worker that provides a web-based AWS role assum
 ## Commands
 
 ```bash
+# Install
+# `postinstall` runs `scripts/ensure-spa-shell-stub.mjs` so tsc works before first build
+
 # Development
 npm run dev               # Vite dev server for frontend SPA
 npm run dev:ssr           # Next.js dev server (SSR mode, needs 2GB+ RAM)
 
 # Build
-npm run build             # Build frontend SPA with Vite (fast, ~7s)
+npm run build             # prettier + lint + Vite build of the SPA (fast, ~7s)
 npm run build:ssr         # Build Next.js SSR via OpenNext (needs 2GB+ RAM)
 
 # Deploy
-npm run deploy            # Build frontend + wrangler deploy
+npm run deploy            # build + `wrangler deploy --dry-run` + `wrangler deploy`
 npm run deploy:ssr        # OpenNext build + deploy (needs 2GB+ RAM)
 
 # Code Quality
@@ -44,13 +47,13 @@ npx wrangler d1 migrations apply --local aws-access-bridge-db     # Apply migrat
 
 `src/index.ts` instantiates `AccessBridgeWorker` (`src/workers/AccessBridgeWorker.ts`) which extends `AbstractWorker` (`src/base/`). AbstractWorker handles both `fetch` (HTTP) and `scheduled` (cron) events. The `/__scheduled` path triggers the scheduled handler via HTTP for testing.
 
-The frontend SPA is built to `app/dist/` by Vite. The HTML shell is embedded into the Worker bundle at build time via a custom Vite plugin that emits `src/generated/spa-shell.ts` (`SPA_HTML`). A catch-all `app.get('*')` handler serves this HTML for any non-API, non-docs, non-asset path, giving the SPA robust deep-linking support without relying on the `ASSETS` binding for HTML routing. Static assets from `app/dist/` are still served by Cloudflare's asset binding.
+The frontend SPA is built to `app/dist/` by Vite. The HTML shell is embedded into the Worker bundle at build time via a custom Vite plugin that emits `src/generated/spa-shell.ts` (`SPA_HTML`). A catch-all `app.get('*')` handler serves this HTML for any non-API, non-docs, non-asset path, giving the SPA robust deep-linking support without relying on the `ASSETS` binding for HTML routing. Static assets from `app/dist/` are still served by Cloudflare's asset binding. The generated `src/generated/spa-shell.ts` is gitignored; a `postinstall` script writes a placeholder stub so type-checks pass before the first build.
 
 ### Dual frontend architecture
 
 The project has two frontend build paths:
 
-1. **Vite SPA** (current, used in CI): `app/SpaApp.tsx` is the entry point. Built with `vite.config.ts` to `app/dist/`. Lightweight (~7s build, <100MB RAM). Client-side rendered with pathname-based view switching between `HomePage`, `AccountList`, `CostDashboardView`, `ResourceInventoryView`, and `AdminPageView`.
+1. **Vite SPA** (current, used in CI): `app/SpaApp.tsx` is the entry point. Built with `vite.config.ts` to `app/dist/`. Lightweight (~7s build, <100MB RAM). Client-side rendered with pathname-based view switching between `AccountList` (default), `CostDashboard`, `ResourceInventory`, `AdminPage`, and `Unauthorized`. The `*View` wrappers and `HomePage` exist for the Next.js path.
 2. **Next.js SSR** (future): `app/layout.tsx` + `app/page.tsx` with the Next.js App Router. Built via OpenNext Cloudflare adapter (`open-next.config.ts`, `next.config.ts`). Requires 2GB+ RAM. The Hono backend is mounted via catch-all route handlers at `app/api/[[...path]]/route.ts`.
 
 Both use the same shared components from `components/` at the project root.
@@ -64,9 +67,9 @@ Every API endpoint is a standalone file under `src/endpoints/api/{domain}/{resou
 
 Endpoints are re-exported through `src/endpoints/index.ts` (cast to `any` for Chanfana compatibility) and registered as Hono routes in `AccessBridgeWorker`.
 
-### API endpoints (47 total routes registered)
+### API endpoints (48 total routes registered)
 
-Counts reflect routes registered in `AccessBridgeWorker` — note several admin-adjacent operations (cost alerts, data collection config, teams) live under the `/api/admin/*` prefix.
+Counts reflect routes registered in `AccessBridgeWorker` — note several admin-adjacent operations (cost alerts, data collection config, teams, maintenance) live under the `/api/admin/*` prefix.
 
 **Root (1):** `/federate` (wrapper that proxies to `/api/aws/federate`)
 **AWS Operations (3):** `POST /api/aws/assume-role`, `POST /api/aws/console`, `GET /api/aws/federate`
@@ -76,6 +79,7 @@ Counts reflect routes registered in `AccessBridgeWorker` — note several admin-
 **Admin — Audit (1):** `GET /api/admin/audit-logs`
 **Admin — Cost & Data Collection (4):** cost/alerts (POST/DELETE), collection/config (POST/DELETE)
 **Admin — Teams (11):** team CRUD, team name PUT, team member add/remove/list, team member role PUT, team account add/remove/list
+**Admin — Maintenance (1):** `POST /api/admin/maintenance/cleanup-orphaned` (admin-triggered orphan purge across satellite tables)
 **Cost Operations (3):** summary, account detail, trends (all GET)
 **Resource Operations (2):** resources list (with filters), resources summary
 
@@ -143,7 +147,12 @@ Key components:
 - `components/Navbar.tsx` — Top navigation shared across views
 - `components/AccountList.tsx` — Main account list with role assumption and favorites
 - `components/AccessKeyModal.tsx` — Displays generated AWS access keys
-- `components/AdminPage.tsx` / `components/AdminPageView.tsx` — Tabbed admin interface (Setup Wizard, Credentials, User Access, Account Nicknames, Role Config, Teams, Audit Logs)
+- `components/AdminPage.tsx` / `components/AdminPageView.tsx` — Tabbed admin interface organized as a grouped left sidebar:
+  - **SETUP**: Setup Wizard
+  - **CONFIGURATION**: Credentials, Account Nicknames, Role Config
+  - **ACCESS**: User Access, Teams
+  - **MONITORING**: Spend Alerts, Data Collection
+  - **SYSTEM**: Audit Logs, Maintenance
 - `components/OnboardingWizard.tsx` — Guided admin account setup
 - `components/CostDashboard.tsx` / `components/CostDashboardView.tsx` — Cost summary cards, trend bar chart, account breakdown
 - `components/ResourceInventory.tsx` / `components/ResourceInventoryView.tsx` — Resource summary, type/search filters, paginated table
@@ -163,7 +172,7 @@ The `npm run tsc` command checks both configs.
 
 ### Tests
 
-Vitest (`vitest.config.ts`) runs ~24 test files under `test/`, organized by area: `test/constants/`, `test/crypto/` (AES-GCM + HMAC), `test/dao/` (12 DAO tests), `test/error/`, `test/middleware/` (HMAC handler), `test/model/`, `test/utils/` (8 util tests).
+Vitest (`vitest.config.ts`) runs ~29 test files under `test/`, organized by area: `test/constants/` (1), `test/crypto/` (2 — AES-GCM + HMAC), `test/dao/` (14 DAO tests), `test/error/` (1), `test/middleware/` (1 — HMAC handler), `test/model/` (1), `test/utils/` (9 util tests).
 
 ## Code Style
 
