@@ -268,8 +268,10 @@ export default function AuditLogsTab({ showMessage: _showMessage }: AuditLogsTab
                     <td className="whitespace-nowrap" style={{ ...styles.td, color: '#d1d5db' }}>
                       {formatTimestamp(log.timestamp)}
                     </td>
-                    <td className="truncate" style={{ ...styles.td, color: '#d1d5db', maxWidth: '128px' }}>
-                      {log.userEmail}
+                    <td style={{ ...styles.td, color: '#d1d5db' }}>
+                      <div className="truncate" style={{ maxWidth: '200px' }} title={log.userEmail}>
+                        {log.userEmail}
+                      </div>
                     </td>
                     <td className="font-medium" style={{ ...styles.td, color: 'white' }}>
                       {log.action}
