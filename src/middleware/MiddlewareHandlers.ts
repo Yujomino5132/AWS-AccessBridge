@@ -1,4 +1,6 @@
+import { AUDIT_ACTIONS } from '@/constants/AuditActions';
 import { INTERNAL_HEADER_PREFIX, SELF_WORKER_BASE_HOSTNAME } from '@/constants';
+import { AuditLogDAO } from '@/dao/AuditLogDAO';
 import { Context, Next } from 'hono';
 import { HMACHandler } from './HMACHandler';
 import { IServiceError } from '@/error';
@@ -13,6 +15,44 @@ class MiddlewareHandlers {
         await this.withErrorTranslation(HMACHandler.validateInternalRequest)(c, next);
       } else {
         await next();
+      }
+    };
+  }
+
+  public static activityAudit() {
+    return async (
+      c: Context<{ Bindings: Env; Variables: { AuthenticatedUserEmailAddress: string } }>,
+      next: Next,
+    ): Promise<void> => {
+      let statusCode: number = 200;
+
+      try {
+        await next();
+        statusCode = c.res.status;
+      } catch (error: unknown) {
+        if (error instanceof Error && 'status' in error && typeof error.status === 'number') {
+          statusCode = error.status;
+        } else {
+          statusCode = 500;
+        }
+        throw error;
+      } finally {
+        try {
+          const method: string = c.req.method;
+          const url: URL = new URL(c.req.url);
+          const path: string = url.pathname;
+          const action: string = AUDIT_ACTIONS[`${method}:${path}`] || `${method}:${path}`;
+          const userEmail: string = c.get('AuthenticatedUserEmailAddress') || 'unknown';
+          const ipAddress: string | undefined = c.req.header('CF-Connecting-IP');
+          const userAgentHeader: string | undefined = c.req.header('User-Agent');
+
+          const auditLogDAO: AuditLogDAO = new AuditLogDAO(c.env.AccessBridgeDB);
+          c.executionCtx.waitUntil(
+            auditLogDAO.create(userEmail, action, method, path, statusCode, undefined, undefined, ipAddress, userAgentHeader),
+          );
+        } catch {
+          console.warn('Failed to write audit log');
+        }
       }
     };
   }

@@ -67,6 +67,8 @@ class AccessBridgeWorker extends AbstractWorker {
 
     // Middleware Handlers
     app.use('*', MiddlewareHandlers.hmacValidation());
+    app.use('/api/*', MiddlewareHandlers.activityAudit());
+    app.use('/federate', MiddlewareHandlers.activityAudit());
 
     const openapi: HonoOpenAPIRouterType<{
       Bindings: Env;
