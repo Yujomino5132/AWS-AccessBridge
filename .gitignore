@@ -185,3 +185,7 @@ dist
 .dev.vars
 .wrangler/
 tsconfig.tsbuildinfo
+
+# OpenAI Codex
+
+.codex
