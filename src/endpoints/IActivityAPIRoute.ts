@@ -1,15 +1,13 @@
 import { OpenAPIRoute } from 'chanfana';
 import { Context } from 'hono';
 import type { StatusCode } from 'hono/utils/http-status';
-import { EmailValidationUtil, TokenAuthUtil, BaseUrlUtil } from '@/utils';
+import { BaseUrlUtil } from '@/utils';
 import { DefaultInternalServerError, InternalServerError, IServiceError } from '@/error';
-import { D1_SESSION_CONSTRAINT_FIRST_UNCONSTRAINED, DEMO_USER_EMAIL, DEFAULT_DEMO_MODE } from '@/constants';
+import { D1_SESSION_CONSTRAINT_FIRST_UNCONSTRAINED, DEFAULT_DEMO_MODE } from '@/constants';
 
 abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IResponse, TEnv extends IEnv> extends OpenAPIRoute {
   async handle(c: ActivityContext<TEnv>) {
     try {
-      const userEmail: string = await this.authenticateUserIdentity(c);
-      c.set('AuthenticatedUserEmailAddress', userEmail);
       let body: unknown = {};
       try {
         body = await c.req.json();
@@ -68,18 +66,6 @@ abstract class IActivityAPIRoute<TRequest extends IRequest, TResponse extends IR
   protected isDemoMode(c: ActivityContext<TEnv>): boolean {
     const env: TEnv = c.env as TEnv;
     return (env.DEMO_MODE || DEFAULT_DEMO_MODE) === 'true';
-  }
-
-  private async authenticateUserIdentity(c: ActivityContext<TEnv>): Promise<string> {
-    if (this.isDemoMode(c)) {
-      return DEMO_USER_EMAIL;
-    }
-    const authHeader: string | undefined = c.req.header('Authorization');
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token: string = authHeader.substring(7);
-      return await TokenAuthUtil.authenticateWithPAT(token, c.env.AccessBridgeDB);
-    }
-    return await EmailValidationUtil.getAuthenticatedUserEmail(c.req.raw, c.env.TEAM_DOMAIN, c.env.POLICY_AUD);
   }
 }
 
