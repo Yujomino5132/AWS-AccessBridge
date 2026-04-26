@@ -1,6 +1,6 @@
 {
-  // "$version": 1776292445,
-  // "$minimumVersion": 1776258590,
+  // "$version": 1777211205,
+  // "$minimumVersion": 1777211205,
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "aws-access-bridge",
   "main": "src/index.ts",
@@ -29,6 +29,20 @@
   "assets": {
     "directory": "./app/dist/",
   },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "CRON_TASKS",
+        "class_name": "CronTasksWorker",
+      },
+    ],
+  },
+  "migrations": [
+    {
+      "tag": "v1777211205",
+      "new_sqlite_classes": ["CronTasksWorker"],
+    },
+  ],
   "services": [
     {
       "binding": "SELF",

@@ -51,9 +51,11 @@ import {
   ListTeamAccountsRoute,
   CleanupOrphanedDataRoute,
 } from '@/endpoints';
-import { CredentialCacheRefreshTask, AuditLogCleanupTask, CostDataCollectionTask, ResourceInventoryCollectionTask } from '@/scheduled';
 import { MiddlewareHandlers } from '@/middleware';
 import { SPA_HTML } from '@/generated/spa-shell';
+
+const CRON_TASKS_OBJECT_NAME: string = 'cron-tasks';
+const CRON_TASKS_RUN_URL: string = 'https://cron-tasks.internal/run';
 
 class AccessBridgeWorker extends AbstractWorker {
   protected readonly app: Hono<{ Bindings: Env }>;
@@ -159,10 +161,28 @@ class AccessBridgeWorker extends AbstractWorker {
   }
 
   protected async handleScheduled(event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
-    await new CredentialCacheRefreshTask().handle(event, env, ctx);
-    await new AuditLogCleanupTask().handle(event, env, ctx);
-    await new CostDataCollectionTask().handle(event, env, ctx);
-    await new ResourceInventoryCollectionTask().handle(event, env, ctx);
+    const cronTasksId: DurableObjectId = env.CRON_TASKS.idFromName(CRON_TASKS_OBJECT_NAME);
+    const cronTasksWorker = env.CRON_TASKS.get(cronTasksId);
+    const cronTasksRequest: Request = new Request(CRON_TASKS_RUN_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        cron: event.cron,
+        scheduledTime: event.scheduledTime,
+      }),
+    });
+
+    ctx.waitUntil(
+      cronTasksWorker
+        .fetch(cronTasksRequest)
+        .then(async (response: Response): Promise<void> => {
+          if (!response.ok && response.status !== 202) {
+            console.error('CronTasksWorker returned an error response:', response.status, await response.text());
+          }
+        })
+        .catch((err: unknown): void => {
+          console.error('Failed to invoke CronTasksWorker:', err);
+        }),
+    );
   }
 }
 
