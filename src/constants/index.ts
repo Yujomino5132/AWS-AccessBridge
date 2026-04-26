@@ -8,6 +8,8 @@ export * from './AuditActions';
 
 export * from './d1/SessionConstraint';
 
+export * from './do/Namespaces';
+
 export * from './error/AssumeRoleUtil';
 export * from './error/HMACHandler';
 

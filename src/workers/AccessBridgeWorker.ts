@@ -53,7 +53,7 @@ import {
 } from '@/endpoints';
 import { MiddlewareHandlers } from '@/middleware';
 import { SPA_HTML } from '@/generated/spa-shell';
-import { DURABLE_OBJECT_CRON_TASKS_NAME, DURABLE_OBJECT_CRON_TASKS_RUN_URL } from '@/constants';
+import { DURABLE_OBJECT_NAMESPACE_GLOBAL, DURABLE_OBJECT_CRON_TASKS_RUN_URL } from '@/constants';
 
 class AccessBridgeWorker extends AbstractEntrypointWorker {
   protected readonly app: Hono<{ Bindings: Env }>;
@@ -159,8 +159,8 @@ class AccessBridgeWorker extends AbstractEntrypointWorker {
   }
 
   protected async onScheduled(event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
-    const cronTasksId: DurableObjectId = env.CRON_TASKS.idFromName(DURABLE_OBJECT_CRON_TASKS_NAME);
-    const cronTasksWorker = env.CRON_TASKS.get(cronTasksId);
+    const cronTasksId: DurableObjectId = env.CRON_TASKS.idFromName(DURABLE_OBJECT_NAMESPACE_GLOBAL);
+    const cronTasksStub = env.CRON_TASKS.get(cronTasksId);
     const cronTasksRequest: Request = new Request(DURABLE_OBJECT_CRON_TASKS_RUN_URL, {
       method: 'POST',
       body: JSON.stringify({
@@ -170,7 +170,7 @@ class AccessBridgeWorker extends AbstractEntrypointWorker {
     });
 
     ctx.waitUntil(
-      cronTasksWorker
+      cronTasksStub
         .fetch(cronTasksRequest)
         .then(async (response: Response): Promise<void> => {
           if (!response.ok && response.status !== 202) {
