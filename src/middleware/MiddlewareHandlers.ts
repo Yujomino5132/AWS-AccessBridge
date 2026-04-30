@@ -6,6 +6,7 @@ import { HMACHandler } from './HMACHandler';
 import { IServiceError } from '@/error';
 import { EmailValidationUtil } from '@/utils/EmailValidationUtil';
 import { ErrorTranslationUtil } from '@/utils/ErrorTranslationUtil';
+import { RequestOriginUtil } from '@/utils/RequestOriginUtil';
 import { TokenAuthUtil } from '@/utils/TokenAuthUtil';
 
 type RequestContext = Context<{ Bindings: Env; Variables: { AuthenticatedUserEmailAddress: string } }>;
@@ -13,6 +14,7 @@ type AuthenticatedEnv = Env & {
   DEMO_MODE?: string | undefined;
   TEAM_DOMAIN?: string | undefined;
   POLICY_AUD?: string | undefined;
+  API_INTERNAL_HOST?: string | undefined;
   AccessBridgeDB: D1DatabaseSession;
 };
 
@@ -50,7 +52,7 @@ class MiddlewareHandlers {
           const path: string = url.pathname;
           const action: string = AUDIT_ACTIONS[`${method}:${path}`] || `${method}:${path}`;
           const userEmail: string = c.get('AuthenticatedUserEmailAddress') || 'unknown';
-          const ipAddress: string | undefined = c.req.header('CF-Connecting-IP');
+          const ipAddress: string | undefined = RequestOriginUtil.getClientIpAddress(c.req.raw, c.env);
           const userAgentHeader: string | undefined = c.req.header('User-Agent');
 
           const auditLogDAO: AuditLogDAO = new AuditLogDAO(c.env.AccessBridgeDB);
