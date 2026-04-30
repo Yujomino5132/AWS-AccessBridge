@@ -1,8 +1,8 @@
 {
-  // "$version": 1777557650,
-  // "$minimumVersion": 1777507611,
+  // "$version": 1777563301,
+  // "$minimumVersion": 1777563301,
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "aws-access-bridge-api",
+  "name": "aws-access-bridge",
   "main": "src/index.ts",
   "compatibility_date": "2025-11-29",
   "compatibility_flags": [],
@@ -43,7 +43,7 @@
   "services": [
     {
       "binding": "SELF",
-      "service": "aws-access-bridge-api",
+      "service": "aws-access-bridge",
     },
   ],
   "d1_databases": [
