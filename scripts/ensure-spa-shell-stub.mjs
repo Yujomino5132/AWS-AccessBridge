@@ -22,6 +22,6 @@ writeFileSync(
     "  <body>\\n" +
     "    <div id=\"root\">AWS AccessBridge</div>\\n" +
     "  </body>\\n" +
-    "</html>`;\\n",
+    "</html>`;\n",
 );
 console.log(`ensure-spa-shell-stub: created stub at ${outPath}`);
