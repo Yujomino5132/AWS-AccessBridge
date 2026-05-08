@@ -1,6 +1,10 @@
 'use client';
 
-import Link from 'next/link';
+const Link: React.FC<{ href: string; className?: string; children?: React.ReactNode }> = ({ href, className, children }) => (
+  <a href={href} className={className}>
+    {children}
+  </a>
+);
 
 interface NavbarProps {
   isSuperAdmin?: boolean;
