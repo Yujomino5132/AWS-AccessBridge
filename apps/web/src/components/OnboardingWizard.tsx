@@ -104,9 +104,10 @@ export default function OnboardingWizard({ showMessage }: OnboardingWizardProps)
   const [validationResult, setValidationResult] = useState<{ arn: string; accountId: string } | null>(null);
 
   // Step 3: Chain
-  const [assumedBy, setAssumedBy] = useState('');
+  const [intermediateRoleArn, setIntermediateRoleArn] = useState('');
   const [chainConfigured, setChainConfigured] = useState(false);
   const [chainTestResult, setChainTestResult] = useState<Array<{ arn: string; status: string }> | null>(null);
+  const [roleForDiscovery, setRoleForDiscovery] = useState('');
 
   // Step 4: Roles
   const [discoveredRoles, setDiscoveredRoles] = useState<Array<{ roleName: string; arn: string; description: string }>>([]);
@@ -216,14 +217,18 @@ export default function OnboardingWizard({ showMessage }: OnboardingWizardProps)
 
   // Step 3 handlers
   const handleSetChain = async () => {
-    if (!assumedBy.trim()) {
-      showMessage('error', 'Assumed By ARN is required.');
+    if (!intermediateRoleArn.trim()) {
+      showMessage('error', 'Intermediate Role ARN is required.');
       return;
     }
     setIsLoading(true);
-    const result = await apiCall('/api/admin/credentials/relationship', 'POST', { principalArn, assumedBy });
+    const result = await apiCall('/api/admin/credentials/relationship', 'POST', {
+      principalArn: intermediateRoleArn,
+      assumedBy: principalArn,
+    });
     if (result.ok) {
       setChainConfigured(true);
+      setRoleForDiscovery(intermediateRoleArn);
       showMessage('success', 'Credential chain configured.');
     } else {
       showMessage('error', result.error!);
@@ -233,7 +238,8 @@ export default function OnboardingWizard({ showMessage }: OnboardingWizardProps)
 
   const handleTestChain = async () => {
     setIsLoading(true);
-    const result = await apiCall('/api/admin/credentials/test-chain', 'POST', { principalArn });
+    const roleArnToTest = roleForDiscovery || principalArn;
+    const result = await apiCall('/api/admin/credentials/test-chain', 'POST', { principalArn: roleArnToTest });
     if (result.ok) {
       const d = result.data as { success: boolean; chain: Array<{ arn: string; status: string }> };
       setChainTestResult(d.chain);
@@ -248,7 +254,8 @@ export default function OnboardingWizard({ showMessage }: OnboardingWizardProps)
   // Step 4 handlers
   const handleDiscoverRoles = async () => {
     setIsLoading(true);
-    const result = await apiCall('/api/admin/account/roles', 'POST', { principalArn });
+    const roleArnToUse = roleForDiscovery || principalArn;
+    const result = await apiCall('/api/admin/account/roles', 'POST', { principalArn: roleArnToUse });
     if (result.ok) {
       const d = result.data as { roles: Array<{ roleName: string; arn: string; description: string }> };
       setDiscoveredRoles(d.roles);
@@ -512,20 +519,20 @@ export default function OnboardingWizard({ showMessage }: OnboardingWizardProps)
           <div style={wizardStyles.cardInner}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'white' }}>Credential Chain (Optional)</h3>
             <p className="text-sm" style={{ color: '#9ca3af' }}>
-              If this credential needs to assume an intermediate role first, configure the chain here. Skip if not needed.
+              Enter the intermediate role ARN that the credentials from Step 2 will assume. Leave empty if no chain is needed.
             </p>
             <input
               type="text"
-              placeholder="Assumed By ARN (the base credential that assumes this role)"
-              value={assumedBy}
-              onChange={(e) => setAssumedBy(e.target.value)}
-              style={getInputStyle('assumedBy')}
-              onFocus={() => setFocusedInput('assumedBy')}
+              placeholder="Intermediate Role ARN (role that credentials from Step 2 will assume)"
+              value={intermediateRoleArn}
+              onChange={(e) => setIntermediateRoleArn(e.target.value)}
+              style={getInputStyle('intermediateRoleArn')}
+              onFocus={() => setFocusedInput('intermediateRoleArn')}
               onBlur={() => setFocusedInput(null)}
             />
             {chainConfigured && (
               <p className="text-sm" style={{ color: '#4ade80' }}>
-                Chain relationship configured.
+                Chain configured. Using {roleForDiscovery} for role discovery.
               </p>
             )}
             {chainTestResult && (
@@ -540,7 +547,7 @@ export default function OnboardingWizard({ showMessage }: OnboardingWizardProps)
               </div>
             )}
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              {assumedBy.trim() && (
+              {intermediateRoleArn.trim() && (
                 <button onClick={handleSetChain} disabled={isLoading} className="font-medium" style={getBtnPrimary(isLoading)}>
                   {isLoading ? 'Setting...' : 'Set Chain'}
                 </button>
@@ -744,9 +751,9 @@ export default function OnboardingWizard({ showMessage }: OnboardingWizardProps)
               <div style={wizardStyles.summaryItem}>
                 <span style={{ color: '#9ca3af' }}>Principal:</span> {principalArn}
               </div>
-              {assumedBy && (
+              {intermediateRoleArn && (
                 <div style={wizardStyles.summaryItem}>
-                  <span style={{ color: '#9ca3af' }}>Chain:</span> {assumedBy} → {principalArn}
+                  <span style={{ color: '#9ca3af' }}>Chain:</span> {principalArn} → {intermediateRoleArn}
                 </div>
               )}
               <div style={wizardStyles.summaryItem}>
