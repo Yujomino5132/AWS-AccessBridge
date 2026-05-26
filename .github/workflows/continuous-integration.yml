@@ -4,6 +4,9 @@ permissions:
   contents: read
 
 on:
+  repository_dispatch:
+    types:
+      - upstream-sync
   pull_request:
   push:
     branches:
