@@ -151,8 +151,10 @@ describe('Model Types', () => {
         roleName: 'Admin',
         destinationPath: '/s3',
         destinationRegion: 'us-west-2',
+        roleSessionDurationSeconds: 14400,
       };
       expect(config.destinationPath).toBe('/s3');
+      expect(config.roleSessionDurationSeconds).toBe(14400);
     });
 
     it('internal model uses snake_case', () => {
@@ -161,6 +163,7 @@ describe('Model Types', () => {
         role_name: 'Admin',
       };
       expect(internal.destination_path).toBeUndefined();
+      expect(internal.role_session_duration_seconds).toBeUndefined();
     });
   });
 

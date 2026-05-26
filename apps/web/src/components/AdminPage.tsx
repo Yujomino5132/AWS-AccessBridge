@@ -702,6 +702,7 @@ function RoleConfigTab({ showMessage }: { showMessage: (type: 'success' | 'error
     roleName: '',
     destinationPath: '',
     destinationRegion: '',
+    roleSessionDurationSeconds: '',
   });
 
   const isSetConfigValid = configForm.awsAccountId.trim() !== '' && configForm.roleName.trim() !== '';
@@ -719,6 +720,9 @@ function RoleConfigTab({ showMessage }: { showMessage: (type: 'success' | 'error
           roleName: configForm.roleName,
           ...(configForm.destinationPath && { destinationPath: configForm.destinationPath }),
           ...(configForm.destinationRegion && { destinationRegion: configForm.destinationRegion }),
+          ...(configForm.roleSessionDurationSeconds && {
+            roleSessionDurationSeconds: Number(configForm.roleSessionDurationSeconds),
+          }),
         }),
       });
 
@@ -727,7 +731,7 @@ function RoleConfigTab({ showMessage }: { showMessage: (type: 'success' | 'error
 
       if (response.ok) {
         showMessage('success', 'Role configuration set successfully');
-        setConfigForm({ awsAccountId: '', roleName: '', destinationPath: '', destinationRegion: '' });
+        setConfigForm({ awsAccountId: '', roleName: '', destinationPath: '', destinationRegion: '', roleSessionDurationSeconds: '' });
       } else {
         let errorMessage = 'Failed to set role configuration';
         try {
@@ -762,7 +766,7 @@ function RoleConfigTab({ showMessage }: { showMessage: (type: 'success' | 'error
 
       if (response.ok) {
         showMessage('success', 'Role configuration deleted successfully');
-        setConfigForm({ awsAccountId: '', roleName: '', destinationPath: '', destinationRegion: '' });
+        setConfigForm({ awsAccountId: '', roleName: '', destinationPath: '', destinationRegion: '', roleSessionDurationSeconds: '' });
       } else {
         let errorMessage = 'Failed to delete role configuration';
         try {
@@ -783,7 +787,7 @@ function RoleConfigTab({ showMessage }: { showMessage: (type: 'success' | 'error
     <div style={cardStyle}>
       <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px' }}>Manage Role Configurations</h3>
       <p style={{ color: '#d1d5db', marginBottom: '24px' }}>
-        Configure custom destination paths and regions for AWS Console redirection when users assume specific roles.
+        Configure custom destination paths, regions, and session durations for AWS Console access when users assume specific roles.
       </p>
       <form style={{ display: 'flex', flexDirection: 'column', gap: '16px' }} onSubmit={(e) => e.preventDefault()}>
         <FocusInput
@@ -812,6 +816,15 @@ function RoleConfigTab({ showMessage }: { showMessage: (type: 'success' | 'error
           placeholder="Destination Region (Optional, e.g., us-east-1)"
           value={configForm.destinationRegion}
           onChange={(e) => setConfigForm({ ...configForm, destinationRegion: e.target.value })}
+        />
+        <FocusInput
+          type="number"
+          placeholder="Role Session Duration Seconds (Optional, 900-43200)"
+          value={configForm.roleSessionDurationSeconds}
+          onChange={(e) => setConfigForm({ ...configForm, roleSessionDurationSeconds: e.target.value })}
+          min="900"
+          max="43200"
+          step="1"
         />
         <div style={{ display: 'flex', gap: '16px' }}>
           <LoadingButton onClick={handleSetConfig} disabled={!isSetConfigValid} variant="blue">

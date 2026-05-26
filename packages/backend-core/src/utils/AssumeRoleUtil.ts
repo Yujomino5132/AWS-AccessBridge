@@ -8,8 +8,11 @@ class AssumeRoleUtil {
     roleArn: string,
     accessKeys: AccessKeys,
     sessionName: string,
+    durationSeconds?: number | undefined,
     region: string = 'us-east-1',
   ): Promise<AccessKeysWithExpiration> {
+    const maxDurationSeconds: number = accessKeys.sessionToken ? 3600 : 43200;
+    const effectiveDurationSeconds: number = Math.min(durationSeconds ?? maxDurationSeconds, maxDurationSeconds);
     const stsClient: AwsClient = new AwsClient({
       service: 'sts',
       region: region,
@@ -22,7 +25,7 @@ class AssumeRoleUtil {
       Action: 'AssumeRole',
       RoleArn: roleArn,
       RoleSessionName: sessionName,
-      DurationSeconds: accessKeys.sessionToken ? '3600' : '43200',
+      DurationSeconds: effectiveDurationSeconds.toString(),
       Version: '2011-06-15',
     });
 

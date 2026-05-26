@@ -43,6 +43,14 @@ class SetRoleConfigRoute extends IAdminActivityAPIRoute<SetRoleConfigRequest, Se
                 example: 'us-east-1',
                 maxLength: 32,
               },
+              roleSessionDurationSeconds: {
+                type: 'integer' as const,
+                description:
+                  'Optional target role session duration in seconds. AWS supports 900 through 43200 seconds; chained role sessions are capped at 3600 seconds.',
+                example: 3600,
+                minimum: 900,
+                maximum: 43200,
+              },
             },
           },
           examples: {
@@ -54,6 +62,7 @@ class SetRoleConfigRoute extends IAdminActivityAPIRoute<SetRoleConfigRequest, Se
                 roleName: 'DeveloperRole',
                 destinationPath: '/ec2/home',
                 destinationRegion: 'us-west-2',
+                roleSessionDurationSeconds: 14400,
               },
             },
             's3-console-config': {
@@ -258,7 +267,13 @@ class SetRoleConfigRoute extends IAdminActivityAPIRoute<SetRoleConfigRequest, Se
     const accountsDAO: AwsAccountsDAO = new AwsAccountsDAO(env.AccessBridgeDB);
 
     await accountsDAO.ensureAccountExists(request.awsAccountId);
-    await roleConfigsDAO.setRoleConfig(request.awsAccountId, request.roleName, request.destinationPath, request.destinationRegion);
+    await roleConfigsDAO.setRoleConfig(
+      request.awsAccountId,
+      request.roleName,
+      request.destinationPath,
+      request.destinationRegion,
+      request.roleSessionDurationSeconds,
+    );
 
     return {
       success: true,
@@ -272,6 +287,7 @@ interface SetRoleConfigRequest extends IRequest {
   roleName: string;
   destinationPath?: string;
   destinationRegion?: string;
+  roleSessionDurationSeconds?: number;
 }
 
 interface SetRoleConfigResponse extends IResponse {
