@@ -6,6 +6,7 @@ import {
   AwsDestinationPathSchema,
   AwsIamPrincipalArnSchema,
   AwsRegionSchema,
+  AwsRoleSessionDurationSecondsSchema,
   AwsRoleNameSchema,
   AwsSecretAccessKeySchema,
   AwsSessionTokenSchema,
@@ -93,6 +94,7 @@ const SetAccountNicknameBodySchema = z.object({
 const RoleConfigBodySchema = AccountRoleBodySchema.extend({
   destinationPath: AwsDestinationPathSchema,
   destinationRegion: AwsRegionSchema,
+  roleSessionDurationSeconds: AwsRoleSessionDurationSecondsSchema,
 });
 
 const CreateSpendAlertBodySchema = z.object({

@@ -3,6 +3,7 @@ interface RoleConfig {
   roleName: string;
   destinationPath?: string | undefined;
   destinationRegion?: string | undefined;
+  roleSessionDurationSeconds?: number | undefined;
 }
 
 interface RoleConfigInternal {
@@ -10,6 +11,7 @@ interface RoleConfigInternal {
   role_name: string;
   destination_path?: string | undefined;
   destination_region?: string | undefined;
+  role_session_duration_seconds?: number | undefined;
 }
 
 export type { RoleConfig, RoleConfigInternal };

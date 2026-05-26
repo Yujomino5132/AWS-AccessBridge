@@ -30,6 +30,7 @@ describe('RoleConfigsDAO', () => {
         role_name: 'Admin',
         destination_path: '/s3',
         destination_region: 'us-west-2',
+        role_session_duration_seconds: 14400,
       });
       const dao = new RoleConfigsDAO(mockDb);
       const result = await dao.getRoleConfig('123456789012', 'Admin');
@@ -38,6 +39,7 @@ describe('RoleConfigsDAO', () => {
         roleName: 'Admin',
         destinationPath: '/s3',
         destinationRegion: 'us-west-2',
+        roleSessionDurationSeconds: 14400,
       });
     });
 
@@ -53,6 +55,7 @@ describe('RoleConfigsDAO', () => {
         role_name: 'Admin',
         destination_path: null,
         destination_region: null,
+        role_session_duration_seconds: null,
       });
       const dao = new RoleConfigsDAO(mockDb);
       const result = await dao.getRoleConfig('123456789012', 'Admin');
@@ -61,6 +64,7 @@ describe('RoleConfigsDAO', () => {
         roleName: 'Admin',
         destinationPath: null,
         destinationRegion: null,
+        roleSessionDurationSeconds: null,
       });
     });
   });
@@ -68,15 +72,15 @@ describe('RoleConfigsDAO', () => {
   describe('setRoleConfig', () => {
     it('upserts role config with all fields', async () => {
       const dao = new RoleConfigsDAO(mockDb);
-      await dao.setRoleConfig('123456789012', 'Admin', '/s3', 'us-west-2');
+      await dao.setRoleConfig('123456789012', 'Admin', '/s3', 'us-west-2', 14400);
       expect(mockDb.prepare).toHaveBeenCalledWith(expect.stringContaining('INSERT OR REPLACE'));
-      expect(mockStmt.bind).toHaveBeenCalledWith('123456789012', 'Admin', '/s3', 'us-west-2');
+      expect(mockStmt.bind).toHaveBeenCalledWith('123456789012', 'Admin', '/s3', 'us-west-2', 14400);
     });
 
     it('stores null for missing optional fields', async () => {
       const dao = new RoleConfigsDAO(mockDb);
       await dao.setRoleConfig('123456789012', 'Admin');
-      expect(mockStmt.bind).toHaveBeenCalledWith('123456789012', 'Admin', null, null);
+      expect(mockStmt.bind).toHaveBeenCalledWith('123456789012', 'Admin', null, null, null);
     });
 
     it('throws DatabaseError on failure', async () => {

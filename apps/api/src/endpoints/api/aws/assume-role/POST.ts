@@ -1,5 +1,5 @@
-import { AssumableRolesDAO, CredentialsCacheDAO, UserMetadataDAO, EnhancedCredentialsDAO } from '@/dao';
-import { AccessKeysWithExpiration, CredentialCache, CredentialChain } from '@/model';
+import { AssumableRolesDAO, CredentialsCacheDAO, UserMetadataDAO, EnhancedCredentialsDAO, RoleConfigsDAO } from '@/dao';
+import { AccessKeysWithExpiration, CredentialCache, CredentialChain, RoleConfig } from '@/model';
 import { ArnUtil, AssumeRoleUtil, TimestampUtil } from '@/utils';
 import { IActivityAPIRoute } from '@/endpoints/IActivityAPIRoute';
 import type { ActivityContext, IEnv, IRequest, IResponse } from '@/endpoints/IActivityAPIRoute';
@@ -79,7 +79,7 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
                 expiration: {
                   type: 'string' as const,
                   format: 'date-time',
-                  description: 'ISO 8601 timestamp when credentials expire (typically 1 hour from issuance)',
+                  description: 'ISO 8601 timestamp when credentials expire based on the role session duration',
                   example: '2024-01-15T14:30:00.000Z',
                 },
               },
@@ -251,6 +251,8 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
 
     const assumableRolesDAO: AssumableRolesDAO = new AssumableRolesDAO(env.AccessBridgeDB);
     await assumableRolesDAO.verifyUserHasAccessToRole(userEmail, accountId, roleName);
+    const roleConfigsDAO: RoleConfigsDAO = new RoleConfigsDAO(env.AccessBridgeDB);
+    const roleConfig: RoleConfig | undefined = await roleConfigsDAO.getRoleConfig(accountId, roleName);
 
     const masterKey: string = await env.AES_ENCRYPTION_KEY_SECRET.get();
     const principalTrustChainLimit: number = parseInt(env.PRINCIPAL_TRUST_CHAIN_LIMIT || DEFAULT_PRINCIPAL_TRUST_CHAIN_LIMIT);
@@ -268,7 +270,14 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
 
     const { startIndex, credentials } = await this.findClosestCachedCredential(credentialsCacheDAO, credentialChain);
 
-    return await this.assumeRoleChain(credentialsCacheDAO, credentialChain, startIndex, credentials, userId);
+    return await this.assumeRoleChain(
+      credentialsCacheDAO,
+      credentialChain,
+      startIndex,
+      credentials,
+      userId,
+      roleConfig?.roleSessionDurationSeconds,
+    );
   }
 
   /**
@@ -317,6 +326,7 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
    * @param startIndex - Index to start role assumption from (decrements towards target at index 0)
    * @param credentials - Starting credentials (either base IAM user or cached intermediate role)
    * @param userId - User ID for role session naming
+   * @param roleSessionDurationSeconds - Optional duration for the final target role session
    * @returns Final credentials for the target role (index 0)
    */
   private async assumeRoleChain(
@@ -325,12 +335,14 @@ class AssumeRoleRoute extends IActivityAPIRoute<AssumeRoleRequest, AssumeRoleRes
     startIndex: number,
     credentials: AccessKeysWithExpiration,
     userId: string,
+    roleSessionDurationSeconds?: number | undefined,
   ): Promise<AccessKeysWithExpiration> {
     let newCredentials: AccessKeysWithExpiration = credentials;
     for (let i = startIndex; i >= 0; --i) {
       const roleArn: string = credentialChain.principalArns[i];
       const sessionName: string = i > 0 ? INTERMEDIATE_ROLE_SESSION_NAME : `${ROLE_SESSION_NAME_PREFIX}${userId}`;
-      newCredentials = await AssumeRoleUtil.assumeRole(roleArn, newCredentials, sessionName);
+      const durationSeconds: number | undefined = i === 0 ? roleSessionDurationSeconds : undefined;
+      newCredentials = await AssumeRoleUtil.assumeRole(roleArn, newCredentials, sessionName, durationSeconds);
       // Cache intermediate credentials (not target role, not base IAM user)
       if (i > 0 && newCredentials.expiration) {
         await credentialsCacheDAO.storeCachedCredential({

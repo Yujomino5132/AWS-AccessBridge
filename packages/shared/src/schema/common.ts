@@ -59,6 +59,12 @@ const AwsDestinationPathSchema = nonEmptyStringSchema('destinationPath', 2048)
   .refine((value: string): boolean => !/^[a-z][a-z0-9+.-]*:\/\//i.test(value), 'destinationPath must be a console path, not a URL.')
   .optional();
 const AwsRegionSchema = z.string().regex(AWS_REGION_PATTERN, 'destinationRegion must be a valid AWS region.').optional();
+const AwsRoleSessionDurationSecondsSchema = z
+  .number()
+  .int('roleSessionDurationSeconds must be an integer.')
+  .min(900, 'roleSessionDurationSeconds must be at least 900 seconds.')
+  .max(43200, 'roleSessionDurationSeconds must be 43200 seconds or less.')
+  .optional();
 const EmailSchema = z.string().email('userEmail must be a valid email address.').max(320, 'userEmail must be 320 characters or less.');
 const TeamRoleSchema = z.enum(['admin', 'member']);
 const CollectionTypeSchema = z.enum(['cost', 'resource']);
@@ -72,6 +78,7 @@ export {
   AwsDestinationPathSchema,
   AwsIamPrincipalArnSchema,
   AwsRegionSchema,
+  AwsRoleSessionDurationSecondsSchema,
   AwsRoleNameSchema,
   AwsSecretAccessKeySchema,
   AwsSessionTokenSchema,

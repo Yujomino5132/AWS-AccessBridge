@@ -40,4 +40,32 @@ describe('Request input schemas', () => {
       }),
     ).rejects.toBeInstanceOf(BadRequestError);
   });
+
+  it('accepts role session duration seconds in role config', async () => {
+    const request = new Request('https://access-bridge.example.com/api/admin/role/config', { method: 'PUT' });
+
+    await expect(
+      validateRequestInput(request, {
+        awsAccountId: '123456789012',
+        roleName: 'Admin',
+        roleSessionDurationSeconds: 14400,
+      }),
+    ).resolves.toEqual({
+      awsAccountId: '123456789012',
+      roleName: 'Admin',
+      roleSessionDurationSeconds: 14400,
+    });
+  });
+
+  it('rejects out-of-range role session duration seconds', async () => {
+    const request = new Request('https://access-bridge.example.com/api/admin/role/config', { method: 'PUT' });
+
+    await expect(
+      validateRequestInput(request, {
+        awsAccountId: '123456789012',
+        roleName: 'Admin',
+        roleSessionDurationSeconds: 899,
+      }),
+    ).rejects.toBeInstanceOf(BadRequestError);
+  });
 });
