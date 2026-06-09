@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Sync Upstream Changes
+      - name: Sync upstream changes
         id: sync
         uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
         with:
@@ -28,11 +28,13 @@ jobs:
           target_repo_token: ${{ secrets.GITHUB_TOKEN }}
           test_mode: false
 
-      - name: Dispatch Continuous Integration
-        if: ${{ steps.sync.outputs.has_new_commits == 'true' }}
-        run: |
-          gh api repos/${{ github.repository }}/dispatches \
-            --method POST \
-            --field event_type=upstream-sync
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Trigger CI for synced commits
+        if: steps.sync.outputs.has_new_commits == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              event_type: 'Upstream Sync',
+            });
